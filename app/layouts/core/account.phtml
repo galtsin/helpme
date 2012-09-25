@@ -1,0 +1,32 @@
+<?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон авторизации пользователей
+ */
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <?php echo $this->headMeta();?>
+    <?php echo $this->headTitle(); ?>
+    <?php print $this->headLink();?>
+    <?php print $this->headScript();?>
+    <style type="text/css">
+    </style>
+    <script type="text/javascript">
+        var domain = '<?php echo $this->baseUrl();?>';
+    </script>
+</head>
+<base href="<?php //echo $this->baseUrl(); ?>" />
+<body style="background: #f5faff;">
+<div class="container">
+    <div style="margin: 5% auto 0; width: 300px;" class="well">
+        <p><img src="http://192.168.1.51/theme/default/images/logo.jpg"></p>
+        <?php echo $this->layout()->content; ?>
+    </div>
+</div>
+</body>
+</html>

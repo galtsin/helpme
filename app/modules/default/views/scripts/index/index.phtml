@@ -1,0 +1,57 @@
+<?php
+$jScript = <<<JS
+require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog", "core/resources/Ajax"]);
+dojo.ready(function(){
+
+/*    var dialog = new core.sandbox.layout.Dialog();
+    dialog.set('content', 'Hello World');
+
+    Sandbox = new core.Sandbox();
+    Sandbox.addStack('dialogs');
+    Sandbox.getStack('dialogs').push(dialog);
+    var t = Sandbox.getStack('dialogs').pop();
+    t.show();*/
+
+/*
+
+
+    dialog.show();
+    Sandbox.addStack('dialogs').push({});
+    Sandbox.getStack('dialogs').pop();*/
+
+    dojo.behavior.add({
+        '#test': {
+            onclick: function(event){
+                Sandbox = new core.Sandbox();
+                Sandbox.Layout.contentLoader('manager/tariffication/test', {}).addCallback(function(results){
+                    Sandbox.Layout.placeContent(dojo.byId('content'), results);
+                    // TODO: Повторное применение позволяет избавиться от повторного навешивания события!!!!!!!!!!!!!
+                    dojo.behavior.apply();
+                });
+            }
+        },
+        '.testing': {
+            onclick: function(event){
+                alert('-1-');
+            }
+        },
+        '#foo': {
+            onclick: function(event) {
+                alert('This is foo');
+            }
+        }
+    });
+    dojo.behavior.apply();
+
+
+
+});
+
+
+
+
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript')
+?>
+<button id="test" type="button" data-testme="hello">Click</button>
+<span class="testing">asdasdas</span><div id="content"></div>

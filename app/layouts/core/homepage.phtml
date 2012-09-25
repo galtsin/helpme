@@ -1,0 +1,35 @@
+<?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон заглавной (домашней) страницы
+ */
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<?php echo $this->headMeta();?>
+		<?php echo $this->headTitle(); ?>
+		<?php print $this->headLink();?>
+        <?php // print $this->headScript();?>
+        <style type="text/css">
+        </style>
+        <script type="text/javascript">
+            var domain = '<?php echo $this->baseUrl();?>';
+        </script>
+	</head>
+	<body style="background: #f5faff;">
+        <div class="container">
+            <div style="margin: 8% auto 0; width: 600px">
+                <div class="logo" style="margin-bottom: 30px">
+                    <img src="<?php echo $this->baseUrl('theme/default/images/logo.jpg')?>"/>
+                </div>
+                <h3>Добро пожаловать в систему HELPME</h3>
+                <p><em>HelpMe – это сервис по удаленной поддержке и удаленному обслуживанию пользователей программного обеспечения фирмы 1С и системы СБиС++ Электронная отчетность.</em></p>
+                <p><strong>На данный момент вы не авторизованы в системе</strong>. Чтобы продолжить работу вам необходимо <a href="<?php echo $this->baseUrl('account/access/login')?>">войти</a> под своей  учетной записью</p>
+            </div>
+        </div>
+	</body>
+</html>

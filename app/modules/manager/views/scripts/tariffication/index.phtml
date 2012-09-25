@@ -1,0 +1,48 @@
+<?php
+$jScript = <<<JS
+require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog"]);
+dojo.ready(function(){
+
+/*    var dialog = new core.sandbox.layout.Dialog();
+    dialog.set('content', 'Hello World');
+
+    Sandbox = new core.Sandbox();
+    Sandbox.addStack('dialogs');
+    Sandbox.getStack('dialogs').push(dialog);
+    var t = Sandbox.getStack('dialogs').pop();
+    t.show();*/
+
+/*
+
+
+    dialog.show();
+    Sandbox.addStack('dialogs').push({});
+    Sandbox.getStack('dialogs').pop();*/
+
+    Sandbox = new core.Sandbox();
+    var query = {
+        "filters[equal][id][]": [12, 13],
+        //"filters[equal][id][]": 16,
+        "possibility": 'ADM_GROUP:15'
+    };
+
+
+    Sandbox.addAction('tariffing', 'getTest', {
+        refresh: function(){
+            Sandbox.Layout.dataLoader('service/query/line', query).addCallback(function(results){
+
+            });
+        },
+        behavior: function(){
+
+        }
+    });
+    Sandbox.getAction('tariffing', 'getTest').refresh();
+});
+
+
+
+
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript')
+?>

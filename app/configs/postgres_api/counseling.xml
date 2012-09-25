@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<functions>
+    <lines_by_user>
+        <id_user type="integer"/>
+    </lines_by_user>
+    <lines_by_company>
+        <id_company type="integer"/>
+    </lines_by_company>
+    <line_get_identity>
+        <id_line type="integer"/>
+    </line_get_identity>
+    <line_get_tarifs>
+        <id_line type="integer"/>
+    </line_get_tarifs>
+    <!--    <line_get_identity>
+        <id_line type=""/>
+    </line_get_identity>-->
+    <line_get_levels>
+        <id_line type="integer"/>
+    </line_get_levels>
+    <level_get_groups>
+        <id_level type="integer"/>
+    </level_get_groups>
+    <group_get_users>
+        <id_group type="integer"/>
+    </group_get_users>
+    <line_add>
+        <params type="integer">id_user</params>
+        <params type="string">name</params>
+    </line_add>
+    <level_add>
+        <id_line type="integer"/>
+        <name type="string"/>
+    </level_add>
+    <group_add>
+        <id_level type="integer"/>
+        <id_company_owner type="integer"/>
+        <name type="string"/>
+    </group_add>
+    <group_add_user>
+        <id_group type="integer"/>
+        <id_user type="integer"/>
+    </group_add_user>
+    <group_delete_user>
+        <id_group type="integer"/>
+        <id_user type="integer"/>
+    </group_delete_user>
+    <group_get_identity>
+        <id_group type="integer"/>
+    </group_get_identity>
+    <level_get_forwarding_rules>
+        <id_level type="integer"/>
+    </level_get_forwarding_rules>
+    <level_update_forwarding_rules>
+        <id_rule type="integer"/>
+        <id_duration type="string"/>
+        <is_enabled type="bool"/>
+    </level_update_forwarding_rules>
+    <line_get_forwarding_rules>
+        <id_line type="integer"/>
+    </line_get_forwarding_rules>
+    <level_get_identity>
+        <id_level type="integer"/>
+    </level_get_identity>
+</functions>

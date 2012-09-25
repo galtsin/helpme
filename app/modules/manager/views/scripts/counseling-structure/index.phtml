@@ -1,0 +1,12 @@
+<?php
+$jScript = <<<JS
+require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog"]);
+dojo.ready(function(){
+
+});
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript')
+?>
+<?php
+$data = $this->data;
+?>

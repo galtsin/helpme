@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<events>
+    <user_activate>
+        <observer>HM_Model_Account_Auth_Observers_UserActivate</observer>
+    </user_activate>
+    <user_create>
+        <observer>HM_Model_Account_Auth_Observers_UserCreate</observer>
+    </user_create>
+    <user_invite>
+        <observer>HM_Model_Account_Auth_Observers_UserInvite</observer>
+    </user_invite>
+    <billing_agreement_subscribtion_activate>
+        <observer>HM_Model_Billing_Agreement_Observer_SubscriptionActivate</observer>
+    </billing_agreement_subscribtion_activate>
+    <billing_agreement_subscribe>
+        <observer>HM_Model_Billing_Agreement_Observer_Subscribe</observer>
+    </billing_agreement_subscribe>
+    <billing_agreement_unsubscribe>
+        <observer>HM_Model_Billing_Agreement_Observer_Unsubscribe</observer>
+    </billing_agreement_unsubscribe>
+</events>

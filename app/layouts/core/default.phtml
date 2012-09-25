@@ -1,0 +1,56 @@
+<?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Системный шаблон "по умолчанию"
+ */
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <?php echo $this->headMeta();?>
+    <?php echo $this->headTitle(); ?>
+    <?php print $this->headLink();?>
+    <script type="text/javascript">
+        // Dojo configuration
+        var djConfig = {
+            parseOnLoad: true,
+            isDebug: true,
+            packages: [
+                {name: "core", location: '../../core'}
+            ]
+        };
+        // Application configuration
+        var appConfig = {
+            baseUrl: "<?=$this->baseUrl();?>",
+            serverTimestamp: <?=date('U');?>
+        };
+    </script>
+    <?php print $this->headScript();?>
+</head>
+<body class="hm" style="position: relative">
+<div id="loader" class="hidden"><span>Загрузка и обработка данных ... </span></div>
+<div id="header">
+    <div style="background: #F5FAFF">
+        <div class="container" style="position: relative; padding: 10px 0">
+            <h1>
+                <a href="<?php echo $this->baseUrl(); ?>">
+                    <img src="<?php echo $this->baseUrl('theme/default/images/logo.jpg')?>"/>
+                </a>
+            </h1>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <ul>
+        <li>Договора</li>
+        <li>Группы/Специалисты</li>
+        <li>Линии Консультации</li>
+        <li>Настройка доступа</li>
+    </ul>
+    <?php echo $this->layout()->content; ?>
+</div>
+</body>
+</html>

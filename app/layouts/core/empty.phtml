@@ -1,0 +1,26 @@
+<?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон для пустой страницы
+ */
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<?php echo $this->headMeta();?>
+		<?php echo $this->headTitle(); ?>
+		<?php print $this->headLink();?>
+	</head>
+    <base href="<?php echo $this->baseUrl(); ?>" />
+	<body>
+        <h1>
+            <a href="<?php echo $this->baseUrl(); ?>">
+                <img src="<?php echo $this->baseUrl('theme/default/images/logo.jpg')?>"/>
+            </a>
+        </h1>
+		<?php echo $this->layout()->content; ?>
+	</body>
+</html>
