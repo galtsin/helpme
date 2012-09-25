@@ -1,0 +1,155 @@
+@charset "UTF-8";
+
+body {
+    padding-top: 150px
+}
+
+#header {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    background: #ffffff;
+    z-index: 1030;
+}
+
+.navbar-inner {
+    background-color: #2C2C2C;
+    background-image: -moz-linear-gradient(center top , #333333, #222222);
+    background-repeat: repeat-x;
+    min-height: 30px;
+    margin-bottom: 10px;
+}
+.navbar-fixed-top {
+    top: 0;
+}
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+    left: 0;
+    margin-bottom: 0;
+    position: fixed;
+    right: 0;
+    z-index: 1030;
+}
+
+.navbar .nav,
+.navbar .nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar .nav ul {
+    visibility: hidden;
+    /* display: block */
+    position: absolute;
+    top: 100%;
+    left: 0%;
+    z-index: 598;
+}
+
+.navbar .nav {
+    position: relative;
+    z-index: 597;
+}
+
+.navbar .nav li,
+.navbar .nav li:hover{
+    float: left;
+    line-height: 1.3em;
+    vertical-align: middle;
+    position: relative;
+    z-index: 599;
+    cursor: pointer;
+    zoom: 1;
+}
+
+.nav ul li {
+    float: none;
+}
+
+.nav ul ul {
+    top: 0px;
+    left: 99%;
+}
+
+.navbar .nav li a,
+.navbar .nav li a:hover {
+    display: block;
+    color: #ffffff;
+    text-decoration: none;
+}
+.navbar .nav  li a {
+    padding: 10px 20px 10px;
+}
+.navbar .nav  ul a {
+    background: #444444;
+    width: 150px;
+}
+
+.navbar .nav > .active > a {
+    background: #000000;
+}
+
+.navbar .nav > li:hover > a {
+    background: #444444;
+}
+.navbar .nav > li a {
+/*    */
+}
+
+.navbar .nav ul a:hover {
+    background: #505050;
+}
+
+.navbar .nav ul.hover {
+    visibility: visible;
+}
+
+
+.well {
+    background-color: #F5F5F5;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+    margin-bottom: 20px;
+    min-height: 20px;
+    padding: 19px;
+}
+
+#loader {
+    height: 300px;
+    /*position: absolute;*/
+    position: fixed;
+    z-index: 9999;
+    left:0;
+    top: 0;
+    background: #fff;
+    opacity: 0.7;
+    filter: alpha(Opacity=70);
+}
+#loader span {
+    display: block;
+    width: 300px;
+    text-align: center;
+    background: #000 url("../images/loading.png") 15px center no-repeat;
+    color: #fff;
+    font: bold 12px/1 Arial;
+    margin: 28% auto 0;
+    padding: 25px 0px;
+}
+
+
+.form-element-error {
+    border: 2px solid  #B94A48;
+}
+.error-anchor {
+    cursor: pointer;
+}
+.required-anchor {
+    color: #cc0000;
+}
+label.inline {
+    display: inline;
+    padding-left: 7px;
+}
