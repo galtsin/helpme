@@ -29,8 +29,8 @@ class HM_Model_Counseling_Structure_Level_Factory extends App_Core_Model_Factory
 
         if($result->rowCount() > 0) {
             $row = $result->fetchRow();
-            $line = new HM_Model_Counseling_Structure_Level();
-            $line->getData()
+            $level = new HM_Model_Counseling_Structure_Level();
+            $level->getData()
                 ->set('id', $id)
                 ->set('name', $row['o_name'])
                 ->set('priority', $row['o_priority']);

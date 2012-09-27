@@ -6,25 +6,26 @@
 class App_Zend_Controller_Action extends Zend_Controller_Action
 {
     /**
-     * ru: Результат выполнения
+     * Результат выполнения оцерации
+     * Используется для изменяющих POST, PUT, DELETE запросов
      * @var int
      */
     private $_result = -1;
 
     /**
-     * Контейнер с данными Данные по умолчанию
+     * Контейнер с данными
      * @var array
      */
     private $_data = array();
 
     /**
-     * ru: Статус ошибок
+     * Статус ошибок
      * @var int
      */
     private $_error = -1;
 
     /**
-     * ru: Статус доступности
+     * Статус доступности
      * @var string ok | error
      */
     private $_status = 'ok';
@@ -40,7 +41,7 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     }
 
     /**
-     * ru: Выводим сообщения в конце диспетчеризации при условии, что мы работает с AJAX-запросами
+     * Выводим сообщения в конце диспетчеризации при условии, что мы работает с AJAX-запросами
      * и типов возвращаемых данных JSON
      */
     public function postDispatch()
@@ -55,12 +56,12 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
             } else {
                 $vars['data'] = $this->_data;
             }
-
+            $this->view->assign($vars);
         }
     }
 
     /**
-     * ru: Установить результат ответа
+     * Установить результат ответа
      * @param $result
      * @return App_Zend_Controller_Action
      */
@@ -83,7 +84,7 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     }
 
     /**
-     * ru: Формат данных 'system' => array('textCode' => 'description')
+     * Формат данных 'system' => array('textCode' => 'description')
      * @param array $error
      * @return App_Zend_Controller_Action
      */
@@ -101,6 +102,7 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     }
 
     /**
+     * Переадресация по рефераллам
      * @param bool $finally
      */
     protected function _redirectToReferer($finally = false)

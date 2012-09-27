@@ -1,9 +1,16 @@
 <?php
-
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Управление структурой Линий Консультации: ЛК, уровни
+ */
 class Manager_CounselingStructureController extends App_Zend_Controller_Action
 {
     /**
      * Загрузить список доступных ЛК с привязкой по компаниям
+     * HTML Context
      */
     public function indexAction()
     {
@@ -37,14 +44,44 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
     /**
      * Управление ЛК
+     * HTML Context
      */
     public function lineAction()
     {
-        $line = (int)$this->getRequest()->getParam('id');
+        $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
+        $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
     }
 
     /**
-     * Упрвление Тарифами
+     * Отредактировать Линию консультации
+     * Ajax Context
      */
-    public function tariffsAction(){}
+    public function editLineAction()
+    {
+        if($this->getRequest()->isPost()){
+            // Сохранить данные
+            // Предпроверка данных
+        } else {
+            // Получить форму для редактирования данных
+            $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
+            $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
+            $this->view->assign('data', $line->getData());
+        }
+    }
+
+    public function getLevelsAction()
+    {
+        $levelColl = new HM_Model_Counseling_Structure_Level_Collection();
+        $levelColl->addEqualFilter('line', (int)$this->getRequest()->getParam('id'))->getCollection();
+        $levelColl->getDataIterator();
+        $this->view->assign('data', $levelColl->getDataIterator());
+    }
+
+    public function addLevelAction(){}
+    public function removeLevelAction(){}
+    public function editRulesAction(){}
+    public function editLevelAction(){}
+    public function getGroups(){}
+    public function addGroup(){}
+    public function removeGroup(){}
 }

@@ -1,0 +1,16 @@
+<?php
+$data = $this->data;
+?>
+<?php if(is_string($data->get('logo'))) :?>
+<img width="60" height="78" style="width: 60px; height: 78px" src="data:image/png;base64,<?=$data->get('logo')?>">
+<?php else: ?>
+<img width="60" height="78" style="width: 60px; height: 78px; border: 2px solid #999" src="<?=$this->baseUrl('theme/default/images/not_image.png')?>">
+<?php endif; ?>
+
+<form id="edit-line" method="post">
+    <label for="edit-line-name">Наименование:</label>
+    <input type="text" value="<?=$data->get('name')?>" id="edit-line-name" name="line[name]"/>
+    <label for="edit-line-description">Описание:</label>
+    <textarea id="edit-line-description" name="line[description]"><?=$data->get('description')?></textarea><br/>
+    <button type="button">Сохранить</button>
+</form>

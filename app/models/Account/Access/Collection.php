@@ -35,7 +35,6 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     }
 
     /**
-     * FINAL
      * Установить фильтр доступа к объектам, используя права доступа и их наследование
      * Результирующая выборка произойдет по всем разрешенным правам с соединением ресурсов
      * @param HM_Model_Account_User $user
@@ -52,17 +51,57 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
             if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
                 $key = array_search($company, $companies);
                 if(is_bool($key) === false){
-                    $params = array(
+                    $possibility = array(
                         'user'          => $user->getData('id'),
                         'role'          => $access->getRole($roleIdentifier)->getId(), // Привязка идет по рролям пользователя
                         'company'       => $company
                     );
-                    $this->addEqualFilter('accessible', $params);
+                    $this->addEqualFilter('accessible', $possibility);
                 }
             }
         }
         return $this;
     }
+
+    /**
+     * Возможность загрузить ресурсы для всех компаний.
+     * Функция не безопасна из-зи $company = null - можем получить доступ ко всем компаниям
+     * Установить фильтр доступа к объектам, используя права доступа и их наследование
+     * Результирующая выборка произойдет по всем разрешенным правам с соединением ресурсов
+     * @param HM_Model_Account_User $user
+     * @param App_Core_Model_Data_Store $role
+     * @param null|int $company
+     * @return HM_Model_Account_Access_Collection
+     */
+/*    public function setAccessFilter(HM_Model_Account_User $user, App_Core_Model_Data_Store $role, $company = null)
+    {
+        $access = HM_Model_Account_Access::getInstance();
+        $userRoles = $user->getRoles();
+        foreach($userRoles as $roleIdentifier => $companies) {
+            // Учитывается наследование Ролей
+            if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
+                if(null !== $company) {
+                    $_companies = array();
+                    if(in_array($company, $companies)) {
+                        $_companies[] = $company;
+                    }
+                } else {
+                    $_companies = $companies;
+                }
+                if(count($companies) > 0) {
+                    foreach($_companies as $_company){
+                        $possibility = array(
+                            'user'          => $user->getData('id'),
+                            'role'          => $access->getRole($roleIdentifier)->getId(), // Привязка идет по ролям пользователя
+                            'company'       => $_company
+                        );
+                        $this->addEqualFilter('accessible', $possibility);
+                    }
+                }
+            }
+        }
+        return $this;
+    }*/
 
     /**
      * Установить тип объекта по которому идет ограничение

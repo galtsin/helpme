@@ -33,9 +33,10 @@ class HM_Model_Counseling_Structure_Level_Collection extends App_Core_Model_Coll
                         'id_line' => $line
                     )
                 );
-                $row = $result->fetchRow();
-                if((int)$row['o_id'] != -1) {
-                    $ids[] = (int)$row['o_id'];
+                if($result->rowCount() > 0) {
+                    foreach($result->fetchAll() as $row) {
+                        $ids[] = $row['o_id'];
+                    }
                 }
             }
         }

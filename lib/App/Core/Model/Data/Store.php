@@ -194,4 +194,13 @@ final class App_Core_Model_Data_Store
             'data' => $this->get('data')
         );
     }
+
+    /**
+     * Преобразовать объект в JSON данные
+     * @return string
+     */
+    public function toJson()
+    {
+        return Zend_Json::encode($this->toArray());
+    }
 }

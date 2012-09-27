@@ -21,7 +21,7 @@ require(["core/Loader"], function(Loader){
 
             var xhr = dojo.xhr(method, {
                 url: url,
-                timeout: 5000,
+                timeout: 10000,
                 handleAs: responseFormat,
                 content: params,
                 load: function(response, ioArgs){

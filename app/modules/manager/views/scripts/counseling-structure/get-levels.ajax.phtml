@@ -1,0 +1,35 @@
+<?php
+$data = $this->data;
+?>
+<form id="edit-levels">
+<table class="table table-bordered">
+    <colgroup>
+        <col width="30"/>
+        <col/>
+    </colgroup>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Наименование</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="2">
+                <button type="button">Добавить</button>
+                <button type="button">Удалить</button>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        <?php
+            foreach($data as $entry):
+        ?>
+        <tr>
+            <td><input type="checkbox"/></td>
+            <td><a><?=$entry->get('name')?></a></td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+</form>
