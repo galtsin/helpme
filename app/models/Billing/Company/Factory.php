@@ -11,11 +11,10 @@ class HM_Model_Billing_Company_Factory extends App_Core_Model_FactoryAbstract
 {
     protected function _init()
     {
-        App::getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
     }
 
-    protected function _insert(App_Core_Model_DataObject $dataObject)
+/*    protected function _insert(App_Core_Model_DataObject $dataObject)
     {
         $identity = $dataObject->get('identity');
         if(!empty($identity)) {
@@ -30,46 +29,33 @@ class HM_Model_Billing_Company_Factory extends App_Core_Model_FactoryAbstract
             return (int)$row['company_add'];
         }
         return -1;
-    }
+    }*/
 
-    protected function _update(App_Core_Model_DataObject $dataObject)
-    {
-
-    }
-
+    /**
+     * @param int $id
+     * @return HM_Model_Billing_Company
+     */
     public function restore($id)
     {
-        $result = $this->getResource('postgres_api')->execute('company_get_identity', array(
+        $company = null;
+
+        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            ->execute('company_get_identity', array(
                 'id' => (int)$id
             )
         );
+
         if($result->rowCount() > 0) {
             $row = $result->fetchRow();
-            $entity = $this->create(array(
-                    array(
-                        'data'  => array(
-                            'identity'  => array(
-                                'name'  => $row['o_name'],
-                                'inn'   => $row['o_inn'],
-                                'kpp'   => $row['o_kpp'],
-                                'user_creator'   => $row['o_id_creator']
-                            )
-                        )
-                    ),
-                    array(
-                        'id'    => $id
-                    )
-                )
-            );
-        } else {
-            $entity = null;
+            $company = new HM_Model_Billing_Company();
+            $company->getData()
+                ->set('id', $id)
+                ->set('name', $row['o_name'])
+                ->set('inn', $row['o_inn'])
+                ->set('kpp', $row['o_kpp'])
+                ->set('user_creator', $row['o_id_creator']);
         }
 
-        return $entity;
-    }
-
-    public function remove($id)
-    {
-
+        return $company;
     }
 }

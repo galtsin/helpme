@@ -7,32 +7,34 @@
 /**
  * ru: Коллекция по сущностям HM_Model_Account_User
  */
-class HM_Model_Billing_Company_Collection extends App_Core_Collection_Filter
+class HM_Model_Billing_Company_Collection extends App_Core_Model_Collection_Filter
 {
     /**
-     * ru: Инициализия
+     * Инициализация
      */
-    public function __construct()
+    protected function _init()
     {
-        parent::__construct(HM_Model_Billing_Company_Factory::getInstance());
-        $this->_addFilterName(App_Core_Collection_Filter::EQUAL_FILTER, 'inn');
-        $this->_addFilterName(App_Core_Collection_Filter::EQUAL_FILTER, 'kpp');
+        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory'));
+        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'inn');
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'kpp');
     }
 
     /**
-    * ru: Вернуть результат работы фильтра отбора по ИНН
-    *
-    * @return array
-    */
+     * Фильтр по ИНН компании
+     * @return array
+     */
     protected function _doInnEqualFilterCollection()
     {
         $ids = array();
 
         if(count($this->getEqualFilterValues('inn')) > 0) {
-            // Получить ресурс
-            $resource = $this->getFactory()->getResource('postgres_api');
             foreach($this->getEqualFilterValues('inn') as $inn) {
-                $result = $resource->execute('company_by_inn', array('inn' => $inn));
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('company_by_inn', array(
+                        'inn' => $inn
+                    )
+                );
                 if($result->rowCount() > 0) {
                     foreach($result->fetchAll() as $row) {
                         $ids[] = $row['id_company'];
@@ -44,21 +46,21 @@ class HM_Model_Billing_Company_Collection extends App_Core_Collection_Filter
         return $ids;
     }
 
-
     /**
-    * ru: Вернуть результат работы фильтра отбора по КПП
-    *
-    * @return array
-    */
+     * Фильтр по КПП компании
+     * @return array
+     */
     protected function _doKppEqualFilterCollection()
     {
         $ids = array();
 
         if(count($this->getEqualFilterValues('kpp')) > 0) {
-            // Получить ресурс
-            $resource = $this->getFactory()->getResource('postgres_api');
             foreach($this->getEqualFilterValues('kpp') as $kpp) {
-                $result = $resource->execute('company_by_kpp', array('kpp' => $kpp));
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('company_by_kpp', array(
+                        'kpp' => $kpp
+                    )
+                );
                 if($result->rowCount() > 0) {
                     foreach($result->fetchAll() as $row) {
                         $ids[] = $row['id_company'];

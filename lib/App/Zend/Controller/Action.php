@@ -12,6 +12,12 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     private $_result = -1;
 
     /**
+     * Контейнер с данными Данные по умолчанию
+     * @var array
+     */
+    private $_data = array();
+
+    /**
      * ru: Статус ошибок
      * @var int
      */
@@ -40,20 +46,27 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     public function postDispatch()
     {
         if($this->getRequest()->isXmlHttpRequest() && $this->_helper->getHelper('AjaxContext')->getCurrentContext() == 'json') {
-            $this->view->status = $this->_status;
-            $this->view->error = $this->_error;
-            $this->view->result = $this->_result;
+            $vars = array(
+                'status'=> $this->_status,
+                'error' => $this->_error
+            );
+            if($this->getRequest()->isPost()){
+                $vars['result'] = $this->_result;
+            } else {
+                $vars['data'] = $this->_data;
+            }
+
         }
     }
 
     /**
      * ru: Установить результат ответа
-     * @param $data
+     * @param $result
      * @return App_Zend_Controller_Action
      */
-    public function setAjaxResult($data)
+    public function setAjaxResult($result)
     {
-        $this->_result = $data;
+        $this->_result = $result;
         return $this;
     }
 

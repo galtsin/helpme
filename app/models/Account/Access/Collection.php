@@ -35,6 +35,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     }
 
     /**
+     * FINAL
      * Установить фильтр доступа к объектам, используя права доступа и их наследование
      * Результирующая выборка произойдет по всем разрешенным правам с соединением ресурсов
      * @param HM_Model_Account_User $user

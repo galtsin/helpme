@@ -44,12 +44,22 @@
     </div>
 </div>
 <div class="container">
-    <ul>
-        <li>Договора</li>
-        <li>Группы/Специалисты</li>
-        <li>Линии Консультации</li>
-        <li>Настройка доступа</li>
-    </ul>
+    <!-- Top navbar -->
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="container">
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                        <li><a>Договора</a></li>
+                        <li><a href="<?=$this->baseUrl('manager/counseling-structure/index')?>">Линии Консультации</a></li>
+                        <li><a>Группы/Специалисты</a></li>
+                        <li><a>Настройка доступа</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Top navbar End-->
     <?php echo $this->layout()->content; ?>
 </div>
 </body>

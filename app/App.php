@@ -65,16 +65,10 @@ class App
      */
     public static function getFactory($class)
     {
-        if(class_exists($class) && get_parent_class($class) == 'App_Core_Model_FactoryAbstract') {
-            if(!array_key_exists('factory', self::$_instances)) {
-                self::$_instances['factory'] = array();
-            }
-            if(!array_key_exists($class, self::$_instances['factory'])){
-                self::$_instances['factory'][$class] = new $class();
-            }
-            return self::$_instances['factory'][$class];
+        if(get_parent_class($class) == 'App_Core_Model_FactoryAbstract') {
+            return self::_getInstance('factory', $class);
         }
-        throw new Exception('Class "' . $class . '" is not defined');
+        throw new Exception('Class "' . $class . '" is not Factory instance');
     }
 
     /**
@@ -84,12 +78,7 @@ class App
      */
     public static function getResource($class)
     {
-        if(class_exists($class)) {
-            if(!array_key_exists($class, self::$_instances['resource'])){
-                self::$_instances['resource'][$class] = new $class();
-            }
-            return self::$_instances['resource'][$class];
-        }
-        throw new Exception('Class "' . $class . '" is not defined');
+        return self::_getInstance('resource', $class);
+
     }
 }

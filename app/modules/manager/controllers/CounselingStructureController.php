@@ -9,34 +9,30 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     {
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+        $access = HM_Model_Account_Access::getInstance();
 
         // Узнать по какой роли стоит осуществлять поиск
         // Мы знаем URL-адрес
+        $pageRole = $access->getRole('ADM_TARIFF'); // TODO: Как то нужно узнавать!
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
 
-        $access = HM_Model_Account_Access::getInstance();
-        $access->getRoles();
-
-        $pageRole = 'ADM_TARIFF'; // TODO: Как то нужно узнавать
-
-        // Доработка
-        $userRoles = $user->getRoles();
-
-        $coll = new HM_Model_Account_Access_Collection();
-        $coll->setType('LINE')
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $accessColl->setType('LINE')
             ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
-        $data = array();
-        foreach($userRoles as $role => $companies) {
-            foreach($companies as $company){
-                $coll->resetFilters();
-                $coll->setAccessFilter($user, $access->getRole($pageRole), $company)->getCollection();
-                $data[$company] = array_merge($coll->getIdsIterator());
-            }
-        }
-        Zend_Debug::dump($data);
 
-        Zend_Debug::dump(array_unique(array_merge(array(1,2,3,4), array(3,4,5,6))));
-        $this->view->data = $data;
+        $data = array();
+
+        foreach($user->getRoles() as $roleIdentifier => $companies) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole->get('code')) || $roleIdentifier === $pageRole->get('code')) {
+                foreach($companies as $company){
+                    $accessColl->resetFilters();
+                    $accessColl->setAccessFilter($user, $pageRole, $company)->getCollection();
+                    $data[] = array('company' => $company, 'lines' => $accessColl->getIdsIterator());
+                }
+            }
+
+        }
+        $this->view->assign('data', $data);
     }
 
     /**
@@ -44,7 +40,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
      */
     public function lineAction()
     {
-
+        $line = (int)$this->getRequest()->getParam('id');
     }
 
     /**

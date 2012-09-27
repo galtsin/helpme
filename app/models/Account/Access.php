@@ -43,7 +43,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
      * Синглтон
      * @var HM_Model_Account_Access|null
      */
-    protected static $_instance = null;
+    private static $_instance = null;
 
     /**
      * Конструктор
