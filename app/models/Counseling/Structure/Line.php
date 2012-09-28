@@ -44,8 +44,9 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
                         ->set('name_level_from', $row['name_level_from'])
                         ->set('name_level_to', $row['name_level_to'])
                         ->set('duration', $row['duration'])
-                        ->set('is_enabled', (bool)$row['is_enabled']);
-                    $rules[] = $rule;
+                        ->set('is_enabled', (bool)$row['is_enabled'])
+                        ->unmarkDirty();
+                    $rules[$rule->getId()] = $rule;
                 }
             }
             $this->_rules = $rules;
@@ -60,28 +61,31 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
      */
     public function updateRules()
     {
+        $processing = true;
         if(count($this->getRules()) > 0) {
             foreach($this->getRules() as $rule) {
-                try{
-                    $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                        ->execute('level_update_forwarding_rules', array(
-                            'id_rule'       => $rule->get('id'),
-                            'id_duration'   => $rule->get('duration'),
-                            'is_enabled'    => (bool)$rule->get('is_enabled')
-                        )
-                    );
-                    if($result)
-                    return true;
-                } catch(Exception $ex) {
-                    $this->addAjaxError(array(
-                            'system'    => array(
-                                'fault' => 'Сбой во время сохранения информации.'
+                if(true === $rule->isDirty()) {
+                    try{
+                        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                            ->execute('level_update_forwarding_rule', array(
+                                'id_rule'       => $rule->get('id'),
+                                'id_duration'   => $rule->get('duration'),
+                                'is_enabled'    => (bool)$rule->get('is_enabled')
                             )
-                        )
-                    );
+                        );
+                        $row = $result->fetchRow();
+                        if($row['o_id_rule'] === -1) {
+                            $processing = false;
+                        } else {
+                            $rule->unmarkDirty();
+                        }
+                    } catch(Exception $ex) {
+                        $processing = false;
+                        continue;
+                    }
                 }
             }
         }
-        return false;
+        return $processing;
     }
 }

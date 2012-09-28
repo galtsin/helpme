@@ -51,11 +51,11 @@
     <level_get_forwarding_rules>
         <id_level type="integer"/>
     </level_get_forwarding_rules>
-    <level_update_forwarding_rules>
+    <level_update_forwarding_rule>
         <id_rule type="integer"/>
         <id_duration type="string"/>
         <is_enabled type="bool"/>
-    </level_update_forwarding_rules>
+    </level_update_forwarding_rule>
     <line_get_forwarding_rules>
         <id_line type="integer"/>
     </line_get_forwarding_rules>

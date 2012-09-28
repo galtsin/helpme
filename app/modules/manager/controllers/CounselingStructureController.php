@@ -101,10 +101,32 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function addGroup(){}
     public function removeGroup(){}
 
+    /**
+     * TODO: Проверить и доработать
+     * Отредактировать правила переадресации
+     */
     public function editRulesAction()
     {
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
-        $this->view->assign('data', $lineColl->load(11)->getRules());
+        $line = $lineColl->load(11);
+
+        if($this->getRequest()->isPost()) {
+            $rulesDirty = $this->getRequest()->getParam('rules');
+            $rulesOrigin = $line->getRules();
+            foreach($rulesDirty as $id => $params) {
+                if(!array_key_exists('is_enabled',$params)) {
+                    $params['is_enabled'] = false;
+                }
+                foreach($params as $key => $value) {
+                    if($rulesOrigin[$id]->get($key) !== $value) {
+                        $rulesOrigin->set($key, $value);
+                    }
+                }
+            }
+            $line->updateRules();
+        } else {
+            $this->view->assign('data', $line->getRules());
+        }
     }
 
 }

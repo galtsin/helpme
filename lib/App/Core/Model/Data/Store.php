@@ -27,6 +27,14 @@ final class App_Core_Model_Data_Store
     protected $_data = array();
 
     /**
+     * Флаг изменения данных объекта
+     * "true" — объект изменен; "false" — объект
+     * Применяется для записи в БД, только измененых объектов
+     * @var bool
+     */
+    private $_dirty = false;
+
+    /**
      * Конструктор позволяет инициализировать модель через метод self::set
      * @param array|null $options
      */
@@ -109,6 +117,10 @@ final class App_Core_Model_Data_Store
             default:
                 $this->_data[$key] = $value;
         }
+
+        // Пометить объект как измененый
+        $this->markDirty();
+
         return $this;
     }
 
@@ -131,6 +143,9 @@ final class App_Core_Model_Data_Store
                     $this->_data[$key] = $this->merge((array)$this->_data[$key], (array)$value, $recursive);
                 }
         }
+
+        // Пометить объект как измененый
+        $this->markDirty();
         return $this;
     }
 
@@ -170,6 +185,36 @@ final class App_Core_Model_Data_Store
         } else {
             throw new Exception("ID '" . $id . "' is exist. (Идентификатор уже задан)");
         }
+    }
+
+    /**
+     * Проверка на изменения в объекте
+     * "true" — объект изменен; "false" — объект
+     * @return bool
+     */
+    public function isDirty()
+    {
+        return $this->_dirty;
+    }
+
+    /**
+     * Пометить объект как измененый
+     * @return App_Core_Model_Data_Store
+     */
+    public function markDirty()
+    {
+        $this->_dirty = true;
+        return $this;
+    }
+
+    /**
+     * Снять отметку изменености объекта
+     * @return App_Core_Model_Data_Store
+     */
+    public function unmarkDirty()
+    {
+        $this->_dirty = false;
+        return $this;
     }
 
     /**

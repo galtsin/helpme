@@ -2,8 +2,8 @@
 $data = $this->data;
 ?>
 <?php if(count($data) > 0):?>
-<form method="post" id="asdf">
-    <table id="usersGroupTable" class="table table-striped table-bordered table-condensed">
+<form id="edit-rules">
+    <table class="table table-striped table-bordered">
         <colgroup>
             <col width="90"/>
             <col/>
@@ -27,12 +27,12 @@ $data = $this->data;
             <td><?=$rule->get('id'); ?></td>
             <td><?=$rule->get('name_level_from'); ?></td>
             <td><?=$rule->get('name_level_to'); ?></td>
-            <td><input name="rule[<?=$rule->get('id') ?>][duration]" type="text" value="<?=$rule->get('duration'); ?>"/></td>
+            <td><input name="rules[<?=$rule->get('id') ?>][duration]" type="text" value="<?=$rule->get('duration'); ?>"/></td>
             <td>
                 <?php if(true == $rule->get('is_enabled')): ?>
-                <input type="checkbox" name="rule[<?=$rule->get('id') ?>][is_enabled]" value="true" checked="true"/>
+                <input type="checkbox" name="rules[<?=$rule->get('id') ?>][is_enabled]" value="true" checked="true"/>
                 <?php else: ?>
-                <input type="checkbox" name="rule[<?=$rule->get('id') ?>][is_enabled]" value="false" />
+                <input type="checkbox" name="rules[<?=$rule->get('id') ?>][is_enabled]" value="false" />
                 <?php endif; ?>
             </td>
         </tr>
@@ -44,6 +44,6 @@ $data = $this->data;
         </tr>
         </tbody>
     </table>
-    <input type="hidden" name="line[id]" value="<?=$this->line->getId();?>"/>
+    <input type="hidden" name="line" value="<?=$this->line->getId();?>"/>
 </form>
 <?php endif; ?>
