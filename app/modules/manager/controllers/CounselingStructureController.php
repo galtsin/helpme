@@ -20,7 +20,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
         // Узнать по какой роли стоит осуществлять поиск
         // Мы знаем URL-адрес
-        $pageRole = $access->getRole('ADM_TARIFF'); // TODO: Как то нужно узнавать!
+        $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
@@ -48,6 +48,23 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
      */
     public function lineAction()
     {
+        // Проверить принадлежность
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+
+        // Узнать по какой роли стоит осуществлять поиск
+        // Мы знаем URL-адрес
+        $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $accessColl->setType('LINE')
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
+
+        $data = array();
+
+
+
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
     }
@@ -79,9 +96,15 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
     public function addLevelAction(){}
     public function removeLevelAction(){}
-    public function editRulesAction(){}
     public function editLevelAction(){}
     public function getGroups(){}
     public function addGroup(){}
     public function removeGroup(){}
+
+    public function editRulesAction()
+    {
+        $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
+        $this->view->assign('data', $lineColl->load(11)->getRules());
+    }
+
 }

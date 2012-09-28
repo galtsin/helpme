@@ -6,14 +6,14 @@
 class App_Zend_Controller_Action extends Zend_Controller_Action
 {
     /**
-     * Результат выполнения оцерации
+     * Результат выполнения оцерации!!!
      * Используется для изменяющих POST, PUT, DELETE запросов
      * @var int
      */
     private $_result = -1;
 
     /**
-     * Контейнер с данными
+     * Контейнер с данными GET-запросы
      * @var array
      */
     private $_data = array();

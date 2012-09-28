@@ -18,6 +18,13 @@ dojo.ready(function(){
                     dojo.byId('content').innerHTML = results;
                 });
             }
+        },
+        '#testme3': {
+            onclick: function(){
+                Sandbox.Layout.contentLoader('manager/counseling-structure/edit-rules', {id: 11}).addCallback(function(results){
+                    dojo.byId('content').innerHTML = results;
+                });
+            }
         }
     });
     dojo.behavior.apply();
@@ -28,7 +35,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript');
 <div style="margin: 15px 0">
     <button type="button" id="testme">Общее</button>
     <button type="button" id="testme2">Уровни</button>
-    <button type="button">Связи уровней</button>
-    <button type="button">Тарифы</button>
+    <button type="button" id="testme3">Связи уровней</button>
+    <button type="button" id="testme4">Тарифы</button>
 </div>
 <div id="content">1</div>
