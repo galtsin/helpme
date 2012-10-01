@@ -185,7 +185,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Массив ролей от которых происходит наследование
+     * Получить массив ролей от которых происходит наследование
      * @param App_Core_Model_Data_Store $role
      * @return array App_Core_Model_Data_Store
      */
@@ -225,6 +225,16 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Далее не проработано!!!!
      */
+
+    /**
+     * TODO:
+     * 1. Разрешен ли пользователю доступ к объекту
+     * 2. Загрузить список доступных ресурсов ObjectType + IdObject
+     * if(isAllowed && isWritable)
+     */
+
+    public function isWritable($user, $role, $company, $type, $objectId){}
+
 
 
     /**

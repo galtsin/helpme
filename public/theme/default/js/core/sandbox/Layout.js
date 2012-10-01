@@ -9,6 +9,7 @@ require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax){
         },
         // Отправить данные на сервер.
         dataSender: function(url, data){
+            data['format'] = "json";
             return this.Ajax.xhr(this.urlCorrect(url), data, "POST", "json");
         },
         // Загрузить данные с сервера JSON-данные

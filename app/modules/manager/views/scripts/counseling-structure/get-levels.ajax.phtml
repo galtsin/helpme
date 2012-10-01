@@ -1,21 +1,37 @@
 <?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон для редактирования и просмотра информации об ЛК
+ */
+?>
+<?php
 $data = $this->data;
+?>
+<?php
+/**
+ * Режим редактирования
+ */
+if(true === $this->is_writable):
 ?>
 <form id="edit-levels">
 <table class="table table-bordered">
     <colgroup>
         <col width="30"/>
+        <col width="50"/>
         <col/>
     </colgroup>
     <thead>
         <tr>
-            <th>#</th>
+            <th colspan="2">#ID</th>
             <th>Наименование</th>
         </tr>
     </thead>
     <tfoot>
         <tr>
-            <td colspan="2">
+            <td colspan="3">
                 <button type="button">Добавить</button>
                 <button type="button">Удалить</button>
             </td>
@@ -23,13 +39,57 @@ $data = $this->data;
     </tfoot>
     <tbody>
         <?php
+            if($data->count() > 0):
             foreach($data as $entry):
         ?>
         <tr>
             <td><input type="checkbox"/></td>
+            <td><?=$entry->get('id')?></td>
             <td><a><?=$entry->get('name')?></a></td>
         </tr>
         <?php endforeach; ?>
+        <?php else: ?>
+        <tr>
+            <td colspan="3"><em>Уровни на линии консультации отсутствуют</em></td>
+        </tr>
+        <?php endif; ?>
     </tbody>
 </table>
 </form>
+<?php
+/**
+ * Режим чтения
+ */
+else:
+?>
+<table class="table table-bordered">
+    <colgroup>
+        <col width="30"/>
+        <col/>
+    </colgroup>
+    <thead>
+    <tr>
+        <th>#ID</th>
+        <th>Наименование</th>
+    </tr>
+    </thead>
+    <tbody>
+        <?php
+        if($data->count() > 0):
+        foreach($data as $entry):
+            ?>
+        <tr>
+            <td><?=$entry->get('id')?></td>
+            <td><a><?=$entry->get('name')?></a></td>
+        </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+        <tr>
+            <td colspan="2"><em>Уровни на линии консультации отсутствуют</em></td>
+        </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
+<?php
+endif;
+?>

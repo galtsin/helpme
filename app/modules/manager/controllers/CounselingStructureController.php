@@ -67,6 +67,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
+        $this->view->assign('line', $line->getData('id'));
     }
 
     /**
@@ -81,17 +82,19 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         } else {
             // Получить форму для редактирования данных
             $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
-            $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
+            $line = $lineColl->load((int)$this->getRequest()->getParam('line'));
             $this->view->assign('data', $line->getData());
+            $this->view->assign('is_writable', false);
         }
     }
 
     public function getLevelsAction()
     {
         $levelColl = new HM_Model_Counseling_Structure_Level_Collection();
-        $levelColl->addEqualFilter('line', (int)$this->getRequest()->getParam('id'))->getCollection();
+        $levelColl->addEqualFilter('line', (int)$this->getRequest()->getParam('line'))->getCollection();
         $levelColl->getDataIterator();
         $this->view->assign('data', $levelColl->getDataIterator());
+        $this->view->assign('is_writable', false);
     }
 
     public function addLevelAction(){}
@@ -108,7 +111,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function editRulesAction()
     {
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
-        $line = $lineColl->load(11);
+        $line = $lineColl->load($this->getRequest()->getParam('line'));
 
         if($this->getRequest()->isPost()) {
             $rulesDirty = $this->getRequest()->getParam('rules');
@@ -119,12 +122,13 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
                 }
                 foreach($params as $key => $value) {
                     if($rulesOrigin[$id]->get($key) !== $value) {
-                        $rulesOrigin->set($key, $value);
+                        $rulesOrigin[$id]->set($key, $value);
                     }
                 }
             }
             $line->updateRules();
         } else {
+            $this->view->assign('line', $line->getData('id'));
             $this->view->assign('data', $line->getRules());
         }
     }

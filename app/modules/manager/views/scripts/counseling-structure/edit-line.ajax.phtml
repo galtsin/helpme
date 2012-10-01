@@ -8,15 +8,16 @@
  */
 ?>
 <?php
+$data = $this->data;
+?>
+<?php
 /**
  * Режим редактирования
  */
-?>
-<?php
-$data = $this->data;
+if(true === $this->is_writable):
 ?>
 <?php if(is_string($data->get('logo'))) :?>
-<img width="60" height="78" style="width: 60px; height: 78px" src="data:image/png;base64,<?=$data->get('logo')?>">
+<img src="data:image/png;base64,<?=$data->get('logo')?>">
 <?php else: ?>
 <img width="60" height="78" style="width: 60px; height: 78px; border: 2px solid #999" src="<?=$this->baseUrl('theme/default/images/not_image.png')?>">
 <?php endif; ?>
@@ -33,29 +34,38 @@ $data = $this->data;
 /**
  * Режим чтения
  */
+else:
 ?>
-<?php
-$access = HM_Model_Account_Access::getInstance();
-Zend_Debug::dump($access->getAcl()->isAllowed('ADM_TARIFF', 'LINE', 'R'));
-?>
-<!--<table class="table table-bordered">
+<table class="table table-bordered">
     <tbody>
         <tr>
             <td>
-                <?php /*if(is_string($data->get('logo'))) :*/?>
-                <img width="60" height="78" style="width: 60px; height: 78px" src="data:image/png;base64,<?/*=$data->get('logo')*/?>">
-                <?php /*else: */?>
-                <img width="60" height="78" style="width: 60px; height: 78px; border: 2px solid #999" src="<?/*=$this->baseUrl('theme/default/images/not_image.png')*/?>">
-                <?php /*endif; */?>
-            </td>
-            <td>
-                <?/*=$data->get('name')*/?>
+                <?php if(is_string($data->get('logo'))) :?>
+                <img src="data:image/png;base64,<?=$data->get('logo')?>">
+                <?php else: ?>
+                <img width="60" height="78" style="width: 60px; height: 78px; border: 2px solid #999" src="<?=$this->baseUrl('theme/default/images/not_image.png')?>">
+                <?php endif; ?>
             </td>
         </tr>
         <tr>
-            <td colspan="2">
-                <?/*=$data->get('description')*/?>
+            <td>
+                <strong>#ID:</strong> <?=$data->get('id')?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Наименование:</strong><br/>
+                <?=$data->get('name')?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Описание:</strong><br/>
+                <?=$data->get('description')?>
             </td>
         </tr>
     </tbody>
-</table>-->
+</table>
+<?php
+endif;
+?>

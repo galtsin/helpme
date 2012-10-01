@@ -14,9 +14,9 @@ require(["dijit/Dialog"], function(){
         },
 
         hideWithMessage: function(msg){
+            var that = this;
             this.set("content", msg);
-            var self = this;
-            setTimeout(function(){self.hide();}, 1500);
+            setTimeout(function(){that.hide();}, 1500);
         }
     });
 });
