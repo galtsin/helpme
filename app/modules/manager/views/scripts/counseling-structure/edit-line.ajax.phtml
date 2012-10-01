@@ -1,4 +1,18 @@
 <?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон для редактирования и просмотра информации об ЛК
+ */
+?>
+<?php
+/**
+ * Режим редактирования
+ */
+?>
+<?php
 $data = $this->data;
 ?>
 <?php if(is_string($data->get('logo'))) :?>
@@ -15,6 +29,15 @@ $data = $this->data;
     <button type="button">Сохранить</button>
 </form>
 
+<?php
+/**
+ * Режим чтения
+ */
+?>
+<?php
+$access = HM_Model_Account_Access::getInstance();
+Zend_Debug::dump($access->getAcl()->isAllowed('ADM_TARIFF', 'LINE', 'R'));
+?>
 <!--<table class="table table-bordered">
     <tbody>
         <tr>

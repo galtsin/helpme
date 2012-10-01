@@ -223,7 +223,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * ДАлее не проработано!!!!
+     * Далее не проработано!!!!
      */
 
 
