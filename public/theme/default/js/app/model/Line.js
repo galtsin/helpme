@@ -9,7 +9,7 @@ require(["app/Model"], function(Model){
                 var id = identity;
                 var that = this;
                 this.getInfo = function(){
-                    return Sandbox.Layout.contentLoader('manager/counseling-structure/edit-line', {line: id});
+                    return Sandbox.Layout.contentLoader('manager/counseling-structure/edit-line-info', {line: id});
                 };
                 this.saveInfo = function(){
 

@@ -19,13 +19,11 @@ dojo.ready(function(){
         '[data-hash^="#!/lineBoard"]': {
             onclick: function(event){
                 event.preventDefault();
-                var elementHash = event.target.getAttribute("data-hash").slice(1);
-                if(dojo.hash() !== elementHash){
-                    dojo.hash(elementHash);
-                }
-                var hashParams = elementHash.split('/');
-                Sandbox.Layout.contentLoader('manager/counseling-structure/line', {line: hashParams[2]}).addCallback(function(results){
+                var hash = event.target.getAttribute("data-hash").slice(1);
+                var hashParams = hash.split('/');
+                Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: hashParams[2]}).addCallback(function(results){
                     Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
+                    dojo.hash(hash);
                     dojo.behavior.apply();
                 });
             }
@@ -54,6 +52,15 @@ dojo.ready(function(){
                     dojo.hash(hash);
                     dojo.behavior.apply();
                 });
+            }
+        }
+    });
+
+    //События по Уровням
+    dojo.behavior.add({
+        '[data-action="addLevel"]': {
+            onclick: function(event){
+                alert("Добавляю уровень...");
             }
         }
     });

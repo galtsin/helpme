@@ -42,11 +42,15 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $this->view->assign('data', $data);
     }
 
+    public function getLineInfo(){}
+    public function getLevels(){}
+
+
     /**
      * Управление ЛК
      * HTML Context
      */
-    public function lineAction()
+    public function getLineBoardAction()
     {
         // Проверить принадлежность
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
@@ -74,7 +78,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
      * Отредактировать Линию консультации
      * Ajax Context
      */
-    public function editLineAction()
+    public function editLineInfoAction()
     {
         if($this->getRequest()->isPost()){
             // Сохранить данные

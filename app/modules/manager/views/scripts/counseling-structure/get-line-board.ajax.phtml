@@ -119,7 +119,7 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript');
 ?>
 
-<div style="border-bottom: 3px solid #444;"><h3>Линия консультации &laquo;<?=$line->get('name')?>&raquo;</h3></div>
+<div style="border-bottom: 3px solid #444;"><h3>#ID<?=$line->get('id')?> / Линия консультации &laquo;<?=$line->get('name')?>&raquo;</h3></div>
 <div style="margin: 0px 0 15px; background: #f3f3f3; padding: 15px 10px">
     <button type="button" data-hash="#!/lineInfo/<?=$line->get('id')?>">Информация</button>
     <button type="button" data-hash="#!/lineLevels/<?=$line->get('id')?>">Уровни</button>
