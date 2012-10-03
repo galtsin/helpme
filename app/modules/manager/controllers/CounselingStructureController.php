@@ -66,7 +66,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
 
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
-        $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
+        $line = $lineColl->load((int)$this->getRequest()->getParam('line'));
         $this->view->assign('line', $line->getData());
     }
 

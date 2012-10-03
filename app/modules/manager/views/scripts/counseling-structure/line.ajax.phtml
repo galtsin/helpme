@@ -1,0 +1,129 @@
+<?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон для редактирования ЛК
+ */
+?>
+<?php
+$line = $this->line;
+$lineId = $line->get('id');
+?>
+<?php
+$jScript = <<<JS
+require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog", "dojo/hash", "app/model/Line"]);
+dojo.ready(function(){
+    Sandbox = new core.Sandbox();
+
+    (function(){
+        dojo.hash('!/lines');
+    })();
+
+    dojo.behavior.add({
+        '[data-action="edit-line"]': {
+            onclick: function(){
+                Sandbox.Layout.contentLoader('manager/counseling-structure/edit-line', {line: $lineId}).addCallback(function(results){
+                    dojo.byId('content').innerHTML = results;
+                    dojo.hash("desc");
+                });
+            }
+        }
+    });
+
+    var level = new function(id){
+        //get-info | save-info
+        //get-groups | add-group | get-group-info | save-group-info | get-group-experts
+        //get-rules | save-rules
+    };
+
+    var group =new function(id){
+        //get-info
+        //get-experts
+        //add-expert
+        //remove-expert
+    };
+
+    // TODO
+    // Управление Линиями консультации
+/*    dojo.declare("Linet", app.model.Line, {
+        that: this,
+
+    });*/
+
+    // РЕдавтирование уровней
+    var editLevel = new function(){
+        var that = this;
+        this.behavior = {
+            '[data-action="edit-level"]': {
+
+            },
+            '[data-action="save-rules"]': {
+                onclick: function(event){
+                    that.save(dojo.formToObject(event.target.form));
+                }
+            }
+        };
+    };
+
+    // Оператор new позволяет получить this ссылку на новый объект
+    var editRules = new function(){
+        var that = this;
+        // События
+        this.behavior = {
+            '[data-action="edit-rules"]': {
+                onclick: function(event){
+                    that.refresh({line: $lineId});
+                    var hash = dojo.hash().split("/");
+                    dojo.hash('sdfsdf/sdf');
+                    dojo.behavior.apply();
+                }
+            },
+            '[data-action="save-rules"]': {
+                onclick: function(event){
+                    that.save(dojo.formToObject(event.target.form));
+                }
+            }
+        };
+        // Обновить информацию
+        this.refresh = function(args){
+            // args = {line}
+            Sandbox.Layout.contentLoader('manager/counseling-structure/edit-rules', args).addCallback(function(results){
+                Sandbox.Layout.placeContent(dojo.byId('content'), results);
+                dojo.behavior.apply();
+            });
+        };
+        // Сохранить информацию о переадресации
+        this.save = function(data){
+            Sandbox.Layout.dataSender('manager/counseling-structure/edit-rules', data).addCallback(function(results){
+                if(results.status === 'ok') {
+                    var dialog = core.sandbox.layout.Dialog();
+                    dialog.show();
+                    setTimeout(function(){
+                        dialog.hideWithSuccess();
+                    }, 0)
+                }
+            });
+        }
+    };
+
+    dojo.behavior.add(editRules.behavior);
+    //dojo.behavior.add(Line.behavior);
+    //dojo.behavior.add(Level.behavior);
+    //Sandbox.addAction('line', 'edit-rules', editRules);
+    dojo.behavior.apply();
+
+});
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript');
+?>
+
+<div style="border-bottom: 3px solid #444;"><h3>Линия консультации &laquo;<?=$line->get('name')?>&raquo;</h3></div>
+<div style="margin: 0px 0 15px; background: #f3f3f3; padding: 15px 10px">
+    <button type="button" data-hash="#!/lineInfo/<?=$line->get('id')?>">Информация</button>
+    <button type="button" data-hash="#!/lineLevels/<?=$line->get('id')?>">Уровни</button>
+    <!--<button type="button" data-action="getRules">Переадресация</button>-->
+    <!--<button type="button" data-action="getTariffs">Тарифы</button>-->
+</div>
+<div id="contentLine"></div>

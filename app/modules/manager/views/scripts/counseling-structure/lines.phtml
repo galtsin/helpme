@@ -1,9 +1,64 @@
 
 <?php
 $jScript = <<<JS
-require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog"]);
+require(["dojo/behavior", "dojo/hash", "core/Sandbox", "app/model/Line", "app/model/Level"]);
 dojo.ready(function(){
+    //Первоначальная инициализация
+    (function(){
+        dojo.hash('!/lines');
+        Sandbox = new core.Sandbox();
+    })();
 
+
+    var Line = new app.model.Line();
+    var Level = new app.model.Level();
+
+    // События на текущую страницу
+    dojo.behavior.add({
+        //#!/lineInfo/{id}
+        '[data-hash^="#!/lineBoard"]': {
+            onclick: function(event){
+                event.preventDefault();
+                var elementHash = event.target.getAttribute("data-hash").slice(1);
+                if(dojo.hash() !== elementHash){
+                    dojo.hash(elementHash);
+                }
+                var hashParams = elementHash.split('/');
+                Sandbox.Layout.contentLoader('manager/counseling-structure/line', {line: hashParams[2]}).addCallback(function(results){
+                    Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
+                    dojo.behavior.apply();
+                });
+            }
+        }
+    });
+
+    //События по Линии Консультации
+    dojo.behavior.add({
+        '[data-hash^="#!/lineInfo"]': {
+            onclick: function(event){
+                var hash = event.target.getAttribute("data-hash").slice(1);
+                var hashParams = hash.split('/');
+                Line.getEntity(hashParams[2]).getInfo().addCallback(function(results){
+                    Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+                    dojo.hash(hash);
+                    dojo.behavior.apply();
+                });
+            }
+        },
+        '[data-hash^="#!/lineLevels"]': {
+            onclick: function(event){
+                var hash = event.target.getAttribute("data-hash").slice(1);
+                var hashParams = hash.split('/');
+                Line.getEntity(hashParams[2]).getLevels().addCallback(function(results){
+                    Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+                    dojo.hash(hash);
+                    dojo.behavior.apply();
+                });
+            }
+        }
+    });
+
+    dojo.behavior.apply();
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript');
@@ -14,6 +69,7 @@ $data = $this->data;
 $companyColl = new HM_Model_Billing_Company_Collection();
 $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
 ?>
+<div id="contentLines">
 <table class="table table-bordered">
     <colgroup>
         <col width="350"/>
@@ -43,11 +99,11 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         ?>
         <tr>
             <td><?=$lineData->get('id')?></td>
-            <td><a href="<?=$this->baseUrl('manager/counseling-structure/line/id/' . $lineData->get('id'))?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
+            <td><a class="engineAjax" data-hash="#!/lineBoard/<?=$lineData->get('id')?>" href="#!/lineInfo/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
             <td><em>просмотр/редактирование</em></td>
         </tr>
         <?php endforeach; ?>
         <?php endforeach; ?>
     </tbody>
 </table>
-
+</div>
