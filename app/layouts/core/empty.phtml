@@ -14,13 +14,16 @@
 		<?php echo $this->headTitle(); ?>
 		<?php print $this->headLink();?>
 	</head>
-    <base href="<?php echo $this->baseUrl(); ?>" />
-	<body>
+    <body class="hm" style="position: relative">
+    <div id="header">
         <h1>
             <a href="<?php echo $this->baseUrl(); ?>">
                 <img src="<?php echo $this->baseUrl('theme/default/images/logo.jpg')?>"/>
             </a>
         </h1>
-		<?php echo $this->layout()->content; ?>
+    </div>
+    <div class="container">
+        <?php echo $this->layout()->content; ?>
+    </div>
 	</body>
 </html>

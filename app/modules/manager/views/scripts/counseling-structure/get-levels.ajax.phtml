@@ -19,21 +19,20 @@ if(true === $this->is_writable):
 <form id="edit-levels">
 <table class="table table-bordered">
     <colgroup>
-        <col width="30"/>
         <col width="50"/>
         <col/>
     </colgroup>
     <thead>
         <tr>
-            <th colspan="2">#ID</th>
+            <th>#ID</th>
             <th>Наименование</th>
         </tr>
     </thead>
     <tfoot>
         <tr>
-            <td colspan="3">
-                <button type="button">Добавить</button>
-                <button type="button">Удалить</button>
+
+            <td colspan="2">
+                <button type="button">+ Добавить</button>
             </td>
         </tr>
     </tfoot>
@@ -43,14 +42,13 @@ if(true === $this->is_writable):
             foreach($data as $entry):
         ?>
         <tr>
-            <td><input type="checkbox"/></td>
             <td><?=$entry->get('id')?></td>
-            <td><a><?=$entry->get('name')?></a></td>
+            <td><a href="#level/<?=$entry->get('id')?>" data-action="edit-level"><?=$entry->get('name')?></a></td>
         </tr>
         <?php endforeach; ?>
         <?php else: ?>
         <tr>
-            <td colspan="3"><em>Уровни на линии консультации отсутствуют</em></td>
+            <td colspan="2"><em>Уровни на линии консультации отсутствуют</em></td>
         </tr>
         <?php endif; ?>
     </tbody>
@@ -64,7 +62,7 @@ else:
 ?>
 <table class="table table-bordered">
     <colgroup>
-        <col width="30"/>
+        <col width="50"/>
         <col/>
     </colgroup>
     <thead>
@@ -80,7 +78,7 @@ else:
             ?>
         <tr>
             <td><?=$entry->get('id')?></td>
-            <td><a><?=$entry->get('name')?></a></td>
+            <td><a href="#level/<?=$entry->get('id')?>" data-action="edit-level"><?=$entry->get('name')?></a></td>
         </tr>
             <?php endforeach; ?>
         <?php else: ?>

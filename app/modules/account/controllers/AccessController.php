@@ -57,6 +57,9 @@ class Account_AccessController extends App_Zend_Controller_Action
         $this->_redirect($this->view->baseUrl($url));
     }
 
+    /**
+     * Страница закрытого доступа
+     */
     public function deniedAction()
     {
 

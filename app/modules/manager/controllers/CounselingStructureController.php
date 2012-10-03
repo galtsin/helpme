@@ -12,7 +12,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
      * Загрузить список доступных ЛК с привязкой по компаниям
      * HTML Context
      */
-    public function indexAction()
+    public function linesAction()
     {
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
@@ -67,7 +67,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         $line = $lineColl->load((int)$this->getRequest()->getParam('id'));
-        $this->view->assign('line', $line->getData('id'));
+        $this->view->assign('line', $line->getData());
     }
 
     /**
@@ -94,7 +94,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $levelColl->addEqualFilter('line', (int)$this->getRequest()->getParam('line'))->getCollection();
         $levelColl->getDataIterator();
         $this->view->assign('data', $levelColl->getDataIterator());
-        $this->view->assign('is_writable', false);
+        $this->view->assign('is_writable', true);
     }
 
     public function addLevelAction(){}
@@ -117,6 +117,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             $rulesDirty = $this->getRequest()->getParam('rules');
             $rulesOrigin = $line->getRules();
             foreach($rulesDirty as $id => $params) {
+                // Дополняем значение чекбоксов формы, когда checkbox отключен
                 if(!array_key_exists('is_enabled',$params)) {
                     $params['is_enabled'] = false;
                 }
