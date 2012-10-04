@@ -68,6 +68,15 @@ dojo.ready(function(){
         }
     });
 
+    dojo.behavior.add({
+        '[data-hash^="#!/levelInfo"]': {
+            onclick: function(event){
+                event.preventDefault();
+                alert("Смотррим уровень!");
+            }
+        }
+    });
+
     //События по Уровням
     dojo.behavior.add({
         // Добавить уровень
