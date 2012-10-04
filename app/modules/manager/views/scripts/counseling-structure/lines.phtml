@@ -9,14 +9,31 @@ dojo.ready(function(){
         Sandbox = new core.Sandbox();
     })();
 
-
     var Line = new app.model.Line();
     var Level = new app.model.Level();
 
-    Sandbox.Screen.add('lineBoard', function(lineId){
-        Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: lineId}).addCallback(function(results){
+    dojo.subscribe('lineBoard', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: args.line}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
             dojo.behavior.apply();
+            dojo.publish('lineInfo', args);
+            return results;
+        });
+    });
+
+    dojo.subscribe('lineInfo', function(args){
+        Line.getEntity(args.line).getInfo().addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+            dojo.behavior.apply();
+            return results;
+        });
+    });
+
+    dojo.subscribe('lineLevels', function(args){
+        Line.getEntity(args.line).getLevels().addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+            dojo.behavior.apply();
+            return results;
         });
     });
 
@@ -25,13 +42,10 @@ dojo.ready(function(){
         //#!/lineInfo/{id}
         '[data-hash^="#!/lineBoard"]': {
             onclick: function(event){
-                Sandbox.Screen.get('lineBoard').callback(function(){
-                    event.preventDefault();
-                    var hash = event.target.getAttribute("data-hash").slice(1);
-                    var hashParams = hash.split('/');
-                    dojo.hash(hash);
-                    return hashParams[2]
-                });
+                event.preventDefault();
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('lineBoard', {line: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
             }
         }
     });
@@ -40,56 +54,40 @@ dojo.ready(function(){
     dojo.behavior.add({
         '[data-hash^="#!/lineInfo"]': {
             onclick: function(event){
-                var hash = event.target.getAttribute("data-hash").slice(1);
-                var hashParams = hash.split('/');
-                Line.getEntity(hashParams[2]).getInfo().addCallback(function(results){
-                    Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
-                    dojo.hash(hash);
-                    dojo.behavior.apply();
-                });
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('lineInfo', {line: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
             }
         },
         '[data-hash^="#!/lineLevels"]': {
             onclick: function(event){
-                var hash = event.target.getAttribute("data-hash").slice(1);
-                var hashParams = hash.split('/');
-                Line.getEntity(hashParams[2]).getLevels().addCallback(function(results){
-                    Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
-                    dojo.hash(hash);
-                    dojo.behavior.apply();
-                });
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('lineLevels', {line: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
             }
         }
     });
-
-    function getLineLevels(identity){
-        Line.getEntity(identity).getLevels().addCallback(function(results){
-            Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
-            dojo.hash(hash);
-            dojo.behavior.apply();
-        });
-    }
 
     //События по Уровням
     dojo.behavior.add({
         // Добавить уровень
         '[data-action="addLevel"]': {
             onclick: function(event){
-                var hashParams = dojo.hash().split('/');
+                var hashParams = Sandbox.Screen.parseHash(dojo.hash());
                 // Загрузить форму в диалог
-                Sandbox.Layout.contentLoader('manager/counseling-structure/add-level', {line: hashParams[2]}).addCallback(function(results){
+                Sandbox.Layout.contentLoader('manager/counseling-structure/add-level', {line: hashParams.parts[1]}).addCallback(function(results){
                     Sandbox.Layout.Dialog.set("content", results);
                     Sandbox.Layout.Dialog.show();
-Sandbox.Screen.get('lineBoard').callback('TESTME');
                     // Отправка формы на сервер
                     var formSendHandle = dojo.connect(dojo.byId('add-level')['send'], 'onclick', function(event){
-                        Line.getEntity(hashParams[2]).addLevel(dojo.formToObject(event.target.form)).addCallback(function(results){
+                        Line.getEntity(hashParams.parts[1]).addLevel(dojo.formToObject(event.target.form)).addCallback(function(results){
                             if(results['result'] != -1){
                                 Sandbox.Layout.Dialog.hide();
+                                // Выполнить по истечении срока исчезновения диалога
                                 setTimeout(function(){
-                                    //getLineLevels(hashParams[2]);
-
-                                }, Sandbox.Layout.Dialog.delay + Sandbox.Layout.Dialog.duration);
+                                    // Обновить данные уровней
+                                   dojo.publish('lineLevels', {line: hashParams.parts[1]});
+                                }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
                             }
                         });
                     });
@@ -98,8 +96,6 @@ Sandbox.Screen.get('lineBoard').callback('TESTME');
                         // Отсоединяем все обработчики событий текущего диалога
                         dojo.disconnect(formSendHandle);
                         dojo.disconnect(dialogHideHandle);
-                        // Обновить данные уровней
-
                     });
                 });
 
