@@ -42,13 +42,8 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $this->view->assign('data', $data);
     }
 
-    public function getLineInfo(){}
-    public function getLevels(){}
-
-
     /**
-     * Управление ЛК
-     * HTML Context
+     * Получить панель управления Линией консультации
      */
     public function getLineBoardAction()
     {
@@ -66,16 +61,13 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
 
         $data = array();
-
-
-
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         $line = $lineColl->load((int)$this->getRequest()->getParam('line'));
         $this->view->assign('line', $line->getData());
     }
 
     /**
-     * Отредактировать Линию консультации
+     * Отредактировать информацию Линию консультации
      * Ajax Context
      */
     public function editLineInfoAction()
@@ -92,6 +84,9 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         }
     }
 
+    /**
+     * Получить список Уровней Линии Консультации
+     */
     public function getLevelsAction()
     {
         $levelColl = new HM_Model_Counseling_Structure_Level_Collection();
@@ -101,7 +96,37 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $this->view->assign('is_writable', true);
     }
 
-    public function addLevelAction(){}
+    /**
+     * TODO: Пример для подражания
+     * Добавить Уровень на Линию Консультации
+     * POST - добавить данные
+     * GET - получить форму для добавления
+     */
+    public function addLevelAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost()){
+            $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
+                ->restore($request->getParam('line'));
+            if($line instanceof HM_Model_Counseling_Structure_Line) {
+                $levelData = $request->getParam('level');
+                $level = $line->addLevel(array(
+                        'name'  => $levelData['name']
+                    )
+                );
+                if($level instanceof HM_Model_Counseling_Structure_Level){
+                    $this->setAjaxResult($level->getData('id'));
+                    return;
+                }
+            }
+        } else {
+            $this->view->assign('data', array(
+                    'line'  => $request->getParam('line')
+                )
+            );
+        }
+    }
+
     public function removeLevelAction(){}
     public function editLevelAction(){}
     public function getGroups(){}

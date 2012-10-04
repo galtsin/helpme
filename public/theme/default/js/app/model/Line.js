@@ -20,6 +20,10 @@ require(["app/Model"], function(Model){
                 this.getTariffs = function(){
 
                 };
+                this.addLevel = function(args){
+                    args['line'] = id;
+                    return Sandbox.Layout.dataSender('manager/counseling-structure/add-level', args);
+                }
             };
 
             return new Entity(identity);

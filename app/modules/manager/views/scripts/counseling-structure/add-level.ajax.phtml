@@ -1,0 +1,19 @@
+<?php
+$data = $this->data;
+?>
+<form id="add-level">
+    <table class="table table-bordered">
+        <tr>
+            <td>
+                <label for="add-level-name">Наименование:</label>
+                <input type="text" id="add-level-name" name="level[name]"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="hidden" name="line" value="<?=$data['line']?>">
+                <button type="button" name="send">Сохранить</button>
+            </td>
+        </tr>
+    </table>
+</form>

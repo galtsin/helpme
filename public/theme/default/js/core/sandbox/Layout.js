@@ -1,11 +1,12 @@
 /* Менеджер слоев */
 dojo.provide("core.sandbox.Layout");
-require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax){
+require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax, Dialog){
     core.sandbox.Layout = function(){};
     dojo.declare("core.sandbox.Layout", null, {
         constructor: function(){
             this.container = [];
             this.Ajax = new Ajax();
+            this.Dialog = new Dialog();
         },
         // Отправить данные на сервер.
         dataSender: function(url, data){

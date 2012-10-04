@@ -13,18 +13,24 @@ dojo.ready(function(){
     var Line = new app.model.Line();
     var Level = new app.model.Level();
 
+    Sandbox.Screen.add('lineBoard', function(lineId){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: lineId}).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
+            dojo.behavior.apply();
+        });
+    });
+
     // События на текущую страницу
     dojo.behavior.add({
         //#!/lineInfo/{id}
         '[data-hash^="#!/lineBoard"]': {
             onclick: function(event){
-                event.preventDefault();
-                var hash = event.target.getAttribute("data-hash").slice(1);
-                var hashParams = hash.split('/');
-                Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: hashParams[2]}).addCallback(function(results){
-                    Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
+                Sandbox.Screen.get('lineBoard').callback(function(){
+                    event.preventDefault();
+                    var hash = event.target.getAttribute("data-hash").slice(1);
+                    var hashParams = hash.split('/');
                     dojo.hash(hash);
-                    dojo.behavior.apply();
+                    return hashParams[2]
                 });
             }
         }
@@ -56,11 +62,47 @@ dojo.ready(function(){
         }
     });
 
+    function getLineLevels(identity){
+        Line.getEntity(identity).getLevels().addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+            dojo.hash(hash);
+            dojo.behavior.apply();
+        });
+    }
+
     //События по Уровням
     dojo.behavior.add({
+        // Добавить уровень
         '[data-action="addLevel"]': {
             onclick: function(event){
-                alert("Добавляю уровень...");
+                var hashParams = dojo.hash().split('/');
+                // Загрузить форму в диалог
+                Sandbox.Layout.contentLoader('manager/counseling-structure/add-level', {line: hashParams[2]}).addCallback(function(results){
+                    Sandbox.Layout.Dialog.set("content", results);
+                    Sandbox.Layout.Dialog.show();
+Sandbox.Screen.get('lineBoard').callback('TESTME');
+                    // Отправка формы на сервер
+                    var formSendHandle = dojo.connect(dojo.byId('add-level')['send'], 'onclick', function(event){
+                        Line.getEntity(hashParams[2]).addLevel(dojo.formToObject(event.target.form)).addCallback(function(results){
+                            if(results['result'] != -1){
+                                Sandbox.Layout.Dialog.hide();
+                                setTimeout(function(){
+                                    //getLineLevels(hashParams[2]);
+
+                                }, Sandbox.Layout.Dialog.delay + Sandbox.Layout.Dialog.duration);
+                            }
+                        });
+                    });
+                    //Закрыть диалог
+                    var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
+                        // Отсоединяем все обработчики событий текущего диалога
+                        dojo.disconnect(formSendHandle);
+                        dojo.disconnect(dialogHideHandle);
+                        // Обновить данные уровней
+
+                    });
+                });
+
             }
         }
     });

@@ -4,6 +4,7 @@
  * @author: GaltsinAK
  */
 /**
+ * TODO: Дабавить валидацию данных Zend_Validate
  * ru: Абстрактный класс-контейнер для сущностей
  */
 class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
@@ -70,6 +71,18 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
             return false;
         }
         throw new Exception('Отсутствуют данные для сохранения');
+    }
+
+    /**
+     * Проверка, принадлежности сущности системе
+     * Определяется по Id сущности в системе
+     */
+    public function isIdentity()
+    {
+        if(null !== $this->getData()->getId()){
+            return true;
+        }
+        return false;
     }
 
     /**

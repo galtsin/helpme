@@ -14,12 +14,36 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
      */
     private $_rules = null;
 
+    /**
+     * Инициализация
+     */
     protected function _init()
     {
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
     }
 
-    public function addLevel(){}
+    /**
+     * Добавить Уровень на Линию Консультации
+     * @param array $options
+     * @return HM_Model_Counseling_Structure_Level|null
+     */
+    public function addLevel(array $options)
+    {
+        if($this->isIdentity()){
+            $level = new HM_Model_Counseling_Structure_Level();
+            foreach($options as $key => $value) {
+                $level->setData($key, $value);
+            }
+            $level->setData('line', $this->getData('id'));
+            if($level->save()) {
+                return $level;
+            } else {
+                unset($level);
+            }
+        }
+        return null;
+    }
+
     public function removeLevel(){}
     public function getLevels(){}
 

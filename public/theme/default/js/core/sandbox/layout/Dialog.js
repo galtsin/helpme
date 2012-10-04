@@ -2,6 +2,7 @@ dojo.provide("core.sandbox.layout.Dialog");
 require(["dijit/Dialog"], function(){
     core.sandbox.layout.Dialog = function(){};
     dojo.declare("core.sandbox.layout.Dialog", [dijit.Dialog], {
+        delay: 1500,
 
         hideWithSuccess: function(){
             var msg = "Запрос выполнен успешно";
