@@ -15,7 +15,6 @@ dojo.ready(function(){
     dojo.subscribe('lineBoard', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: args.line}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
-            dojo.behavior.apply();
             dojo.publish('lineInfo', args);
             return results;
         });
@@ -40,6 +39,30 @@ dojo.ready(function(){
     dojo.subscribe('levelBoard', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/get-level-board', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+            dojo.publish('levelInfo', args);
+            return results;
+        });
+    });
+
+    dojo.subscribe('levelInfo', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/edit-level-info', {level: args.level}).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
+            dojo.behavior.apply();
+            return results;
+        });
+    });
+
+    dojo.subscribe('levelGroups', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-groups', {level: args.level}).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
+            dojo.behavior.apply();
+            return results;
+        });
+    });
+
+    dojo.subscribe('editLevelRules', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/edit-level-forwarding-rules', {level: args.level}).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
             dojo.behavior.apply();
             return results;
         });
@@ -48,7 +71,7 @@ dojo.ready(function(){
     // События на текущую страницу
     dojo.behavior.add({
         //#!/lineInfo/{id}
-        '[data-hash^="#!/lineBoard"]': {
+        '[data-hash^="#!/getLineBoard"]': {
             onclick: function(event){
                 event.preventDefault();
                 var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
@@ -60,14 +83,14 @@ dojo.ready(function(){
 
     //События по Линии Консультации
     dojo.behavior.add({
-        '[data-hash^="#!/lineInfo"]': {
+        '[data-hash^="#!/editLineInfo"]': {
             onclick: function(event){
                 var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
                 dojo.publish('lineInfo', {line: hashParams.parts[1]});
                 dojo.hash(event.target.getAttribute("data-hash"));
             }
         },
-        '[data-hash^="#!/lineLevels"]': {
+        '[data-hash^="#!/getLineLevels"]': {
             onclick: function(event){
                 var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
                 dojo.publish('lineLevels', {line: hashParams.parts[1]});
@@ -77,11 +100,35 @@ dojo.ready(function(){
     });
 
     dojo.behavior.add({
-        '[data-hash^="#!/levelBoard"]': {
+        '[data-hash^="#!/getLevelBoard"]': {
             onclick: function(event){
                 event.preventDefault();
                 var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
                 dojo.publish('levelBoard', {level: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
+            }
+        },
+        '[data-hash^="#!/editLevelInfo"]': {
+            onclick: function(event){
+                event.preventDefault();
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('levelInfo', {level: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
+            }
+        },
+        '[data-hash^="#!/getLevelGroups"]': {
+            onclick: function(event){
+                event.preventDefault();
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('levelGroups', {level: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
+            }
+        },
+        '[data-hash^="#!/editLevelForwardingRules"]': {
+            onclick: function(event){
+                event.preventDefault();
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('editLevelRules', {level: hashParams.parts[1]});
                 dojo.hash(event.target.getAttribute("data-hash"));
             }
         }
@@ -163,7 +210,7 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         ?>
         <tr>
             <td><?=$lineData->get('id')?></td>
-            <td><a class="engineAjax" data-hash="#!/lineBoard/<?=$lineData->get('id')?>" href="#!/lineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
+            <td><a class="engineAjax" data-hash="#!/getLineBoard/<?=$lineData->get('id')?>" href="#!/getLineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
             <td><em>просмотр/редактирование</em></td>
         </tr>
         <?php endforeach; ?>

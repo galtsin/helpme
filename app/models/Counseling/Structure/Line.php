@@ -69,22 +69,26 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
     {
         if(null === $this->_rules){
             $rules = array();
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                ->execute('line_get_forwarding_rules', array(
-                    'id_line' => $this->getData('id')
-                )
-            );
+            if($this->isIdentity()){
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('line_get_forwarding_rules', array(
+                        'id_line' => $this->getData('id')
+                    )
+                );
 
-            if($result->rowCount() > 0) {
-                foreach($result->fetchAll() as $row) {
-                    $rule = new App_Core_Model_Data_Store();
-                    $rule->set('id', (int)$row['id_rule'])
-                        ->set('name_level_from', $row['name_level_from'])
-                        ->set('name_level_to', $row['name_level_to'])
-                        ->set('duration', $row['duration'])
-                        ->set('is_enabled', (bool)$row['is_enabled'])
-                        ->unmarkDirty();
-                    $rules[$rule->getId()] = $rule;
+                if($result->rowCount() > 0) {
+                    foreach($result->fetchAll() as $row) {
+                        $rule = new App_Core_Model_Data_Store();
+                        $rule->set('id', (int)$row['o_id_rule'])
+                            ->set('level_from', $row['o_id_level_from'])
+                            ->set('name_level_from', $row['o_name_level_from'])
+                            ->set('level_to', $row['o_id_level_to'])
+                            ->set('name_level_to', $row['o_name_level_to'])
+                            ->set('duration', $row['o_duration'])
+                            ->set('is_enabled', (bool)$row['o_is_enabled'])
+                            ->unmarkDirty();
+                        $rules[$rule->getId()] = $rule;
+                    }
                 }
             }
             $this->_rules = $rules;

@@ -15,7 +15,7 @@ require(["app/Model"], function(Model){
 
                 };
                 this.getLevels = function(){
-                    return Sandbox.Layout.contentLoader('manager/counseling-structure/get-levels', {line: id});
+                    return Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-levels', {line: id});
                 };
                 this.getTariffs = function(){
 

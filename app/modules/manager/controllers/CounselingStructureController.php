@@ -87,7 +87,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     /**
      * Получить список Уровней Линии Консультации
      */
-    public function getLevelsAction()
+    public function getLineLevelsAction()
     {
         $levelColl = new HM_Model_Counseling_Structure_Level_Collection();
         $levelColl->addEqualFilter('line', (int)$this->getRequest()->getParam('line'))->getCollection();
@@ -105,6 +105,70 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
             ->restore($request->getParam('level'));
         $this->view->assign('data', $level->getData());
+    }
+
+    /**
+     * Отредактировать информацию о уровне
+     */
+    public function editLevelInfoAction()
+    {
+        $request = $this->getRequest();
+        if($this->getRequest()->isPost()){
+            // Сохранить данные
+            // Предпроверка данных
+        } else {
+            // Получить форму для редактирования данных
+            $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
+                ->restore($request->getParam('level'));
+            $this->view->assign('data', $level->getData());
+            $this->view->assign('is_writable', false);
+        }
+    }
+
+    /**
+     * Получить список групп
+     */
+    public function getGroupsAction()
+    {
+        $request = $this->getRequest();
+        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
+            ->restore($request->getParam('level'));
+        if($level instanceof HM_Model_Counseling_Structure_Level) {
+            $this->view->assign('data', $level->getGroups());
+        }
+    }
+
+    /**
+     * TODO: Пример
+     * Отредактировать правила переадресации уровня
+     */
+    public function editLevelForwardingRulesAction()
+    {
+        $request = $this->getRequest();
+        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
+            ->restore($request->getParam('level'));
+        if($level instanceof HM_Model_Counseling_Structure_Level) {
+            if($request->isPost()){
+                $rulesDirty = $request->getParam('rules');
+                $rulesOrigin = $level->getRules();
+                foreach($rulesDirty as $id => $params) {
+                    // Дополняем значение чекбоксов формы, когда checkbox отключен
+                    if(!array_key_exists('is_enabled',$params)) {
+                        $params['is_enabled'] = false;
+                    }
+                    foreach($params as $key => $value) {
+                        // Проверяем, изменились ли значения
+                        if($rulesOrigin[$id]->get($key) !== $value) {
+                            $rulesOrigin[$id]->set($key, $value);
+                        }
+                    }
+                }
+                $level->updateRules();
+            } else {
+                $this->view->assign('data', $level->getRules());
+            }
+        }
+
     }
 
     /**

@@ -1,0 +1,31 @@
+<?php
+/**
+ * Product: HELPME
+ * @author: GaltsinAK
+ */
+/**
+ * Шаблон для редактирования и просмотра информации об Уровне
+ */
+?>
+<?php
+$level = $this->data;
+?>
+<?php
+/**
+ * Режим редактирования
+ */
+?>
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <td>
+            <strong>#ID:</strong> <?=$level->get('id')?>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <strong>Наименование:</strong> &laquo;<?=$level->get('name')?>&raquo;
+        </td>
+    </tr>
+    </tbody>
+</table>

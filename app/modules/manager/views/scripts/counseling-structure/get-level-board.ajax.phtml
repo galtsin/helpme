@@ -3,8 +3,8 @@ $level = $this->data;
 ?>
 <div style="border-bottom: 3px solid #444;"><h3>#ID<?=$level->get('id')?> / Уровень &laquo;<?=$level->get('name')?>&raquo;</h3></div>
 <div style="margin: 0px 0 15px; background: #f3f3f3; padding: 15px 10px">
-    <button type="button" data-hash="#!/lineInfo/<?=$level->get('id')?>">Информация</button>
-    <button type="button" data-hash="#!/lineLevels/<?=$level->get('id')?>">Группы</button>
-    <button type="button" data-action="getRules">Переадресация</button>
+    <button type="button" data-hash="#!/editLevelInfo/<?=$level->get('id')?>">Информация</button>
+    <button type="button" data-hash="#!/getLevelGroups/<?=$level->get('id')?>">Группы</button>
+    <button type="button" data-hash="#!/editLevelForwardingRules/<?=$level->get('id')?>">Переадресация</button>
 </div>
 <div id="contentLevel"></div>
