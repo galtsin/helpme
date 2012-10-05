@@ -68,6 +68,7 @@ dojo.ready(function(){
         });
     });
 
+
     // События на текущую страницу
     dojo.behavior.add({
         //#!/lineInfo/{id}
@@ -136,12 +137,23 @@ dojo.ready(function(){
 
     //События по Уровням
     dojo.behavior.add({
+        '[data-action="save-rules"]': {
+            onclick: function(event){
+                var hashParams = Sandbox.Screen.parseHash(dojo.hash());
+                var params = dojo.formToObject(event.target.form);
+                params['level'] = hashParams.parts[1];
+                Sandbox.Layout.dataSender('manager/counseling-structure/edit-level-forwarding-rules', params).addCallback(function(results){
+                });
+            }
+        },
+        // TODO: Перенести в dojo.subscribe
         // Добавить уровень
         '[data-action="addLevel"]': {
             onclick: function(event){
                 var hashParams = Sandbox.Screen.parseHash(dojo.hash());
                 // Загрузить форму в диалог
                 Sandbox.Layout.contentLoader('manager/counseling-structure/add-level', {line: hashParams.parts[1]}).addCallback(function(results){
+                    Sandbox.Layout.Dialog.set("title", "Добавление уровня");
                     Sandbox.Layout.Dialog.set("content", results);
                     Sandbox.Layout.Dialog.show();
                     // Отправка формы на сервер
@@ -165,6 +177,74 @@ dojo.ready(function(){
                     });
                 });
 
+            }
+        },
+        '[data-action="addGroup"]': {
+            onclick: function(event){
+                event.preventDefault();
+                var hashParams = Sandbox.Screen.parseHash(dojo.hash());
+                Sandbox.Layout.contentLoader('manager/counseling-structure/add-group', {line: hashParams.parts[1]}).addCallback(function(results){
+                    Sandbox.Layout.Dialog.set("title", "Добавление группы");
+                    Sandbox.Layout.Dialog.set("content", results);
+                    Sandbox.Layout.Dialog.show();
+                    var formSearchCompanySendHandle = dojo.connect(dojo.byId('search-company')['send'], 'onclick', function(event){
+                        Sandbox.Layout.dataLoader('service/query/company', {
+                            "filters[equal][inn][]": event.target.form["company[inn]"].value,
+                            "filters[equal][kpp][]": event.target.form["company[kpp]"].value
+                        }).addCallback(function(results){
+                            var html = '';
+                            if(results['data'].length > 0) {
+                                html += "<label>Компания владелец (ИНН/КПП):</label>";
+                                html += "<select name='group[company_owner]'>";
+                                dojo.forEach(results['data'], function(entry){
+                                    html += "<option value='" + entry['id'] + "'>" + entry['data']['name'] + " (" + entry['data']['inn'] + " / " + entry['data']['kpp'] + ")</option>";
+                                });
+                                html += "</select>";
+                                dojo.byId("add-group")["send"].disabled = false;
+                            } else {
+                                html = "<em>С указанными параметрами компания не найдена</em>";
+                                dojo.byId("add-group")["send"].disabled = true;
+                            }
+
+                            Sandbox.Layout.placeContent(dojo.byId("search-company-results"), html);
+                        })
+                    });
+                    var formAddGroupSendHandle = dojo.connect(dojo.byId('add-group')['send'], 'onclick', function(event){
+                        var params = dojo.formToObject(dojo.byId('add-group'));
+                        params['level'] = hashParams.parts[1];
+                        Sandbox.Layout.dataSender('manager/counseling-structure/add-group', params).addCallback(function(results){
+                            if(results['result'] != -1){
+                                Sandbox.Layout.Dialog.hide();
+                                // Выполнить по истечении срока исчезновения диалога
+                                setTimeout(function(){
+                                    // Обновить данные уровней
+                                   dojo.publish('levelGroups', {level: hashParams.parts[1]});
+                                }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
+                            }
+                        });
+                    });
+                    //Закрыть диалог
+                    var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
+                        // Отсоединяем все обработчики событий текущего диалога
+                        dojo.disconnect(formSearchCompanySendHandle);
+                        dojo.disconnect(formAddGroupSendHandle);
+                        dojo.disconnect(dialogHideHandle);
+                    });
+                });
+            }
+        },
+        '[data-action="getGroupExperts"]': {
+            onclick: function(event){
+                event.preventDefault();
+                Sandbox.Layout.Dialog.set("content", "Сейчас загружу специалистов!");
+                Sandbox.Layout.Dialog.show();
+            }
+        },
+        '[data-action="editGroupInfo"]': {
+            onclick: function(event){
+                event.preventDefault();
+                Sandbox.Layout.Dialog.set("content", "Сейчас отредактируем группу!");
+                Sandbox.Layout.Dialog.show();
             }
         }
     });

@@ -28,7 +28,8 @@ class Service_QueryController extends App_Zend_Controller_Action
         $this->_collections = array(
             'user'      => 'HM_Model_Account_User_Collection',
             'line'      => 'HM_Model_Counseling_Structure_Line_Collection',
-            'level'     => 'HM_Model_Counseling_Structure_Level_Collection'
+            'level'     => 'HM_Model_Counseling_Structure_Level_Collection',
+            'company'   => 'HM_Model_Billing_Company_Collection'
         );
     }
 
@@ -71,7 +72,7 @@ class Service_QueryController extends App_Zend_Controller_Action
                     }
                 }
 
-                // Accessible block
+/*                // Accessible block
                 // TODO: Проверка на доступность только те объекты которые присутствуют в системе
                 if(HM_Model_Account_Access::getInstance()->getType(strtoupper($entity)) instanceof App_Core_Model_Data_Store) {
                     // Get Possibility
@@ -98,8 +99,8 @@ class Service_QueryController extends App_Zend_Controller_Action
                     foreach($result as $id) {
                         $entityCollection->addEqualFilter('id', $id);
                     }
-                }
-                $this->setAjaxResult($entityCollection->getCollection()->toArray());
+                }*/
+                $this->setAjaxData($entityCollection->getCollection()->toArray());
             }
         }
     }

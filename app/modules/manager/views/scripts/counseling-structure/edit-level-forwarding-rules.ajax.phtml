@@ -1,3 +1,51 @@
 <?php
-Zend_Debug::dump($this->data);
+$data = $this->data;
+$level = $this->level;
 ?>
+<?php if(count($data) > 0):?>
+<form id="edit-rules">
+    <table class="table table-striped table-bordered">
+        <colgroup>
+            <col width="50"/>
+            <col width="80">
+            <col width="350"/>
+            <col width="350"/>
+            <col/>
+        </colgroup>
+        <thead>
+        <tr>
+            <th>#ID</th>
+            <th>Включено</th>
+            <th>Отправитель</th>
+            <th>Получатель</th>
+            <th>Время реакции (сек.)</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="5">
+                <input type="hidden" name="line" value="<?=$line?>"/>
+                <button type="button" value="Сохранить" data-action="save-rules">Сохранить</button>
+            </td>
+        </tr>
+        </tfoot>
+        <tbody>
+            <?php foreach($data as $rule): ?>
+        <tr>
+            <td><?=$rule->get('id'); ?></td>
+            <td>
+                <?php if(true == $rule->get('is_enabled')): ?>
+                <input type="checkbox" name="rules[<?=$rule->get('id') ?>][is_enabled]" value="true" checked="true"/>
+                <?php else: ?>
+                <input type="checkbox" name="rules[<?=$rule->get('id') ?>][is_enabled]" value="false" />
+                <?php endif; ?>
+            </td>
+            <td><?=$level->get('name')?></td>
+            <td><?=$rule->get('name_level_to'); ?></td>
+            <td><input name="rules[<?=$rule->get('id') ?>][duration]" type="text" value="<?=$rule->get('duration'); ?>"/></td>
+        </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</form>
+<?php endif; ?>

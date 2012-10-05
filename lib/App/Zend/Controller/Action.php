@@ -72,6 +72,17 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     }
 
     /**
+     * Установить результат ответа
+     * @param $data
+     * @return App_Zend_Controller_Action
+     */
+    public function setAjaxData($data)
+    {
+        $this->_data = $data;
+        return $this;
+    }
+
+    /**
      * @param $status
      * @return App_Zend_Controller_Action
      */

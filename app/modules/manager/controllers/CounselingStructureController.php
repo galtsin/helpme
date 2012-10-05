@@ -151,24 +151,28 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             if($request->isPost()){
                 $rulesDirty = $request->getParam('rules');
                 $rulesOrigin = $level->getRules();
+                $rulesUpdated = array();
                 foreach($rulesDirty as $id => $params) {
                     // Дополняем значение чекбоксов формы, когда checkbox отключен
                     if(!array_key_exists('is_enabled',$params)) {
                         $params['is_enabled'] = false;
                     }
+
                     foreach($params as $key => $value) {
                         // Проверяем, изменились ли значения
                         if($rulesOrigin[$id]->get($key) !== $value) {
                             $rulesOrigin[$id]->set($key, $value);
+                            $rulesUpdated[] = $id;
                         }
                     }
                 }
                 $level->updateRules();
+                $this->setAjaxResult($rulesUpdated);
             } else {
+                $this->view->assign('level', $level->getData());
                 $this->view->assign('data', $level->getRules());
             }
         }
-
     }
 
     /**
@@ -202,10 +206,36 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         }
     }
 
+    /**
+     * Добавить группу на Уровень
+     */
+    public function addGroupAction()
+    {
+        $request = $this->getRequest();
+        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
+            ->restore($request->getParam('level'));
+        if($level instanceof HM_Model_Counseling_Structure_Level) {
+            if($request->isPost()){
+                $groupData = $request->getParam('group');
+                $group = $level->addGroup(array(
+                        'name'          => $groupData['name'],
+                        'company_owner' => $groupData['company_owner']
+                    )
+                );
+                if($group instanceof HM_Model_Counseling_Structure_Group){
+                    $this->setAjaxResult($group->getData('id'));
+                    return;
+                }
+            } else {
+
+            }
+        }
+    }
+
     public function removeLevelAction(){}
     public function editLevelAction(){}
     public function getGroups(){}
-    public function addGroup(){}
+
     public function removeGroup(){}
 
     /**

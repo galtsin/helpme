@@ -1,0 +1,62 @@
+<form id="search-company">
+<table class="table table-bordered">
+    <colgroup>
+        <col width="250"/>
+        <col width="250"/>
+    </colgroup>
+    <thead>
+    <tr>
+        <th>Поиск компании</th>
+    </tr>
+    </thead>
+    <tfoot>
+    <tr>
+        <td colspan="2">
+            <button type="button" data-action="searchCompany" name="send">Найти</button>
+        </td>
+    </tr>
+    </tfoot>
+    <tbody>
+    <tr>
+        <td>
+            <label>ИНН:</label>
+            <input type="text" name="company[inn]"/>
+        </td>
+        <td>
+            <label>КПП:</label>
+            <input type="text" name="company[kpp]"/>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</form>
+
+<form id="add-group">
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Информация о Группе</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td>
+                <button type="button" disabled="true" name="send">Добавить</button>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        <tr>
+            <td>
+                <span id="search-company-results"><em>Компания не выбрана</em></span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="add-group-name">Наименование:</label>
+                <input type="text" id="add-group-name" name="group[name]"/>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</form>
