@@ -45,7 +45,21 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
     }
 
     public function removeLevel(){}
-    public function getLevels(){}
+
+    /**
+     * Получить массив Уровней
+     * @return ArrayObject
+     */
+    public function getLevels()
+    {
+        if($this->isIdentity()){
+            $levelColl = new HM_Model_Counseling_Structure_Level_Collection();
+            return $levelColl->addEqualFilter('line', $this->getData('id'))
+                ->getCollection()
+                ->getObjectsIterator();
+        }
+        return new ArrayObject(array());
+    }
 
     /**
      * Получить список правил переадресации на ЛК

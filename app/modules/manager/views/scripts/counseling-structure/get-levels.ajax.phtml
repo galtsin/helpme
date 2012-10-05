@@ -43,7 +43,7 @@ if(true === $this->is_writable):
         ?>
         <tr>
             <td><?=$entry->get('id')?></td>
-            <td><a href="#level/<?=$entry->get('id')?>" data-hash="#!/levelInfo/<?=$entry->get('id')?>"><?=$entry->get('name')?></a></td>
+            <td><a href="#!/levelBoard/<?=$entry->get('id')?>" data-hash="#!/levelBoard/<?=$entry->get('id')?>"><?=$entry->get('name')?></a></td>
         </tr>
         <?php endforeach; ?>
         <?php else: ?>
@@ -78,7 +78,7 @@ else:
             ?>
         <tr>
             <td><?=$entry->get('id')?></td>
-            <td><a href="#level/<?=$entry->get('id')?>" data-action="edit-level"><?=$entry->get('name')?></a></td>
+            <td><a href="#!/levelBoard/<?=$entry->get('id')?>" data-hash="#!/levelBoard/<?=$entry->get('id')?>"><?=$entry->get('name')?></a></td>
         </tr>
             <?php endforeach; ?>
         <?php else: ?>

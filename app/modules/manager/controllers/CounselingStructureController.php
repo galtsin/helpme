@@ -97,6 +97,17 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     }
 
     /**
+     * Получить панель управления уровнем
+     */
+    public function getLevelBoardAction()
+    {
+        $request = $this->getRequest();
+        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
+            ->restore($request->getParam('level'));
+        $this->view->assign('data', $level->getData());
+    }
+
+    /**
      * TODO: Пример для подражания
      * Добавить Уровень на Линию Консультации
      * POST - добавить данные

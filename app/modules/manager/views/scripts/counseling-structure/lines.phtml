@@ -37,6 +37,14 @@ dojo.ready(function(){
         });
     });
 
+    dojo.subscribe('levelBoard', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-level-board', {level: args.level}).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
+            dojo.behavior.apply();
+            return results;
+        });
+    });
+
     // События на текущую страницу
     dojo.behavior.add({
         //#!/lineInfo/{id}
@@ -69,10 +77,12 @@ dojo.ready(function(){
     });
 
     dojo.behavior.add({
-        '[data-hash^="#!/levelInfo"]': {
+        '[data-hash^="#!/levelBoard"]': {
             onclick: function(event){
                 event.preventDefault();
-                alert("Смотррим уровень!");
+                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
+                dojo.publish('levelBoard', {level: hashParams.parts[1]});
+                dojo.hash(event.target.getAttribute("data-hash"));
             }
         }
     });
@@ -153,7 +163,7 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         ?>
         <tr>
             <td><?=$lineData->get('id')?></td>
-            <td><a class="engineAjax" data-hash="#!/lineBoard/<?=$lineData->get('id')?>" href="#!/lineInfo/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
+            <td><a class="engineAjax" data-hash="#!/lineBoard/<?=$lineData->get('id')?>" href="#!/lineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
             <td><em>просмотр/редактирование</em></td>
         </tr>
         <?php endforeach; ?>
