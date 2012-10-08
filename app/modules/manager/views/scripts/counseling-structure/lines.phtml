@@ -36,15 +36,15 @@ dojo.ready(function(){
         });
     });
 
-    dojo.subscribe('levelBoard', function(args){
+    dojo.subscribe('getLevelBoard', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/get-level-board', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
-            dojo.publish('levelInfo', args);
+            dojo.publish('editLevelInfo', args);
             return results;
         });
     });
 
-    dojo.subscribe('levelInfo', function(args){
+    dojo.subscribe('editLevelInfo', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/edit-level-info', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
             dojo.behavior.apply();
@@ -52,7 +52,7 @@ dojo.ready(function(){
         });
     });
 
-    dojo.subscribe('levelGroups', function(args){
+    dojo.subscribe('getLevelGroups', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/get-groups', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
             dojo.behavior.apply();
@@ -60,7 +60,7 @@ dojo.ready(function(){
         });
     });
 
-    dojo.subscribe('editLevelRules', function(args){
+    dojo.subscribe('editLevelForwardingRules', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/edit-level-forwarding-rules', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
             dojo.behavior.apply();
@@ -101,50 +101,31 @@ dojo.ready(function(){
                 event.preventDefault();
                 dispatcher(event.target.getAttribute("data-action"), ['line']);
             }
-        }
-    });
-
-    //dispatcher()
-    function dispatcher(shortLink, argsIndex) {
-        var actionParams = Sandbox.Layout.parseShortLink(shortLink);
-        dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
-        if(actionParams.hasOwnProperty('prefix')){
-            dojo.hash(shortLink);
-        }
-    }
-
-
-    dojo.behavior.add({
-        '[data-hash^="#!/getLevelBoard"]': {
+        },
+        // Получить панель управления Уровнем
+        '[data-action^="#!/getLevelBoard"]': {
             onclick: function(event){
                 event.preventDefault();
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('levelBoard', {level: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
+                dispatcher(event.target.getAttribute("data-action"), ['level']);
             }
         },
-        '[data-hash^="#!/editLevelInfo"]': {
+        // Редактирование информации об Уровне
+        '[data-action^="#!/editLevelInfo"]': {
             onclick: function(event){
                 event.preventDefault();
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('levelInfo', {level: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
+                dispatcher(event.target.getAttribute("data-action"), ['level']);
             }
         },
-        '[data-hash^="#!/getLevelGroups"]': {
+        '[data-action^="#!/getLevelGroups"]': {
             onclick: function(event){
                 event.preventDefault();
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('levelGroups', {level: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
+                dispatcher(event.target.getAttribute("data-action"), ['level']);
             }
         },
-        '[data-hash^="#!/editLevelForwardingRules"]': {
+        '[data-action^="#!/editLevelForwardingRules"]': {
             onclick: function(event){
                 event.preventDefault();
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('editLevelRules', {level: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
+                dispatcher(event.target.getAttribute("data-action"), ['level']);
             }
         }
     });
@@ -232,7 +213,7 @@ dojo.ready(function(){
                                 // Выполнить по истечении срока исчезновения диалога
                                 setTimeout(function(){
                                     // Обновить данные уровней
-                                   dojo.publish('levelGroups', {level: hashParams.parts[1]});
+                                   dojo.publish('getLevelGroups', {level: hashParams.parts[1]});
                                 }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
                             }
                         });
@@ -277,7 +258,7 @@ dojo.ready(function(){
                                 // Выполнить по истечении срока исчезновения диалога
                                 setTimeout(function(){
                                     // Обновить группы
-                                   dojo.publish('levelGroups', {level: hashParams.parts[1]});
+                                   dojo.publish('getLevelGroups', {level: hashParams.parts[1]});
                                 }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
                             }
                         });
@@ -295,6 +276,15 @@ dojo.ready(function(){
     });
 
     dojo.behavior.apply();
+
+    // Диспетчер событий и обработчиков
+    function dispatcher(shortLink, argsIndex) {
+        var actionParams = Sandbox.Layout.parseShortLink(shortLink);
+        dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
+        if(actionParams.hasOwnProperty('prefix')){
+            dojo.hash(shortLink);
+        }
+    }
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript');

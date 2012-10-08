@@ -37,6 +37,7 @@ require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax, Di
         urlCorrect: function(url) {
             return appConfig.baseUrl + '/' + url;
         },
+        // Распарсить короткую Ajax ссылку вида: '#!/{action}/{arg}/{arg} ... '
         parseShortLink: function(hash){
             var obj = {};
             var parts = hash.split('/');
