@@ -15,6 +15,38 @@ $level = $this->data;
  * Режим редактирования
  */
 ?>
+<h3>::Режим редактирования</h3>
+<form id="edit-level-info" method="post">
+<table class="table table-bordered">
+    <tfoot>
+        <tr>
+            <td>
+                <input type="hidden" name="level[id]" value="<?=$level->get('id')?>">
+                <button type="button" name="send">Сохранить</button>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+    <tr>
+        <td>
+            <strong>#ID:</strong> <?=$level->get('id')?>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label for="edit-line-name">Наименование:</label>
+            <input type="text" value="<?=$level->get('name')?>" id="edit-line-name" name="level[name]"/>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</form>
+<?php
+/**
+ * Режим чтения
+ */
+?>
+<h3>::Режим чтения</h3>
 <table class="table table-bordered">
     <tbody>
     <tr>

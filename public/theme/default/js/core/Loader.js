@@ -2,7 +2,7 @@ dojo.provide("core.Loader");
 require([], function(){
     core.Loader = function(){};
     dojo.declare("core.Loader", null, {
-        _delay: 500,
+        _delay: 400,
         _timeout: 5000,
         constructor: function(node){
             this._node = node;

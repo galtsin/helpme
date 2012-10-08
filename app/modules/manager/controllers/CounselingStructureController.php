@@ -106,7 +106,9 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $request = $this->getRequest();
         $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
             ->restore($request->getParam('level'));
-        $this->view->assign('data', $level->getData());
+        if($level instanceof HM_Model_Counseling_Structure_Level) {
+            $this->view->assign('data', $level->getData());
+        }
     }
 
     /**
@@ -115,22 +117,32 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function editLevelInfoAction()
     {
         $request = $this->getRequest();
-        if($this->getRequest()->isPost()){
-            // Сохранить данные
-            // Предпроверка данных
-        } else {
-            // Получить форму для редактирования данных
-            $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
-                ->restore($request->getParam('level'));
-            $this->view->assign('data', $level->getData());
-            $this->view->assign('is_writable', false);
+        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
+            ->restore($request->getParam('level'));
+        if($level instanceof HM_Model_Counseling_Structure_Level){
+            if($this->getRequest()->isPost()){
+                // Сохранить данные
+                // Предпроверка данных
+                foreach($request->getPost('level') as $key => $value) {
+                    if($key !== 'id' && $level->getData($key) !== $value) {
+                        $level->getData()->set($key, $value);
+                    }
+                }
+                if(true === $level->save()) {
+                    $this->setAjaxResult($level->getData('id'));
+                }
+            } else {
+                // Получить форму для редактирования данных
+                $this->view->assign('data', $level->getData());
+                $this->view->assign('is_writable', false);
+            }
         }
     }
 
     /**
      * Получить список групп
      */
-    public function getGroupsAction()
+    public function getLevelGroupsAction()
     {
         $request = $this->getRequest();
         $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
@@ -273,12 +285,6 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             $this->view->assign('data', $group->getExperts());
         }
     }
-
-    public function removeLevelAction(){}
-    public function editLevelAction(){}
-    public function getGroups(){}
-
-    public function removeGroup(){}
 
     /**
      * TODO: Проверить и доработать

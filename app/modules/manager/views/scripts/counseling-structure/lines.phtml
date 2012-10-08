@@ -48,12 +48,22 @@ dojo.ready(function(){
         Sandbox.Layout.contentLoader('manager/counseling-structure/edit-level-info', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
             dojo.behavior.apply();
+            // TODO: Только если тип доступа == writable
+            var formSendHandle = dojo.connect(dojo.byId("edit-level-info")["send"], "onclick", function(event){
+                Sandbox.Layout.dataSender('manager/counseling-structure/edit-level-info/level/' + args.level, dojo.formToObject(dojo.byId('edit-level-info'))).addCallback(function(results){
+                    if(results['result'] != -1){
+                        //dojo.disconnect(formSendHandle);
+                    } else {
+                        alert("Не получилось сохранить!");
+                    }
+                });
+            });
             return results;
         });
     });
 
     dojo.subscribe('getLevelGroups', function(args){
-        Sandbox.Layout.contentLoader('manager/counseling-structure/get-groups', {level: args.level}).addCallback(function(results){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-level-groups', {level: args.level}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLevel'), results);
             dojo.behavior.apply();
             return results;

@@ -50,6 +50,29 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
     }
 
     /**
+     * Обновить уровень
+     * @return int
+     */
+    protected function _update()
+    {
+        if($this->getData()->isDirty()) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('level_update_identity', array(
+                    'id_level'  => $this->getData('id'),
+                    'name'      => $this->getData('name')
+                )
+            );
+            $row = $result->fetchRow();
+            if($row['o_id_level'] !== -1) {
+                $this->getData()->unmarkDirty();
+                return $this->getData('id');
+            }
+        }
+
+        return parent::_update();
+    }
+
+    /**
      * Получить список групп
      * @return ArrayObject
      */

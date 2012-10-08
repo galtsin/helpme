@@ -24,6 +24,10 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'production'
         );
 
+        $validate = new Zend_Config_Ini(
+            APPLICATION_PATH . '/configs/validate.ini'
+          );
+
         // Инициализация адаптера БД
         Zend_Db_Table::setDefaultAdapter(
             new Zend_Db_Adapter_Pdo_Pgsql($config->resources->db->general->params)
@@ -31,6 +35,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         Zend_Registry::set('configs', $config);
         Zend_Registry::set('forms', $forms);
+        Zend_Registry::set('validate', $validate);
         Zend_Registry::set('acl', new Zend_Acl());
 
 
