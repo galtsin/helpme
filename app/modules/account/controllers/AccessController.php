@@ -29,7 +29,8 @@ class Account_AccessController extends App_Zend_Controller_Action
             if($form->isValid($this->getRequest()->getPost())) {
                 $auth = HM_Model_Account_Auth::getInstance();
                 if($auth->authenticate($form->getValue('login'), $form->getValue('password'))) {
-                    $url = 'account/access/possibility';
+                    //$url = 'account/access/possibility';
+                    $url = '';
                     if($this->getRequest()->getParam('ref')) {
                         $url .= '/ref/' . $this->getRequest()->getParam('ref');
                     }

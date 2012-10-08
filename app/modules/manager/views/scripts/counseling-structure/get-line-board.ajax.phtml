@@ -121,8 +121,8 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript');
 
 <div style="border-bottom: 3px solid #444;"><h3>#ID<?=$line->get('id')?> / Линия консультации &laquo;<?=$line->get('name')?>&raquo;</h3></div>
 <div style="margin: 0px 0 15px; background: #f3f3f3; padding: 15px 10px">
-    <button type="button" data-hash="#!/editLineInfo/<?=$line->get('id')?>">Информация</button>
-    <button type="button" data-hash="#!/getLineLevels/<?=$line->get('id')?>">Уровни</button>
+    <button type="button" data-action="#!/editLineInfo/<?=$line->get('id')?>">Информация</button>
+    <button type="button" data-action="#!/getLineLevels/<?=$line->get('id')?>">Уровни</button>
     <!--<button type="button" data-action="getRules">Переадресация</button>-->
     <!--<button type="button" data-action="getTariffs">Тарифы</button>-->
 </div>

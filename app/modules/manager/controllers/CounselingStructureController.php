@@ -151,7 +151,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             if($request->isPost()){
-                $rulesDirty = $request->getParam('rules');
+                $rulesDirty = $request->getPost('rules');
                 $rulesOrigin = $level->getRules();
                 $rulesUpdated = array();
                 foreach($rulesDirty as $id => $params) {
@@ -190,7 +190,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
                 ->restore($request->getParam('line'));
             if($line instanceof HM_Model_Counseling_Structure_Line) {
-                $levelData = $request->getParam('level');
+                $levelData = $request->getPost('level');
                 $level = $line->addLevel(array(
                         'name'  => $levelData['name']
                     )
@@ -218,7 +218,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             if($request->isPost()){
-                $groupData = $request->getParam('group');
+                $groupData = $request->getPost('group');
                 $group = $level->addGroup(array(
                         'name'          => $groupData['name'],
                         'company_owner' => $groupData['company_owner']

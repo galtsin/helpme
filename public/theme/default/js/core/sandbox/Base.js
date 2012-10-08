@@ -35,6 +35,14 @@ require([], function(){
                     eval(jsContent);
                 } catch(ex) {}
             }
+        },
+        //Создание объекта на основе индексов массива
+        indexing: function(argsArray, argsIndex){
+            var argsObject = {};
+            for(var i = 0; i < argsIndex.length; i ++) {
+                argsObject[argsIndex[i]] = argsArray[i];
+            }
+            return argsObject;
         }
     });
 });

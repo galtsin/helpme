@@ -12,15 +12,15 @@ dojo.ready(function(){
     var Line = new app.model.Line();
     var Level = new app.model.Level();
 
-    dojo.subscribe('lineBoard', function(args){
+    dojo.subscribe('getLineBoard', function(args){
         Sandbox.Layout.contentLoader('manager/counseling-structure/get-line-board', {line: args.line}).addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLines'), results);
-            dojo.publish('lineInfo', args);
+            dojo.publish('editLineInfo', args);
             return results;
         });
     });
 
-    dojo.subscribe('lineInfo', function(args){
+    dojo.subscribe('editLineInfo', function(args){
         Line.getEntity(args.line).getInfo().addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
             dojo.behavior.apply();
@@ -28,7 +28,7 @@ dojo.ready(function(){
         });
     });
 
-    dojo.subscribe('lineLevels', function(args){
+    dojo.subscribe('getLineLevels', function(args){
         Line.getEntity(args.line).getLevels().addCallback(function(results){
             Sandbox.Layout.placeContent(dojo.byId('contentLine'), results);
             dojo.behavior.apply();
@@ -68,41 +68,51 @@ dojo.ready(function(){
         });
     });
 
-    //Отключаем возможность отправки формы по событию submit;
+    // Глобальное поведение
+    // TODO: Не работает! Отключаем возможность отправки формы по событию submit;
     dojo.behavior.add({
-        'form': {onsubmit: function(event){dojo.stopEvent(event);return false;}}
+        'form': {
+            'onsubmit': function(event){
+                event.preventDefault();
+            }
+        }
     });
 
     // События на текущую страницу
+    // TODO: Пример для подражания
     dojo.behavior.add({
-        //#!/lineInfo/{id}
-        '[data-hash^="#!/getLineBoard"]': {
+        // Получить панель управления ЛК
+        '[data-action^="#!/getLineBoard"]': {
             onclick: function(event){
                 event.preventDefault();
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('lineBoard', {line: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
+                dispatcher(event.target.getAttribute("data-action"), ['line']);
+            }
+        },
+        // Редактирование информации об ЛК
+        '[data-action^="#!/editLineInfo"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['line']);
+            }
+        },
+        // Получить список Уровней на ЛК
+        '[data-action^="#!/getLineLevels"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['line']);
             }
         }
     });
 
-    //События по Линии Консультации
-    dojo.behavior.add({
-        '[data-hash^="#!/editLineInfo"]': {
-            onclick: function(event){
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('lineInfo', {line: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
-            }
-        },
-        '[data-hash^="#!/getLineLevels"]': {
-            onclick: function(event){
-                var hashParams = Sandbox.Screen.parseHash(event.target.getAttribute("data-hash"));
-                dojo.publish('lineLevels', {line: hashParams.parts[1]});
-                dojo.hash(event.target.getAttribute("data-hash"));
-            }
+    //dispatcher()
+    function dispatcher(shortLink, argsIndex) {
+        var actionParams = Sandbox.Layout.parseShortLink(shortLink);
+        dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
+        if(actionParams.hasOwnProperty('prefix')){
+            dojo.hash(shortLink);
         }
-    });
+    }
+
 
     dojo.behavior.add({
         '[data-hash^="#!/getLevelBoard"]': {
@@ -168,7 +178,7 @@ dojo.ready(function(){
                                 // Выполнить по истечении срока исчезновения диалога
                                 setTimeout(function(){
                                     // Обновить данные уровней
-                                   dojo.publish('lineLevels', {line: hashParams.parts[1]});
+                                   dojo.publish('getLineLevels', {line: hashParams.parts[1]});
                                 }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
                             }
                         });
@@ -325,7 +335,7 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         ?>
         <tr>
             <td><?=$lineData->get('id')?></td>
-            <td><a class="engineAjax" data-hash="#!/getLineBoard/<?=$lineData->get('id')?>" href="#!/getLineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
+            <td><a class="engineAjax" data-action="#!/getLineBoard/<?=$lineData->get('id')?>" href="#!/getLineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
             <td><em>просмотр/редактирование</em></td>
         </tr>
         <?php endforeach; ?>

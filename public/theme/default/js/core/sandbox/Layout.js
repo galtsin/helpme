@@ -36,6 +36,16 @@ require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax, Di
         },
         urlCorrect: function(url) {
             return appConfig.baseUrl + '/' + url;
+        },
+        parseShortLink: function(hash){
+            var obj = {};
+            var parts = hash.split('/');
+            if(hash.indexOf('#') != -1) {
+                obj['prefix'] = parts.shift().slice(1);
+            }
+            obj['action'] = parts.shift();
+            obj['args'] = parts;
+            return obj;
         }
     });
 });
