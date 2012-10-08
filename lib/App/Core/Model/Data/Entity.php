@@ -56,7 +56,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     public function save()
     {
         if($this->getData() instanceof App_Core_Model_Data_Store) {
-            if(is_int($this->getData()->getId())){
+            if($this->isIdentity()){
                 // Делегируем обновление записей
                 if($this->_update() > 0) {
                     return true;

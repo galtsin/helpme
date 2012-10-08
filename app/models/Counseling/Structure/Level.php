@@ -100,8 +100,8 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
     public function getRules()
     {
         if(null === $this->_rules){
-            $rules = array();
             if($this->isIdentity()){
+                $rules = array();
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                     ->execute('level_get_forwarding_rules', array(
                         'id_level' => $this->getData('id')

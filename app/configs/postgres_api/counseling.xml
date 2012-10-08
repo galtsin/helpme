@@ -48,6 +48,10 @@
     <group_get_identity>
         <id_group type="integer"/>
     </group_get_identity>
+    <group_update_identity>
+        <id_group type="integer"/>
+        <name type="string"/>
+    </group_update_identity>
     <level_get_forwarding_rules>
         <id_level type="integer"/>
     </level_get_forwarding_rules>

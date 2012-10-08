@@ -68,6 +68,10 @@ dojo.ready(function(){
         });
     });
 
+    //Отключаем возможность отправки формы по событию submit;
+    dojo.behavior.add({
+        'form': {onsubmit: function(event){dojo.stopEvent(event);return false;}}
+    });
 
     // События на текущую страницу
     dojo.behavior.add({
@@ -233,18 +237,49 @@ dojo.ready(function(){
                 });
             }
         },
-        '[data-action="getGroupExperts"]': {
+        '[data-action^="getGroupExperts"]': {
             onclick: function(event){
                 event.preventDefault();
-                Sandbox.Layout.Dialog.set("content", "Сейчас загружу специалистов!");
-                Sandbox.Layout.Dialog.show();
+                var actionParams = event.target.getAttribute("data-action").split('/');
+                Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-experts', {group: actionParams[1]}).addCallback(function(results){
+                    Sandbox.Layout.Dialog.set("title", "Редактирование группы");
+                    Sandbox.Layout.Dialog.set("content", results);
+                    Sandbox.Layout.Dialog.show();
+                });
+
             }
         },
-        '[data-action="editGroupInfo"]': {
+        '[data-action^="editGroupInfo"]': {
             onclick: function(event){
                 event.preventDefault();
-                Sandbox.Layout.Dialog.set("content", "Сейчас отредактируем группу!");
-                Sandbox.Layout.Dialog.show();
+                var hashParams = Sandbox.Screen.parseHash(dojo.hash());
+                var actionParams = event.target.getAttribute("data-action").split('/');
+                Sandbox.Layout.contentLoader('manager/counseling-structure/edit-group-info', {group: actionParams[1]}).addCallback(function(results){
+                    Sandbox.Layout.Dialog.set("title", "Редактирование группы");
+                    Sandbox.Layout.Dialog.set("content", results);
+                    Sandbox.Layout.Dialog.show();
+                    // TODO: Отключаем возможность отправки формы!!
+                    var formEditGroupSendHandle = dojo.connect(dojo.byId('edit-group-info')['send'], 'onclick', function(event){
+                        var params = dojo.formToObject(dojo.byId('edit-group-info'));
+                        Sandbox.Layout.dataSender('manager/counseling-structure/edit-group-info/group/' + actionParams[1], params).addCallback(function(results){
+                            if(results['result'] != -1){
+                                Sandbox.Layout.Dialog.hide();
+                                // Выполнить по истечении срока исчезновения диалога
+                                setTimeout(function(){
+                                    // Обновить группы
+                                   dojo.publish('levelGroups', {level: hashParams.parts[1]});
+                                }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
+                            }
+                        });
+                    });
+                    //Закрыть диалог
+                    var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
+                        // Отсоединяем все обработчики событий текущего диалога
+                        dojo.disconnect(formEditGroupSendHandle);
+                        dojo.disconnect(dialogHideHandle);
+                    });
+                });
+
             }
         }
     });

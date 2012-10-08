@@ -1,0 +1,28 @@
+<?php
+$group = $this->data;
+?>
+<form id="edit-group-info">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Информация о Группе</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td>
+                <input type="hidden" name="group[id]" value="<?=$group->getData('id')?>">
+                <button type="button" name="send">Сохранить</button>
+            </td>
+        </tr>
+        </tfoot>
+        <tbody>
+        <tr>
+            <td>
+                <label for="edit-group-name">Наименование:</label>
+                <input type="text" id="edit-group-name" name="group[name]" value="<?=$group->getData('name')?>"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>

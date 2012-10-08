@@ -16,7 +16,8 @@ class Account_AccessController extends App_Zend_Controller_Action
     public function loginAction()
     {
         if(true == HM_Model_Account_Auth::getInstance()->isAuth()) {
-            $this->_redirect($this->view->baseUrl('account/access/possibility'));
+            //$this->_redirect($this->view->baseUrl('account/access/possibility'));
+            $this->_redirect($this->view->baseUrl());
         }
 
         $forms = Zend_Registry::get('forms');

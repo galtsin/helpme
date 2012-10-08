@@ -42,8 +42,8 @@ if(true === $this->is_writable):
             foreach($data as $entry):
         ?>
         <tr>
-            <td><?=$entry->get('id')?></td>
-            <td><a href="#!/getLevelBoard/<?=$entry->get('id')?>" data-hash="#!/getLevelBoard/<?=$entry->get('id')?>"><?=$entry->get('name')?></a></td>
+            <td><?=$entry->getData('id')?></td>
+            <td><a href="#!/getLevelBoard/<?=$entry->getData('id')?>" data-hash="#!/getLevelBoard/<?=$entry->getData('id')?>"><?=$entry->getData('name')?></a></td>
         </tr>
         <?php endforeach; ?>
         <?php else: ?>
@@ -77,8 +77,8 @@ else:
         foreach($data as $entry):
             ?>
         <tr>
-            <td><?=$entry->get('id')?></td>
-            <td><a href="#!/getLevelBoard/<?=$entry->get('id')?>" data-hash="#!/getLevelBoard/<?=$entry->get('id')?>"><?=$entry->get('name')?></a></td>
+            <td><?=$entry->getData('id')?></td>
+            <td><a href="#!/getLevelBoard/<?=$entry->getData('id')?>" data-hash="#!/getLevelBoard/<?=$entry->getData('id')?>"><?=$entry->getData('name')?></a></td>
         </tr>
             <?php endforeach; ?>
         <?php else: ?>

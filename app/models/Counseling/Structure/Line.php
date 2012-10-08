@@ -68,8 +68,8 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
     public function getRules()
     {
         if(null === $this->_rules){
-            $rules = array();
             if($this->isIdentity()){
+                $rules = array();
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                     ->execute('line_get_forwarding_rules', array(
                         'id_line' => $this->getData('id')
@@ -90,8 +90,8 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
                         $rules[$rule->getId()] = $rule;
                     }
                 }
+                $this->_rules = $rules;
             }
-            $this->_rules = $rules;
         }
 
         return $this->_rules;

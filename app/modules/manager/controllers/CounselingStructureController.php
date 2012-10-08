@@ -89,11 +89,13 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
      */
     public function getLineLevelsAction()
     {
-        $levelColl = new HM_Model_Counseling_Structure_Level_Collection();
-        $levelColl->addEqualFilter('line', (int)$this->getRequest()->getParam('line'))->getCollection();
-        $levelColl->getDataIterator();
-        $this->view->assign('data', $levelColl->getDataIterator());
-        $this->view->assign('is_writable', true);
+        $request = $this->getRequest();
+        $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
+            ->restore($request->getParam('line'));
+        if($line instanceof HM_Model_Counseling_Structure_Line) {
+            $this->view->assign('data', $line->getLevels());
+            $this->view->assign('is_writable', true);
+        }
     }
 
     /**
@@ -229,6 +231,46 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             } else {
 
             }
+        }
+    }
+
+    /**
+     * Обновить информацию о группе
+     */
+    public function editGroupInfoAction()
+    {
+        $request = $this->getRequest();
+        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
+            ->restore($request->getParam('group'));
+        if($group instanceof HM_Model_Counseling_Structure_Group){
+            if($request->isPost()){
+                // Сохранить результаты
+                foreach($request->getPost('group') as $key => $value) {
+                    if($key !== 'id' && $group->getData($key) !== $value) {
+                        $group->getData()->set($key, $value);
+                    }
+                }
+                if($group->save()) {
+                    $this->setAjaxResult($group->getData('id'));
+                }
+            } else{
+                // Форма на редактирование
+                $this->view->assign('data', $group);
+            }
+        }
+    }
+
+    /**
+     * Получить список специалистов в группе
+     */
+    public function getGroupExpertsAction()
+    {
+        $request = $this->getRequest();
+        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
+            ->restore($request->getParam('group'));
+            //->restore(12);
+        if($group instanceof HM_Model_Counseling_Structure_Group){
+            $this->view->assign('data', $group->getExperts());
         }
     }
 

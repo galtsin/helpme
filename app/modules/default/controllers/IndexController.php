@@ -11,5 +11,9 @@ class Default_IndexController extends App_Zend_Controller_Action
         $acl->allow('guest', 'page', 'read');
         $acl->allow('user', 'page', 'write');
         Zend_Debug::dump($acl->isAllowed('guest', 'page', 'write'));
+
+
+        $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')->restore(12);
+        Zend_Debug::dump($line->getExperts());
     }
 }

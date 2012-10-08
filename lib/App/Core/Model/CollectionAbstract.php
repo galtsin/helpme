@@ -100,6 +100,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
+     * TODO: Возвращать массив!
      * @return ArrayObject
      */
     public function getObjectsIterator()
@@ -113,6 +114,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
+     * TODO: Возвращать массив!
      * @return ArrayObject App_Core_Model_Data_Store
      */
     public function getDataIterator()
@@ -121,7 +123,7 @@ abstract class App_Core_Model_CollectionAbstract
         $objects = $this->getObjectsIterator();
         if(count($objects) > 0) {
             foreach($objects as $object) {
-                $data[] = clone($object->getData());
+                $data[$object->getData()->getId()] = clone($object->getData());
             }
         }
         return new ArrayObject($data);
