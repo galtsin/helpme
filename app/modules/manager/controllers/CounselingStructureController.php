@@ -45,8 +45,10 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function groupsAction()
     {
         $groupColl = new HM_Model_Counseling_Structure_Group_Collection();
-        $groups = $groupColl->addEqualFilter('company', 12)->getCollection()->getObjectsIterator();
-        $this->view->assign('data', $groups);
+        $groups = $groupColl->addEqualFilter('company', 12)->getCollection()->getIdsIterator();
+        $data = array();
+        $data[] = array('company' => 12, 'groups' => $groups);
+        $this->view->assign('data', $data);
     }
 
     /**
@@ -298,6 +300,16 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         }
     }
 
+    public function getGroupBoardAction()
+    {
+        $request = $this->getRequest();
+        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
+            ->restore($request->getParam('group'));
+        if($group instanceof HM_Model_Counseling_Structure_Group){
+            $this->view->assign('data', $group->getData());
+        }
+    }
+
     /**
      * Получить список специалистов в группе
      */
@@ -306,9 +318,25 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $request = $this->getRequest();
         $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
             ->restore($request->getParam('group'));
-            //->restore(12);
         if($group instanceof HM_Model_Counseling_Structure_Group){
-            $this->view->assign('data', $group->getExperts());
+            $this->view->assign(array('data' => $group->getExperts(), 'is_writable' => (bool)$request->getQuery('is_writable')));
+        }
+    }
+
+    /**
+     * Добавить специалистов в группу
+     */
+    public function addGroupExpertsAction()
+    {
+        $request = $this->getRequest();
+        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
+            ->restore($request->getParam('group'));
+        if($group instanceof HM_Model_Counseling_Structure_Group){
+            if($this->getRequest()->isPost()) {
+
+            } else {
+
+            }
         }
     }
 

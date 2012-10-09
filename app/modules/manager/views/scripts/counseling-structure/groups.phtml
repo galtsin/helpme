@@ -6,9 +6,104 @@ dojo.ready(function(){
     require(["core/Sandbox", "core/sandbox/helpers/Validate"], function(){
         //Первоначальная инициализация
         (function(){
-            dojo.hash('!/lines');
+            dojo.hash('!/groups');
             Sandbox = new core.Sandbox();
         })();
+
+        dojo.subscribe('getGroupBoard', function(args){
+            Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-board', args).addCallback(function(results){
+                Sandbox.Layout.placeContent(dojo.byId('contentGroups'), results);
+                dojo.behavior.apply();
+                return results;
+            });
+        });
+
+        dojo.subscribe('editGroupInfo', function(args){
+            Sandbox.Layout.contentLoader('manager/counseling-structure/edit-group-info', args).addCallback(function(results){
+                Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
+                dojo.behavior.apply();
+                // TODO: Только если тип доступа == writable
+                var formNode = dojo.byId("edit-group-info");
+                var Validate = new core.sandbox.helpers.Validate(formNode);
+                var formSendHandle = dojo.connect(formNode["send"], "onclick", function(event){
+                    Validate.clear();
+                    Sandbox.Layout.dataSender('manager/counseling-structure/edit-group-info/group/' + args.group, dojo.formToObject(formNode)).addCallback(function(results){
+                        if(results['result'] == -1){
+                            Validate.display(results['error']['messages']);
+                            //dojo.disconnect(formSendHandle);
+                        }
+                    });
+                });
+                return results;
+            });
+        });
+
+        dojo.subscribe('getGroupExperts', function(args){
+            args['is_writable'] = true;
+            Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-experts', args).addCallback(function(results){
+                Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
+                dojo.behavior.apply();
+                var formAddHandle = dojo.connect(dojo.byId("edit-group-experts")["add"], "onclick", function(event){
+                    Sandbox.Layout.contentLoader('manager/counseling-structure/add-group-experts', args).addCallback(function(results){
+                        Sandbox.Layout.Dialog.set("title", "Добавление специалиста в группу");
+                        Sandbox.Layout.Dialog.set("content", results);
+                        Sandbox.Layout.Dialog.show();
+                        var formSearchNode = dojo.byId("search-account");
+                        var formAddGroupExperts = dojo.byId("add-group-experts");
+                        var formSearchAccountHandle = dojo.connect(formSearchNode["send"], "onclick", function(event){
+                            // email or login
+                            var filters = {};
+                            if(formSearchNode['account'].value.indexOf('@') == -1){
+                                filters['filters[equal][login][]'] = formSearchNode['account'].value;
+                            } else {
+                                filters['filters[equal][email][]'] = formSearchNode['account'].value;
+                            }
+                            Sandbox.Layout.dataLoader('service/query/user', filters).addCallback(function(results){
+                                if(results['data'].length > 0) {
+                                    var data = results['data'][0];
+                                    // Добавить к списку
+                                    var tbody = dojo.query("tbody", dojo.byId("table-add-group-experts"))[0];
+                                    var html = '<td>' + data['id'] + '</td>' +
+                                    '<td></td>' +
+                                    '<td>' + data['data']['login'] + '</td>' +
+                                    '<td>' + data['data']['last_name'] + ' ' + data['data']['first_name'] + ' ' + data['data']['middle_name'] + '</td>';
+                                    Sandbox.Layout.placeContent(tbody, '<tr>' + html + '</tr>');
+                                }
+                            });
+                        });
+                        var formAddGroupExpertsHandle = dojo.connect(formAddGroupExperts["send"], "onclick", function(event){
+                            alert("Сохранить");
+                        });
+                        return results;
+                    });
+                });
+                return results;
+            });
+        });
+
+        dojo.behavior.add({
+            // Получить панель управления ЛК
+            '[data-action^="#!/getGroupBoard"]': {
+                onclick: function(event){
+                    event.preventDefault();
+                    dispatcher(event.target.getAttribute("data-action"), ['group']);
+                }
+            },
+            '[data-action^="#!/editGroupInfo"]': {
+                onclick: function(event){
+                    event.preventDefault();
+                    dispatcher(event.target.getAttribute("data-action"), ['group']);
+                }
+            },
+            '[data-action^="#!/getGroupExperts"]': {
+                onclick: function(event){
+                    event.preventDefault();
+                    dispatcher(event.target.getAttribute("data-action"), ['group']);
+                }
+            }
+        });
+
+        dojo.behavior.apply();
 
         // Диспетчер событий и обработчиков
         function dispatcher(shortLink, argsIndex) {
@@ -28,39 +123,38 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript');
 <?php
 $data = $this->data;
 $companyColl = new HM_Model_Billing_Company_Collection();
+$groupColl = new HM_Model_Counseling_Structure_Group_Collection();
 ?>
-<div id="contentLines">
+
+<div id="contentGroups">
     <table class="table table-bordered">
         <colgroup>
             <col width="350"/>
             <col width="30"/>
-            <col width="50%"/>
             <col/>
         </colgroup>
         <thead>
         <tr>
-            <th colspan="4">Название компании</th>
+            <th colspan="3">Название компании</th>
         </tr>
         </thead>
         <tbody>
         <?php
         foreach($data as $entry):
-            $companyData = $companyColl->load(12)->getData();
+            $companyData = $companyColl->load($entry['company'])->getData();
             ?>
         <tr>
-            <td rowspan="<?=count($entry['lines']) + 1?>"><?=$companyData->get('name')?></td>
+            <td rowspan="<?=count($entry['groups']) + 1?>"><?=$companyData->get('name')?></td>
             <th>#ID</th>
-            <th>Линия Консультации</th>
-            <th>Опции</th>
+            <th>Группа</th>
         </tr>
             <?php
-            foreach($entry['lines'] as $line):
-                $lineData = $lineColl->load($line)->getData();
+            foreach($entry['groups'] as $group):
+                $groupData = $groupColl->load($group)->getData();
                 ?>
             <tr>
-                <td><?=$lineData->get('id')?></td>
-                <td><a class="engineAjax" data-action="#!/getLineBoard/<?=$lineData->get('id')?>" href="#!/getLineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
-                <td><em>просмотр/редактирование</em></td>
+                <td><?=$groupData->get('id')?></td>
+                <td><a class="engineAjax" data-action="#!/getGroupBoard/<?=$groupData->get('id')?>" href="#!/getGroupBoard/<?=$groupData->get('id')?>" title="<?=$groupData->get('name')?>"><?=$groupData->get('name')?></a></td>
             </tr>
                 <?php endforeach; ?>
             <?php endforeach; ?>
