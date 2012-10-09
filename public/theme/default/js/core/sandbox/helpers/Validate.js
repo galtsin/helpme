@@ -1,4 +1,4 @@
-// Подсветка
+// Хэлпер отображения сообщений об ошибках в привязке к полям формы
 dojo.provide("core.sandbox.helpers.Validate");
 require(["dijit/Tooltip"], function(Tooltip){
     core.sandbox.helpers.Validate = function(){};
@@ -51,6 +51,7 @@ require(["dijit/Tooltip"], function(Tooltip){
             }
             return this;
         },
+        // Присоединение идет к элементам label полей формы
         _addAnchor: function(el){
             var label = dojo.query("label[for=" + el.getAttribute('id') + "]", this._formNode)[0];
             if(label !== undefined) {

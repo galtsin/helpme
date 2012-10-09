@@ -102,6 +102,9 @@
     <company_by_kpp>
         <kpp type="integer"/>
     </company_by_kpp>
+    <company_get_groups>
+        <id_company type="integer"/>
+    </company_get_groups>
     <billing_get_invoices>
         <id_company type="integer"/>
     </billing_get_invoices>

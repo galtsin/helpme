@@ -38,7 +38,7 @@ if(true === $this->is_writable):
     </tfoot>
     <tbody>
         <?php
-            if($data->count() > 0):
+            if(count($data) > 0):
             foreach($data as $entry):
         ?>
         <tr>

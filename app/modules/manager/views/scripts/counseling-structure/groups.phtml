@@ -1,0 +1,69 @@
+
+<?php
+$jScript = <<<JS
+require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level"]);
+dojo.ready(function(){
+    require(["core/Sandbox", "core/sandbox/helpers/Validate"], function(){
+        //Первоначальная инициализация
+        (function(){
+            dojo.hash('!/lines');
+            Sandbox = new core.Sandbox();
+        })();
+
+        // Диспетчер событий и обработчиков
+        function dispatcher(shortLink, argsIndex) {
+            var actionParams = Sandbox.Layout.parseShortLink(shortLink);
+            dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
+            if(actionParams.hasOwnProperty('prefix')){
+                dojo.hash(shortLink);
+            }
+        }
+    });
+
+});
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript');
+?>
+
+<?php
+$data = $this->data;
+$companyColl = new HM_Model_Billing_Company_Collection();
+?>
+<div id="contentLines">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="350"/>
+            <col width="30"/>
+            <col width="50%"/>
+            <col/>
+        </colgroup>
+        <thead>
+        <tr>
+            <th colspan="4">Название компании</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        foreach($data as $entry):
+            $companyData = $companyColl->load(12)->getData();
+            ?>
+        <tr>
+            <td rowspan="<?=count($entry['lines']) + 1?>"><?=$companyData->get('name')?></td>
+            <th>#ID</th>
+            <th>Линия Консультации</th>
+            <th>Опции</th>
+        </tr>
+            <?php
+            foreach($entry['lines'] as $line):
+                $lineData = $lineColl->load($line)->getData();
+                ?>
+            <tr>
+                <td><?=$lineData->get('id')?></td>
+                <td><a class="engineAjax" data-action="#!/getLineBoard/<?=$lineData->get('id')?>" href="#!/getLineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
+                <td><em>просмотр/редактирование</em></td>
+            </tr>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

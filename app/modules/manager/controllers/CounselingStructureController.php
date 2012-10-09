@@ -42,6 +42,13 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         $this->view->assign('data', $data);
     }
 
+    public function groupsAction()
+    {
+        $groupColl = new HM_Model_Counseling_Structure_Group_Collection();
+        $groups = $groupColl->addEqualFilter('company', 12)->getCollection()->getObjectsIterator();
+        $this->view->assign('data', $groups);
+    }
+
     /**
      * Получить панель управления Линией консультации
      */

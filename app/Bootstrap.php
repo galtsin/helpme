@@ -19,11 +19,6 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'development'
         );
 
-        $forms = new Zend_Config_Ini(
-            APPLICATION_PATH . '/configs/forms.ini',
-            'production'
-        );
-
         $validate = new Zend_Config_Ini(
             APPLICATION_PATH . '/configs/validate.ini'
           );
@@ -34,11 +29,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         );
 
         Zend_Registry::set('configs', $config);
-        Zend_Registry::set('forms', $forms);
         Zend_Registry::set('validate', $validate);
         Zend_Registry::set('acl', new Zend_Acl());
-
-
     }
 
     /**

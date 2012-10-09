@@ -16,6 +16,7 @@ class HM_Model_Counseling_Structure_Group_Collection extends App_Core_Model_Coll
         $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory'));
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'level');
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'company');
     }
 
     /**
@@ -36,6 +37,32 @@ class HM_Model_Counseling_Structure_Group_Collection extends App_Core_Model_Coll
                 if($result->rowCount() > 0) {
                     foreach($result->fetchAll() as $row) {
                         $ids[] = $row['o_id'];
+                    }
+                }
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Фильтр по Компании
+     * @return array
+     */
+    protected function _doCompanyEqualFilterCollection()
+    {
+        $ids = array();
+
+        if(count($this->getEqualFilterValues('company')) > 0) {
+            foreach($this->getEqualFilterValues('company') as $company) {
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('company_get_groups', array(
+                        'id_company' => $company
+                    )
+                );
+                if($result->rowCount() > 0) {
+                    foreach($result->fetchAll() as $row) {
+                        $ids[] = $row['o_id_group'];
                     }
                 }
             }

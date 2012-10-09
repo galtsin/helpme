@@ -103,8 +103,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * TODO: Возвращать массив!
-     * @return ArrayObject
+     * @return array
      */
     public function getObjectsIterator()
     {
@@ -113,12 +112,11 @@ abstract class App_Core_Model_CollectionAbstract
                 $this->load($id);
             }
         }
-        return new ArrayObject($this->_objectsCollection);
+        return $this->_objectsCollection;
     }
 
     /**
-     * TODO: Возвращать массив!
-     * @return ArrayObject App_Core_Model_Data_Store
+     * @return array
      */
     public function getDataIterator()
     {
@@ -129,7 +127,7 @@ abstract class App_Core_Model_CollectionAbstract
                 $data[$object->getData()->getId()] = clone($object->getData());
             }
         }
-        return new ArrayObject($data);
+        return $data;
     }
 
     /**
