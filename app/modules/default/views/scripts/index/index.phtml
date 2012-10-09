@@ -1,50 +1,24 @@
 <?php
+$json = $this->json;
+?>
+<?php
 $jScript = <<<JS
-require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog", "core/resources/Ajax"]);
+require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog", "core/resources/Ajax", "core/sandbox/helpers/Validate"]);
 dojo.ready(function(){
+var Validate = new core.sandbox.helpers.Validate(dojo.byId("testme"));
+/*var msgs =
+    {
+        'hello': {'test': 'Hello', 'dfsdfs': ''}
+    };*/
+var msgs = $json;
 
-/*    var dialog = new core.sandbox.layout.Dialog();
-    dialog.set('content', 'Hello World');
+Validate.display(msgs);
+setTimeout(function(){
+/*    Validate.clear();
+    setTimeout(function(){Validate.display(msgs);}, 2000)*/
 
-    Sandbox = new core.Sandbox();
-    Sandbox.addStack('dialogs');
-    Sandbox.getStack('dialogs').push(dialog);
-    var t = Sandbox.getStack('dialogs').pop();
-    t.show();*/
-
-/*
-
-
-    dialog.show();
-    Sandbox.addStack('dialogs').push({});
-    Sandbox.getStack('dialogs').pop();*/
-
-    dojo.behavior.add({
-        '#test': {
-            onclick: function(event){
-                Sandbox = new core.Sandbox();
-                Sandbox.Layout.contentLoader('manager/tariffication/test', {}).addCallback(function(results){
-                    Sandbox.Layout.placeContent(dojo.byId('content'), results);
-                    // TODO: Повторное применение позволяет избавиться от повторного навешивания события!!!!!!!!!!!!!
-                    dojo.behavior.apply();
-                });
-            }
-        },
-        '.testing': {
-            onclick: function(event){
-                alert('-1-');
-            }
-        },
-        '#foo': {
-            onclick: function(event) {
-                alert('This is foo');
-            }
-        }
-    });
-    dojo.behavior.apply();
-
-
-
+}, 2000);
+console.log(Validate);
 });
 
 
@@ -54,3 +28,9 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 <p>Добро пожаловать в систему online помощи - &laquo;Helpme&raquo;</p>
+<form id="testme">
+    <label for="hello">Тестовое поле</label>
+    <input type="text" id="hello" name="level[name]"/>
+    <label for="test">Тестовое поле</label>
+    <input type="text" id="test" name="level[test]"/>
+</form>

@@ -34,9 +34,21 @@ class Default_IndexController extends App_Zend_Controller_Action
                 $messages[] = $validatorChain->getMessages();
             }
         }*/
-        Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро 4"));
-        Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро @4"));
 
+        //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро 4"));
+        //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро @4"));
+
+        $ar = array(
+            'level' => array(
+                'name'  => 'Igor',
+                'first' => 'Test'
+            )
+        );
+        Zend_Debug::dump($ar['level']);
+
+        $valid = new App_Zend_Controller_Action_Helper_Validate('level');
+        Zend_Debug::dump($valid->isValid(array('name' => "Привет Миро @4", "test" => "1234")));
+        $this->view->json = Zend_Json::encode($valid->getMessages(true));
 
     }
 
