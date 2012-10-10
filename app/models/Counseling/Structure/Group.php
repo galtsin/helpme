@@ -91,4 +91,53 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
         }
         return $this->_experts;
     }
+
+    /**
+     * Присоединить специалиста к группе
+     * @param HM_Model_Account_User $user
+     * @return int
+     */
+    public function attachExpert(HM_Model_Account_User $user)
+    {
+        if($this->isIdentity()){
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('group_add_user', array(
+                    'id_group'  => $this->getData('id'),
+                    'id_user'   => $user->getData('id')
+                )
+            );
+            if($result->rowCount() > 0){
+                $row = $result->fetchRow();
+                if($row['o_id_expert'] !== -1) {
+                    return (int)$row['o_id_expert'];
+                }
+            }
+        }
+
+        return parent::_insert();
+    }
+
+    /**
+     * Исключить пользователя из группы
+     * @param HM_Model_Account_User $user
+     * @return int
+     */
+    public function detachExpert(HM_Model_Account_User $user)
+    {
+        if($this->isIdentity()){
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('group_delete_user', array(
+                    'id_group'  => $this->getData('id'),
+                    'id_user'   => $user->getData('id')
+                )
+            );
+            if($result->rowCount() > 0){
+                $row = $result->fetchRow();
+                if($row['o_id_expert'] !== -1) {
+                    return (int)$row['o_id_expert'];
+                }
+            }
+        }
+        return parent::remove();
+    }
 }

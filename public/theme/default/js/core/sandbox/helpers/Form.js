@@ -3,7 +3,7 @@ dojo.provide("core.sandbox.helpers.Form");
 require([], function(){
     core.sandbox.helpers.Form = function(){};
     dojo.declare("core.sandbox.helpers.Form", null, {
-        getCheckedValues: function(/*Array|Node*/ node) {
+        getCheckedValues: function(/*Array|NodeCheckbox*/ node) {
             // Проверить тип ноды - checkbox
             var checked = [];
             if (node != undefined) {

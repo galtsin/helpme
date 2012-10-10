@@ -333,7 +333,50 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($this->getRequest()->isPost()) {
+                $attaching = array();
+                $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
+                foreach($request->getPost('users') as $userId) {
+                    $user = $userFactory->restore($userId);
+                    if($user instanceof HM_Model_Account_User) {
+                        $expert = $group->attachExpert($user);
+                        if($expert != -1){
+                            $attaching[] = $expert;
+                        }
+                    }
+                }
+                if(count($attaching) > 0) {
+                    $this->setAjaxResult($attaching);
+                }
+            } else {
 
+            }
+        }
+    }
+
+    /**
+     * Удалить специалиста из группы
+     */
+    public function removeGroupExpertsAction()
+    {
+        $request = $this->getRequest();
+        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
+            ->restore($request->getParam('group'));
+        if($group instanceof HM_Model_Counseling_Structure_Group){
+            if($this->getRequest()->isPost()) {
+                $detaching = array();
+                $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
+                foreach($request->getPost('experts') as $userId) {
+                    $user = $userFactory->restore($userId);
+                    if($user instanceof HM_Model_Account_User) {
+                        $expert = $group->detachExpert($user);
+                        if($expert != -1){
+                            $detaching[] = $expert;
+                        }
+                    }
+                }
+                if(count($detaching) > 0) {
+                    $this->setAjaxResult($detaching);
+                }
             } else {
 
             }

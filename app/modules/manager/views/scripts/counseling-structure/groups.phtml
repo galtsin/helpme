@@ -1,7 +1,7 @@
 
 <?php
 $jScript = <<<JS
-require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level"]);
+require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level", "core/sandbox/helpers/Form"]);
 dojo.ready(function(){
     require(["core/Sandbox", "core/sandbox/helpers/Validate"], function(){
         //Первоначальная инициализация
@@ -43,6 +43,18 @@ dojo.ready(function(){
             Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-experts', args).addCallback(function(results){
                 Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
                 dojo.behavior.apply();
+                // Удаление Экспертов из Группы
+                var formRemoveHandle = dojo.connect(dojo.byId("edit-group-experts")["remove"], "onclick", function(event){
+                    var helper = core.sandbox.helpers.Form();
+                    var experts = helper.getCheckedValues(dojo.byId("edit-group-experts")['experts[]']);
+                    Sandbox.Layout.dataSender('manager/counseling-structure/remove-group-experts/group/' + args.group, dojo.formToObject(dojo.byId("edit-group-experts"))).addCallback(function(results){
+                        if(results['result'] != -1){
+                            dojo.publish('getGroupExperts', args);
+                        }
+                    });
+
+                });
+                // Форма добавления Пользователей в Группу
                 var formAddHandle = dojo.connect(dojo.byId("edit-group-experts")["add"], "onclick", function(event){
                     Sandbox.Layout.contentLoader('manager/counseling-structure/add-group-experts', args).addCallback(function(results){
                         Sandbox.Layout.Dialog.set("title", "Добавление специалиста в группу");
@@ -63,7 +75,8 @@ dojo.ready(function(){
                                     var data = results['data'][0];
                                     // Добавить к списку
                                     var tbody = dojo.query("tbody", dojo.byId("table-add-group-experts"))[0];
-                                    var html = '<td>' + data['id'] + '</td>' +
+                                    var html = '<td>' + data['id'] +
+                                    '<input type="hidden" name="users[]" value="' + data['id'] + '"/></td>' +
                                     '<td></td>' +
                                     '<td>' + data['data']['login'] + '</td>' +
                                     '<td>' + data['data']['last_name'] + ' ' + data['data']['first_name'] + ' ' + data['data']['middle_name'] + '</td>';
@@ -72,7 +85,22 @@ dojo.ready(function(){
                             });
                         });
                         var formAddGroupExpertsHandle = dojo.connect(formAddGroupExperts["send"], "onclick", function(event){
-                            alert("Сохранить");
+                            Sandbox.Layout.dataSender('manager/counseling-structure/add-group-experts/group/' + args.group, dojo.formToObject(formAddGroupExperts)).addCallback(function(results){
+                                if(results['result'] != -1){
+                                    Sandbox.Layout.Dialog.hide();
+                                    setTimeout(function(){
+                                        // Обновить данные уровней
+                                       dojo.publish('getGroupExperts', args);
+                                    }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
+                                }
+                            });
+                        });
+                        //Закрыть диалог
+                        var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
+                            // Отсоединяем все обработчики событий текущего диалога
+                            dojo.disconnect(formSearchAccountHandle);
+                            dojo.disconnect(formAddGroupExpertsHandle);
+                            dojo.disconnect(dialogHideHandle);
                         });
                         return results;
                     });

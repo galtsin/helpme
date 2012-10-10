@@ -104,4 +104,13 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     {
         return -1;
     }
+
+    /**
+     * Удаление объекта
+     * @return int
+     */
+    public function remove()
+    {
+        return -1;
+    }
 }
