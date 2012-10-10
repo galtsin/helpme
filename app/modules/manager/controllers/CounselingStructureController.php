@@ -132,20 +132,22 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level){
             if($this->getRequest()->isPost()){
-                // Предпроверка данных
-                $valid = new App_Zend_Controller_Action_Helper_Validate('level');
-                if($valid->isValid($request->getPost('level'))){
-                    foreach($request->getPost('level') as $key => $value) {
-                        if($key !== 'id' && $level->getData($key) !== $value) {
-                            $level->getData()->set($key, $value);
+                if(array_key_exists('level', $request->getPost())){
+                    // Предпроверка данных
+                    $valid = new App_Zend_Controller_Action_Helper_Validate('level');
+                    if($valid->isValid($request->getPost('level'))){
+                        foreach($request->getPost('level') as $key => $value) {
+                            if($key !== 'id' && $level->getData($key) !== $value) {
+                                $level->getData()->set($key, $value);
+                            }
                         }
+                        // Сохранить данные
+                        if(true === $level->save()) {
+                            $this->setAjaxResult($level->getData('id'));
+                        }
+                    } else {
+                        $this->addAjaxError($valid->getMessages(true));
                     }
-                    // Сохранить данные
-                    if(true === $level->save()) {
-                        $this->setAjaxResult($level->getData('id'));
-                    }
-                } else {
-                    $this->addAjaxError($valid->getMessages(true));
                 }
             } else {
                 // Получить форму для редактирования данных
@@ -179,25 +181,27 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             if($request->isPost()){
-                $rulesDirty = $request->getPost('rules');
-                $rulesOrigin = $level->getRules();
-                $rulesUpdated = array();
-                foreach($rulesDirty as $id => $params) {
-                    // Дополняем значение чекбоксов формы, когда checkbox отключен
-                    if(!array_key_exists('is_enabled',$params)) {
-                        $params['is_enabled'] = false;
-                    }
+                if(array_key_exists('rules', $request->getPost())) {
+                    $rulesDirty = $request->getPost('rules');
+                    $rulesOrigin = $level->getRules();
+                    $rulesUpdated = array();
+                    foreach($rulesDirty as $id => $params) {
+                        // Дополняем значение чекбоксов формы, когда checkbox отключен
+                        if(!array_key_exists('is_enabled',$params)) {
+                            $params['is_enabled'] = false;
+                        }
 
-                    foreach($params as $key => $value) {
-                        // Проверяем, изменились ли значения
-                        if($rulesOrigin[$id]->get($key) !== $value) {
-                            $rulesOrigin[$id]->set($key, $value);
-                            $rulesUpdated[] = $id;
+                        foreach($params as $key => $value) {
+                            // Проверяем, изменились ли значения
+                            if($rulesOrigin[$id]->get($key) !== $value) {
+                                $rulesOrigin[$id]->set($key, $value);
+                                $rulesUpdated[] = $id;
+                            }
                         }
                     }
+                    $level->updateRules();
+                    $this->setAjaxResult($rulesUpdated);
                 }
-                $level->updateRules();
-                $this->setAjaxResult($rulesUpdated);
             } else {
                 $this->view->assign('level', $level->getData());
                 $this->view->assign('data', $level->getRules());
@@ -246,22 +250,23 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             if($request->isPost()){
-                // Предпроверка данных
-                $valid = new App_Zend_Controller_Action_Helper_Validate('group');
-                if($valid->isValid($request->getPost('group'))){
-                    $groupData = $request->getPost('group');
-                    $group = $level->addGroup(array(
-                            'name'          => $groupData['name'],
-                            'company_owner' => $groupData['company_owner']
-                        )
-                    );
-                    if($group instanceof HM_Model_Counseling_Structure_Group){
-                        $this->setAjaxResult($group->getData('id'));
-                        return;
+                if(array_key_exists('group', $request->getPost())) {
+                    // Предпроверка данных
+                    $valid = new App_Zend_Controller_Action_Helper_Validate('group');
+                    if($valid->isValid($request->getPost('group'))){
+                        $groupData = $request->getPost('group');
+                        $group = $level->addGroup(array(
+                                'name'          => $groupData['name'],
+                                'company_owner' => $groupData['company_owner']
+                            )
+                        );
+                        if($group instanceof HM_Model_Counseling_Structure_Group){
+                            $this->setAjaxResult($group->getData('id'));
+                            return;
+                        }
+                    } else {
+                        $this->addAjaxError($valid->getMessages(true));
                     }
-
-                } else {
-                    $this->addAjaxError($valid->getMessages(true));
                 }
             } else {
 
@@ -279,20 +284,25 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($request->isPost()){
-                // Предпроверка данных
-                $valid = new App_Zend_Controller_Action_Helper_Validate('group');
-                if($valid->isValid($request->getPost('group'))){
-                    // Сохранить результаты
-                    foreach($request->getPost('group') as $key => $value) {
-                        if($key !== 'id' && $group->getData($key) !== $value) {
-                            $group->getData()->set($key, $value);
+                if(array_key_exists('group', $request->getPost())) {
+                    // Предпроверка данных
+                    $validate = new App_Zend_Controller_Action_Helper_Validate('group');
+                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
+                    $filterInput->setData($request->getPost('group'));
+
+                    if($filterInput->isValid()){
+                        // Сохранить результаты
+                        foreach($request->getPost('group') as $key => $value) {
+                            if($key !== 'id' && $group->getData($key) !== $value) {
+                                $group->getData()->set($key, $value);
+                            }
                         }
+                        if($group->save()) {
+                            $this->setAjaxResult($group->getData('id'));
+                        }
+                    } else {
+                        $this->addAjaxError($filterInput->getMessages(), 'group');
                     }
-                    if($group->save()) {
-                        $this->setAjaxResult($group->getData('id'));
-                    }
-                } else {
-                    $this->addAjaxError($valid->getMessages(true));
                 }
             } else{
                 // Форма на редактирование

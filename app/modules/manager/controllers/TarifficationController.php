@@ -36,7 +36,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
         $this->view->assign('data', $data);
     }
 
-    public function getTariffsAction()
+    public function linesAction()
     {
 
     }

@@ -38,9 +38,14 @@ class Default_IndexController extends App_Zend_Controller_Action
         //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро 4"));
         //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро @4"));
 
-        $tr = Zend_Registry::get('translate');
-        echo $tr->_(Zend_Validate_Digits::STRING_EMPTY);
 
+
+        $k = new App_Zend_Controller_Action_Helper_Validate('account');
+        $f = new Zend_Filter_Input(array_merge(array('*' => 'StringTrim'),$k->getFilters()), $k->getValidators());
+        $f->setData(array('login' => ' dfgo'));
+        Zend_Debug::dump($f->isValid());
+        Zend_Debug::dump($f->getEscaped('login'));
+        Zend_Debug::dump($f->getMessages());
     }
 
     public function isValid(array $values)

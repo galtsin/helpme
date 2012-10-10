@@ -12,6 +12,7 @@ class Account_AccessController extends App_Zend_Controller_Action
      * final
      * ru: Авторизация пользователя
      * TODO: Использовать MD5 шифрование для паролей
+     * TODO: Zend_Filter_Input
      */
     public function loginAction()
     {
@@ -20,19 +21,21 @@ class Account_AccessController extends App_Zend_Controller_Action
             $this->_redirect($this->view->baseUrl());
         }
 
-        $forms = Zend_Registry::get('forms');
-        $form = new App_Zend_Form($forms->account->options);
-        $form->getElement('login')->setRequired(true);
-        $form->getElement('password')->setRequired(true);
+        $request = $this->getRequest();
+        if ($request->isPost()) {
 
-        if ($this->getRequest()->isPost()) {
-            if($form->isValid($this->getRequest()->getPost())) {
+            $validate = new App_Zend_Controller_Action_Helper_Validate('account');
+            $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
+            $filterInput->setData($request->getPost('account'));
+
+            // TODO: Внимание! Валидируются только входящие данные. Посторонние данные не описанные в Ini - игнорируются
+            if($filterInput->isValid()){
                 $auth = HM_Model_Account_Auth::getInstance();
-                if($auth->authenticate($form->getValue('login'), $form->getValue('password'))) {
+                if($auth->authenticate($filterInput->getEscaped('login'), $filterInput->getEscaped('password'))) {
                     //$url = 'account/access/possibility';
                     $url = '';
-                    if($this->getRequest()->getParam('ref')) {
-                        $url .= '/ref/' . $this->getRequest()->getParam('ref');
+                    if($request->getParam('ref')) {
+                        $url .= '/ref/' . $request->getParam('ref');
                     }
                     $this->_redirect($this->view->baseUrl($url));
                 }

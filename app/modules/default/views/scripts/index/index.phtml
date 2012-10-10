@@ -3,30 +3,14 @@ $json = $this->json;
 ?>
 <?php
 $jScript = <<<JS
-require(["dojo/behavior", "core/Sandbox", "core/sandbox/layout/Dialog", "core/resources/Ajax", "core/sandbox/helpers/Validate"]);
 dojo.ready(function(){
-var Validate = new core.sandbox.helpers.Validate(dojo.byId("testme"));
-/*var msgs =
-    {
-        'hello': {'test': 'Hello', 'dfsdfs': ''}
-    };*/
-var msgs = $json;
-
-Validate.display(msgs);
-setTimeout(function(){
-/*    Validate.clear();
-    setTimeout(function(){Validate.display(msgs);}, 2000)*/
-
-}, 2000);
-console.log(Validate);
+var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
+console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
 });
-
-
-
-
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
+
 <p>Добро пожаловать в систему online помощи - &laquo;Helpme&raquo;</p>
 <form id="testme">
     <label for="hello">Тестовое поле</label>
@@ -34,3 +18,16 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     <label for="test">Тестовое поле</label>
     <input type="text" id="test" name="level[test]"/>
 </form>
+
+<!-- Шаблон для -->
+<script id="entry-template" type="text/x-handlebars-template">
+    <div class="entry">
+        <h1>{{title}}</h1>
+        <div class="body">
+            {{body}}
+            <ul class="people_list">
+                {{#each people}}<li>{{this}}</li>{{/each}}
+            </ul>
+        </div>
+    </div>
+</script>

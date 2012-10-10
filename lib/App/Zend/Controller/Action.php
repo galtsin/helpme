@@ -97,9 +97,10 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
     /**
      * Формат данных 'system' => array('textCode' => 'description')
      * @param array $error
+     * @param bool $belongTo
      * @return App_Zend_Controller_Action
      */
-    public function addAjaxError(array $error)
+    public function addAjaxError(array $error, $belongTo = null)
     {
         if(count($error) > 0) {
             if($this->_error == -1) {
@@ -107,7 +108,16 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
                     'messages' => array()
                 );
             }
-            $this->_error['messages'] = array_merge_recursive((array)$this->_error['messages'], $error);
+            $_error = $error;
+            if(is_string($belongTo)) {
+                $errorBelongTo = array();
+                foreach($error as $key => $message) {
+                    $keyWithBelongTo = $belongTo . '[' . $key . ']';
+                    $errorBelongTo[$keyWithBelongTo] = $message;
+                }
+                $_error = $errorBelongTo;
+            }
+            $this->_error['messages'] = array_merge_recursive((array)$this->_error['messages'], $_error);
         }
         return $this;
     }
