@@ -1,148 +1,147 @@
 
 <?php
 $jScript = <<<JS
-require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level", "core/sandbox/helpers/Form"]);
+require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level", "core/Sandbox", "core/sandbox/helpers/Validate", "core/sandbox/helpers/Form"]);
 dojo.ready(function(){
-    require(["core/Sandbox", "core/sandbox/helpers/Validate"], function(){
-        //Первоначальная инициализация
-        (function(){
-            dojo.hash('!/groups');
-            Sandbox = new core.Sandbox();
-        })();
+    //Первоначальная инициализация
+    (function(){
+        dojo.hash('!/groups');
+        Sandbox = new core.Sandbox();
+    })();
 
-        dojo.subscribe('getGroupBoard', function(args){
-            Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-board', args).addCallback(function(results){
-                Sandbox.Layout.placeContent(dojo.byId('contentGroups'), results);
-                dojo.behavior.apply();
-                return results;
-            });
+    dojo.subscribe('getGroupBoard', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-board', args).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentGroups'), results);
+            dojo.publish('editGroupInfo', args);
+            return results;
         });
+    });
 
-        dojo.subscribe('editGroupInfo', function(args){
-            Sandbox.Layout.contentLoader('manager/counseling-structure/edit-group-info', args).addCallback(function(results){
-                Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
-                dojo.behavior.apply();
-                // TODO: Только если тип доступа == writable
-                var formNode = dojo.byId("edit-group-info");
-                var Validate = new core.sandbox.helpers.Validate(formNode);
-                var formSendHandle = dojo.connect(formNode["send"], "onclick", function(event){
-                    Validate.clear();
-                    Sandbox.Layout.dataSender('manager/counseling-structure/edit-group-info/group/' + args.group, dojo.formToObject(formNode)).addCallback(function(results){
-                        if(results['result'] == -1){
-                            Validate.display(results['error']['messages']);
-                            //dojo.disconnect(formSendHandle);
-                        }
-                    });
-                });
-                return results;
-            });
-        });
-
-        dojo.subscribe('getGroupExperts', function(args){
-            args['is_writable'] = true;
-            Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-experts', args).addCallback(function(results){
-                Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
-                dojo.behavior.apply();
-                // Удаление Экспертов из Группы
-                var formRemoveHandle = dojo.connect(dojo.byId("edit-group-experts")["remove"], "onclick", function(event){
-                    var helper = core.sandbox.helpers.Form();
-                    if(helper.getCheckedValues(dojo.byId("edit-group-experts")['experts[]']).length > 0) {
-                        Sandbox.Layout.dataSender('manager/counseling-structure/remove-group-experts/group/' + args.group, dojo.formToObject(dojo.byId("edit-group-experts"))).addCallback(function(results){
-                            if(results['result'] != -1){
-                                dojo.publish('getGroupExperts', args);
-                            }
-                        });
+    dojo.subscribe('editGroupInfo', function(args){
+        Sandbox.Layout.contentLoader('manager/counseling-structure/edit-group-info', args).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
+            dojo.behavior.apply();
+            // TODO: Только если тип доступа == writable
+            var formNode = dojo.byId("edit-group-info");
+            var Validate = new core.sandbox.helpers.Validate(formNode);
+            var formSendHandle = dojo.connect(formNode["send"], "onclick", function(event){
+                Validate.clear();
+                Sandbox.Layout.dataSender('manager/counseling-structure/edit-group-info/group/' + args.group, dojo.formToObject(formNode)).addCallback(function(results){
+                    if(results['result'] == -1){
+                        Validate.display(results['error']['messages']);
+                        //dojo.disconnect(formSendHandle);
                     }
                 });
-                // Форма добавления Пользователей в Группу
-                var formAddHandle = dojo.connect(dojo.byId("edit-group-experts")["add"], "onclick", function(event){
-                    Sandbox.Layout.contentLoader('manager/counseling-structure/add-group-experts', args).addCallback(function(results){
-                        Sandbox.Layout.Dialog.set("title", "Добавление специалиста в группу");
-                        Sandbox.Layout.Dialog.set("content", results);
-                        Sandbox.Layout.Dialog.show();
-                        var formSearchNode = dojo.byId("search-account");
-                        var formAddGroupExperts = dojo.byId("add-group-experts");
-                        var formSearchAccountHandle = dojo.connect(formSearchNode["send"], "onclick", function(event){
-                            // email or login
-                            var filters = {};
-                            if(formSearchNode['account'].value.indexOf('@') == -1){
-                                filters['filters[equal][login][]'] = formSearchNode['account'].value;
-                            } else {
-                                filters['filters[equal][email][]'] = formSearchNode['account'].value;
-                            }
-                            Sandbox.Layout.dataLoader('service/query/user', filters).addCallback(function(results){
-                                if(results['data'].length > 0) {
-                                    var data = results['data'][0];
-                                    // Добавить к списку
-                                    var tbody = dojo.query("tbody", dojo.byId("table-add-group-experts"))[0];
-                                    var html = tbody.innerHTML;
-                                    html += '<td>' + data['id'] +
-                                    '<input type="hidden" name="users[]" value="' + data['id'] + '"/></td>' +
-                                    '<td></td>' +
-                                    '<td>' + data['data']['login'] + '</td>' +
-                                    '<td>' + data['data']['last_name'] + ' ' + data['data']['first_name'] + ' ' + data['data']['middle_name'] + '</td>';
-                                    Sandbox.Layout.placeContent(tbody, '<tr>' + html + '</tr>');
-                                }
-                            });
-                        });
-                        var formAddGroupExpertsHandle = dojo.connect(formAddGroupExperts["send"], "onclick", function(event){
-                            Sandbox.Layout.dataSender('manager/counseling-structure/add-group-experts/group/' + args.group, dojo.formToObject(formAddGroupExperts)).addCallback(function(results){
-                                if(results['result'] != -1){
-                                    Sandbox.Layout.Dialog.hide();
-                                    setTimeout(function(){
-                                        // Обновить данные уровней
-                                       dojo.publish('getGroupExperts', args);
-                                    }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
-                                }
-                            });
-                        });
-                        //Закрыть диалог
-                        var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
-                            // Отсоединяем все обработчики событий текущего диалога
-                            dojo.disconnect(formSearchAccountHandle);
-                            dojo.disconnect(formAddGroupExpertsHandle);
-                            dojo.disconnect(dialogHideHandle);
-                        });
-                        return results;
-                    });
-                });
-                return results;
             });
+            return results;
         });
+    });
 
-        dojo.behavior.add({
-            // Получить панель управления ЛК
-            '[data-action^="#!/getGroupBoard"]': {
-                onclick: function(event){
-                    event.preventDefault();
-                    dispatcher(event.target.getAttribute("data-action"), ['group']);
+    dojo.subscribe('getGroupExperts', function(args){
+        args['is_writable'] = true;
+        Sandbox.Layout.contentLoader('manager/counseling-structure/get-group-experts', args).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentGroup'), results);
+            dojo.behavior.apply();
+            // Удаление Экспертов из Группы
+            var formRemoveHandle = dojo.connect(dojo.byId("edit-group-experts")["remove"], "onclick", function(event){
+                var helper = core.sandbox.helpers.Form();
+                if(helper.getCheckedValues(dojo.byId("edit-group-experts")['experts[]']).length > 0) {
+                    Sandbox.Layout.dataSender('manager/counseling-structure/remove-group-experts/group/' + args.group, dojo.formToObject(dojo.byId("edit-group-experts"))).addCallback(function(results){
+                        if(results['result'] != -1){
+                            dojo.publish('getGroupExperts', args);
+                        }
+                    });
                 }
-            },
-            '[data-action^="#!/editGroupInfo"]': {
-                onclick: function(event){
-                    event.preventDefault();
-                    dispatcher(event.target.getAttribute("data-action"), ['group']);
-                }
-            },
-            '[data-action^="#!/getGroupExperts"]': {
-                onclick: function(event){
-                    event.preventDefault();
-                    dispatcher(event.target.getAttribute("data-action"), ['group']);
-                }
+            });
+            // Форма добавления Пользователей в Группу
+            var formAddHandle = dojo.connect(dojo.byId("edit-group-experts")["add"], "onclick", function(event){
+                Sandbox.Layout.contentLoader('manager/counseling-structure/add-group-experts', args).addCallback(function(results){
+                    Sandbox.Layout.Dialog.set("title", "Добавление специалиста в группу");
+                    Sandbox.Layout.Dialog.set("content", results);
+                    Sandbox.Layout.Dialog.show();
+                    var formSearchNode = dojo.byId("search-account");
+                    var formAddGroupExperts = dojo.byId("add-group-experts");
+                    var formSearchAccountHandle = dojo.connect(formSearchNode["send"], "onclick", function(event){
+                        // email or login
+                        var filters = {};
+                        if(formSearchNode['account'].value.indexOf('@') == -1){
+                            filters['filters[equal][login][]'] = formSearchNode['account'].value;
+                        } else {
+                            filters['filters[equal][email][]'] = formSearchNode['account'].value;
+                        }
+                        Sandbox.Layout.dataLoader('service/query/user', filters).addCallback(function(results){
+                            if(results['data'].length > 0) {
+                                var data = results['data'][0];
+                                // Добавить к списку
+                                var tbody = dojo.query("tbody", dojo.byId("table-add-group-experts"))[0];
+                                var html = tbody.innerHTML;
+                                html += '<td>' + data['id'] +
+                                '<input type="hidden" name="users[]" value="' + data['id'] + '"/></td>' +
+                                '<td></td>' +
+                                '<td>' + data['data']['login'] + '</td>' +
+                                '<td>' + data['data']['last_name'] + ' ' + data['data']['first_name'] + ' ' + data['data']['middle_name'] + '</td>';
+                                Sandbox.Layout.placeContent(tbody, '<tr>' + html + '</tr>');
+                            }
+                        });
+                    });
+                    var formAddGroupExpertsHandle = dojo.connect(formAddGroupExperts["send"], "onclick", function(event){
+                        Sandbox.Layout.dataSender('manager/counseling-structure/add-group-experts/group/' + args.group, dojo.formToObject(formAddGroupExperts)).addCallback(function(results){
+                            if(results['result'] != -1){
+                                Sandbox.Layout.Dialog.hide();
+                                setTimeout(function(){
+                                    // Обновить данные уровней
+                                   dojo.publish('getGroupExperts', args);
+                                }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
+                            }
+                        });
+                    });
+                    //Закрыть диалог
+                    var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
+                        // Отсоединяем все обработчики событий текущего диалога
+                        dojo.disconnect(formSearchAccountHandle);
+                        dojo.disconnect(formAddGroupExpertsHandle);
+                        dojo.disconnect(dialogHideHandle);
+                    });
+                    return results;
+                });
+            });
+            return results;
+        });
+    });
+
+    dojo.behavior.add({
+        // Получить панель управления ЛК
+        '[data-action^="#!/getGroupBoard"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['group']);
             }
-        });
-
-        dojo.behavior.apply();
-
-        // Диспетчер событий и обработчиков
-        function dispatcher(shortLink, argsIndex) {
-            var actionParams = Sandbox.Layout.parseShortLink(shortLink);
-            dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
-            if(actionParams.hasOwnProperty('prefix')){
-                dojo.hash(shortLink);
+        },
+        '[data-action^="#!/editGroupInfo"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['group']);
+            }
+        },
+        '[data-action^="#!/getGroupExperts"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['group']);
             }
         }
     });
+
+    dojo.behavior.apply();
+
+    // Диспетчер событий и обработчиков
+    function dispatcher(shortLink, argsIndex) {
+        var actionParams = Sandbox.Layout.parseShortLink(shortLink);
+        dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
+        if(actionParams.hasOwnProperty('prefix')){
+            dojo.hash(shortLink);
+        }
+    }
+
 
 });
 JS;

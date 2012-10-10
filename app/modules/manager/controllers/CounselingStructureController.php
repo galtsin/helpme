@@ -9,6 +9,7 @@
 class Manager_CounselingStructureController extends App_Zend_Controller_Action
 {
     /**
+     * TODO: Использует права доступа
      * Загрузить список доступных ЛК с привязкой по компаниям
      * HTML Context
      */
@@ -300,6 +301,9 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         }
     }
 
+    /**
+     * Получить панель управления Группой
+     */
     public function getGroupBoardAction()
     {
         $request = $this->getRequest();

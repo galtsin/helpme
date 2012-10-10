@@ -38,16 +38,8 @@ class Default_IndexController extends App_Zend_Controller_Action
         //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро 4"));
         //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро @4"));
 
-        $ar = array(
-            'level' => array(
-                'name'  => 'Igor',
-                'first' => 'Test'
-            )
-        );
-        Zend_Debug::dump($ar['level']);
-
-        $groupColl = new HM_Model_Counseling_Structure_Group_Collection();
-        Zend_Debug::dump($groupColl->addEqualFilter('company', 12)->getCollection()->getDataIterator());
+        $tr = Zend_Registry::get('translate');
+        echo $tr->_(Zend_Validate_Digits::STRING_EMPTY);
 
     }
 

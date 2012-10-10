@@ -36,7 +36,7 @@ return array(
 		Zend_Validate_Ip::NOT_IP_ADDRESS => '"%value%" не является правильным IP-адресом',
 		Zend_Validate_LessThan::NOT_LESS => '"%value%" не меньше, чем "%max%"',
 		Zend_Validate_NotEmpty::IS_EMPTY => 'Отсутствует значение, пожалуйста, заполните поле',
-		Zend_Validate_Regex::NOT_MATCH => 'Значение "%value%" не подходит под шаблон регулярного выражения "%pattern%"',
+		Zend_Validate_Regex::NOT_MATCH => "Значение '%value%' не подходит под шаблон регулярного выражения '%pattern%'",
 		Zend_Validate_StringLength::TOO_SHORT => 'Длина введённого значения "%value%", меньше чем %min% симв.',
 		Zend_Validate_StringLength::TOO_LONG => 'Длина введённого значения "%value%", больше чем %max% симв.',
 		Zend_Validate_Db_NoRecordExists::ERROR_RECORD_FOUND => 'Запись "%value%" уже существует',

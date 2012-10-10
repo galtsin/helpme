@@ -28,6 +28,23 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             new Zend_Db_Adapter_Pdo_Pgsql($config->resources->db->general->params)
         );
 
+        // Инициализация Локали
+        Zend_Locale::setDefault('ru_RU');
+
+        // Инициализация системы переводов
+        $translate = new Zend_Translate(
+            array(
+                'adapter' => 'array',
+                'content' => APPLICATION_PATH . '/languages/ru.php',
+                'locale'  => 'ru_RU',
+            )
+        );
+
+        // Переводчик для валидации "по умолчанию"
+        Zend_Validate::setDefaultTranslator($translate);
+
+        // Регистрируем настройки в Реестре
+        Zend_Registry::set('translate', $translate);
         Zend_Registry::set('configs', $config);
         Zend_Registry::set('validate', $validate);
         Zend_Registry::set('acl', new Zend_Acl());
