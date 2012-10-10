@@ -42,6 +42,7 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
     }
 
     /**
+     * TODO: Лишнее
      * Проверить валидность данных
      * @param array $values
      * @return bool
@@ -157,6 +158,7 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
     }
 
     /**
+     * TODO: Лишнее
      * Получить сообщения об ошибках
      * @param bool $belongTo
      * @return array
