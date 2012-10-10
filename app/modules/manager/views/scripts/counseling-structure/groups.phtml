@@ -46,13 +46,13 @@ dojo.ready(function(){
                 // Удаление Экспертов из Группы
                 var formRemoveHandle = dojo.connect(dojo.byId("edit-group-experts")["remove"], "onclick", function(event){
                     var helper = core.sandbox.helpers.Form();
-                    var experts = helper.getCheckedValues(dojo.byId("edit-group-experts")['experts[]']);
-                    Sandbox.Layout.dataSender('manager/counseling-structure/remove-group-experts/group/' + args.group, dojo.formToObject(dojo.byId("edit-group-experts"))).addCallback(function(results){
-                        if(results['result'] != -1){
-                            dojo.publish('getGroupExperts', args);
-                        }
-                    });
-
+                    if(helper.getCheckedValues(dojo.byId("edit-group-experts")['experts[]']).length > 0) {
+                        Sandbox.Layout.dataSender('manager/counseling-structure/remove-group-experts/group/' + args.group, dojo.formToObject(dojo.byId("edit-group-experts"))).addCallback(function(results){
+                            if(results['result'] != -1){
+                                dojo.publish('getGroupExperts', args);
+                            }
+                        });
+                    }
                 });
                 // Форма добавления Пользователей в Группу
                 var formAddHandle = dojo.connect(dojo.byId("edit-group-experts")["add"], "onclick", function(event){
@@ -75,7 +75,8 @@ dojo.ready(function(){
                                     var data = results['data'][0];
                                     // Добавить к списку
                                     var tbody = dojo.query("tbody", dojo.byId("table-add-group-experts"))[0];
-                                    var html = '<td>' + data['id'] +
+                                    var html = tbody.innerHTML;
+                                    html += '<td>' + data['id'] +
                                     '<input type="hidden" name="users[]" value="' + data['id'] + '"/></td>' +
                                     '<td></td>' +
                                     '<td>' + data['data']['login'] + '</td>' +

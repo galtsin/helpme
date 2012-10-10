@@ -333,19 +333,21 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($this->getRequest()->isPost()) {
-                $attaching = array();
-                $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
-                foreach($request->getPost('users') as $userId) {
-                    $user = $userFactory->restore($userId);
-                    if($user instanceof HM_Model_Account_User) {
-                        $expert = $group->attachExpert($user);
-                        if($expert != -1){
-                            $attaching[] = $expert;
+                if(array_key_exists('users', $request->getPost())){
+                    $attaching = array();
+                    $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
+                    foreach($request->getPost('users') as $userId) {
+                        $user = $userFactory->restore($userId);
+                        if($user instanceof HM_Model_Account_User) {
+                            $expert = $group->attachExpert($user);
+                            if($expert != -1){
+                                $attaching[] = $expert;
+                            }
                         }
                     }
-                }
-                if(count($attaching) > 0) {
-                    $this->setAjaxResult($attaching);
+                    if(count($attaching) > 0) {
+                        $this->setAjaxResult($attaching);
+                    }
                 }
             } else {
 
@@ -363,54 +365,25 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
             ->restore($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($this->getRequest()->isPost()) {
-                $detaching = array();
-                $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
-                foreach($request->getPost('experts') as $userId) {
-                    $user = $userFactory->restore($userId);
-                    if($user instanceof HM_Model_Account_User) {
-                        $expert = $group->detachExpert($user);
-                        if($expert != -1){
-                            $detaching[] = $expert;
+                if(array_key_exists('experts', $request->getPost())){
+                    $detaching = array();
+                    $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
+                    foreach($request->getPost('experts') as $userId) {
+                        $user = $userFactory->restore($userId);
+                        if($user instanceof HM_Model_Account_User) {
+                            $expert = $group->detachExpert($user);
+                            if($expert != -1){
+                                $detaching[] = $expert;
+                            }
                         }
                     }
-                }
-                if(count($detaching) > 0) {
-                    $this->setAjaxResult($detaching);
+                    if(count($detaching) > 0) {
+                        $this->setAjaxResult($detaching);
+                    }
                 }
             } else {
 
             }
         }
     }
-
-    /**
-     * TODO: Проверить и доработать
-     * Отредактировать правила переадресации
-     */
-    public function editRulesAction()
-    {
-        $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
-        $line = $lineColl->load($this->getRequest()->getParam('line'));
-
-        if($this->getRequest()->isPost()) {
-            $rulesDirty = $this->getRequest()->getParam('rules');
-            $rulesOrigin = $line->getRules();
-            foreach($rulesDirty as $id => $params) {
-                // Дополняем значение чекбоксов формы, когда checkbox отключен
-                if(!array_key_exists('is_enabled',$params)) {
-                    $params['is_enabled'] = false;
-                }
-                foreach($params as $key => $value) {
-                    if($rulesOrigin[$id]->get($key) !== $value) {
-                        $rulesOrigin[$id]->set($key, $value);
-                    }
-                }
-            }
-            $line->updateRules();
-        } else {
-            $this->view->assign('line', $line->getData('id'));
-            $this->view->assign('data', $line->getRules());
-        }
-    }
-
 }
