@@ -92,14 +92,15 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
                 if(array_key_exists('tariff', $request->getPost())) {
                     // Предпроверка данных
                     $validate = new App_Zend_Controller_Action_Helper_Validate('tariff');
-                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
+                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators()/*, array(), array(Zend_Filter_Input::ALLOW_EMPTY => true)*/);
+                    $filterInput->setDefaultEscapeFilter(new Zend_Filter_StringTrim());
                     $filterInput->setData($request->getPost('tariff'));
 
                     if($filterInput->isValid()){
                         // Сохранить результаты
-                        foreach(array_keys($request->getPost('tariff')) as $key) {
-                            if($key !== 'id' && $tariff->getData($key) !== $filterInput->getEscaped($key)) {
-                                $tariff->getData()->set($key, $filterInput->getEscaped($key));
+                        foreach($filterInput->getEscaped() as $key => $value) {
+                            if($key != 'id'){
+                                $tariff->getData()->set($key, $value);
                             }
                         }
                         if($tariff->save()) {

@@ -20,33 +20,32 @@ class Default_IndexController extends App_Zend_Controller_Action
 
         $validateConfig = Zend_Registry::get('validate');
 
-/*        $messages = array();
-        foreach($validateConfig->level->elements->toArray() as $key => $options) {
-            $validatorChain = new Zend_Validate();
-            $validators = $validateConfig->level->elements->{$key}->options->validators;
-            foreach($validators->toArray() as $validateOptions) {
-                $class = 'Zend_Validate_' . $validateOptions['validator'];
-                if(!empty($validateOptions['options'])){
-                    $validatorChain->addValidator(new $class($validateOptions['options']), true);
-                }
-            }
-            if(false === $validatorChain->isValid("Привет Миро @4")){
-                $messages[] = $validatorChain->getMessages();
-            }
-        }*/
 
-        //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро 4"));
-        //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро @4"));
+/*        Zend_Debug::dump(array_merge(array(Zend_Filter_Input::DEFAULT_VALUE => 'dsf'), array(array('Alnum', array('allowWhiteSpace' => true)))));
+        Zend_Debug::dump(array(
+        Zend_Filter_Input::DEFAULT_VALUE => 'dsf',
+        array('Alnum', array('allowWhiteSpace' => true))
+    ));*/
 
-        $b = new HM_Model_Billing_Tariff_Collection();
-        Zend_Debug::dump($b->addEqualFilter('line', 10)->getCollection()->getDataIterator());
 
-        $k = new App_Zend_Controller_Action_Helper_Validate('account');
-        $f = new Zend_Filter_Input(array('*' => 'StringTrim'), array('name' => 'Alnum'));
-        $f->setData(array('login' => ' dfgo'));
-        Zend_Debug::dump($f->isValid());
-        Zend_Debug::dump($f->getEscaped('login'));
-        Zend_Debug::dump($f->getMessages());
+
+        $k = new App_Zend_Controller_Action_Helper_Validate('tariff');
+        //$input = new Zend_Filter_Input(array(), $k->getValidators());
+
+        //$input->setData(array('name' => 'sdf s'));
+        //Zend_Debug::dump($input->getEscaped('name'));
+
+
+        $var1 = array('name' => array(array('Alnum', array()),'default' => 'dsf',));
+        $var2 = $k->getValidators();
+
+        //Zend_Debug::dump($var1);
+        //Zend_Debug::dump($var2);
+
+        $input = new Zend_Filter_Input(array(), $var2);
+        $input->setData(array('name' => ''));
+        Zend_Debug::dump($input->isValid());
+        Zend_Debug::dump($input->getEscaped('active'));
     }
 
     public function isValid(array $values)

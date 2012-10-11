@@ -2,10 +2,9 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 09.10.12
  */
 /**
- * ru:
+ * TODO: http://framework.zend.com/manual/1.12/en/zend.filter.input.html
  */
 class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_Helper_Abstract
 {
@@ -82,15 +81,20 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
         $validateConfig = Zend_Registry::get('validate');
         if($validateConfig->{$this->_namespace} instanceof Zend_Config){
             foreach($validateConfig->{$this->_namespace}->toArray() as $name => $options) {
-                if(!empty($options['options']['validators'])) {
-                    $this->_validators[$name] = $this->_getValidatorsChain($options['options']['validators']);
-                } else{
+                if(empty($options['options'])){
                     $this->_validators[$name] = array();
-                }
-                if(!empty($options['options']['filters'])) {
-                    $this->_filters[$name] = $this->_getFiltersChain($options['options']['filters']);
-                } else {
                     $this->_filters[$name] = array();
+                } else {
+                    $this->_validators[$name] = array();
+                    foreach(array_keys($options['options']) as $key) {
+                        if($key == 'validators') {
+                            $this->_validators[$name] = array_merge($this->_validators[$name], $this->_getValidatorsChain($options['options'][$key]));
+                        } elseif($key == 'filters') {
+                            $this->_filters[$name] = $this->_getFiltersChain($options['options'][$key]);
+                        } else {
+                            $this->_validators[$name] = array_merge($this->_validators[$name], array($key => $options['options'][$key]));
+                        }
+                    }
                 }
             }
         }
@@ -105,12 +109,24 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
     protected function _getValidatorsChain(array $validators)
     {
         $validatorsChain = array();
+        foreach($validators as $validator => $params) {
+            $options = array();
+            if(array_key_exists('options', (array)$params)) {
+                $options = $params['options'];
+            }
+            $validatorsChain[] = array($validator, $options);
+        }
+        return $validatorsChain;
+    }
+/*    protected function _getValidatorsChain(array $validators)
+    {
+        $validatorsChain = array();
         foreach($validators as $validator) {
             $class = 'Zend_Validate_' . $validator['validator'];
             $validatorsChain[] = new $class($validator['options']);
         }
         return $validatorsChain;
-    }
+    }*/
 
     /**
      * Получить цепочку фильтров

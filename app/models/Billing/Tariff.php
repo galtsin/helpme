@@ -46,13 +46,35 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
     {
         if($this->getData()->isDirty()) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                ->execute('level_update_identity', array(
-                    'id_level'  => $this->getData('id'),
-                    'name'      => $this->getData('name')
+                ->execute('tarif_update', array(
+                    'id_tarif'              => $this->getData('id'),
+                    'name'                  => $this->getData('name'),
+                    'consultation_enabled'  => $this->getData('consultation_enabled'),
+                    'consultation_unlimited'=> $this->getData('consultation_unlimited'),
+                    'auto_prolongate'       => $this->getData('auto_prolongate'),
+                    'message_enabled'       => $this->getData('message_enabled'),
+                    'message_unlimited'     => $this->getData('message_unlimited'),
+                    'not_available'         => $this->getData('not_available'),
+                    'minute_count'          => $this->getData('minute_count'),
+                    'message_count'         => $this->getData('message_count'),
+                    'price'                 => $this->getData('price'),
+                    'specchoice'            => $this->getData('specchoice'),
+                    'description'           => $this->getData('description'),
+                    'message_response'      => $this->getData('message_response'),
+                    'consultation_response' => $this->getData('consultation_response'),
+                    'tmin'                  => $this->getData('tmin'),
+                    'message_price'         => $this->getData('message_price'),
+                    'minute_price'          => $this->getData('minute_price'),
+                    'queue_priority'        => $this->getData('queue_priority'),
+                    'tquant'                => $this->getData('tquant'),
+                    'period'                => $this->getData('period'),
+                    'tqmin'                 => $this->getData('tqmin'),
+                    'active'                => $this->getData('active'),
+                    'need_committer'        => $this->getData('need_committer')
                 )
             );
             $row = $result->fetchRow();
-            if($row['o_id_level'] !== -1) {
+            if($row['o_id_tarif'] !== -1) {
                 $this->getData()->unmarkDirty();
                 return $this->getData('id');
             }

@@ -2,8 +2,7 @@
 $tariff = $this->data;
 ?>
 <form id="edit-tariff-info">
-    <input type="hidden" class="hidden" name="tarif[used]" value="<?=(bool)$tariff->getData('used')?>">
-    <input type="hidden" class="hidden" name="tarif[id]" value="<?=$tariff->getData('id')?>">
+    <input type="hidden" class="hidden" name="tariff[id]" value="<?=$tariff->getData('id')?>">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -28,8 +27,8 @@ $tariff = $this->data;
         </tr>
         <tr>
             <td>
-                <label for="tarif-description"><strong>Описание:</strong></label>
-                <textarea name="tarif[description]" id="tarif-description" cols="1" rows="4" style="width: 700px; max-width: 700px; min-width: 700px"><?=$tariff->getData('description')?></textarea>
+                <label for="edit-tariff-description"><strong>Описание:</strong></label>
+                <textarea name="tariff[description]" id="edit-tariff-description" cols="1" rows="4" style="width: 700px; max-width: 700px; min-width: 700px"><?=$tariff->getData('description')?></textarea>
             </td>
         </tr>
         </tbody>
@@ -43,46 +42,54 @@ $tariff = $this->data;
         <tbody>
         <tr>
             <td>
-                <input type="checkbox" name="tarif[active]" id="tarif-active"
-                    <?=$tariff->getData('active') ? "checked=\"true\"" : ""; ?> value="1" />
-                <label for="tarif-active" class="inline">Активен</label>
+                <input type="checkbox" name="tariff[active]" id="edit-tariff-active"
+                    <?=$tariff->getData('active') ? "checked=\"true\"" : ""; ?> value="true" />
+                <label for="edit-tariff-active" class="inline">Активен</label>
             </td>
             <td>
-                <input type="checkbox" name="tarif[not_available]" id="tarif-not-available"
-                    <?=$tariff->getData('not_available') ? "checked=\"true\"" : ""; ?> value="1" />
-                <label for="tarif-not-available" class="inline">Доступен клиенту</label>
+                <input type="checkbox" name="tariff[not_available]" id="edit-tariff-not-available"
+                    <?=$tariff->getData('not_available') ? "checked=\"true\"" : ""; ?> value="true" />
+                <label for="edit-tariff-not-available" class="inline">Доступен клиенту</label>
             </td>
             <td>
-                <input type="checkbox" name="tarif[need_committer]" id="tarif-need-committer"
-                    <?=$tariff->getData('need_committer') ? "checked=\"true\"" : ""; ?> value="1" />
-                <label for="tarif-need-committer" class="inline">Требует подтверждения администратора ЛК</label>
+                <input type="checkbox" name="tariff[need_committer]" id="edit-tariff-need-committer"
+                    <?=$tariff->getData('need_committer') ? "checked=\"true\"" : ""; ?> value="true" />
+                <label for="edit-tariff-need-committer" class="inline">Требует подтверждения администратора ЛК</label>
             </td>
             <td>
-                <input type="checkbox" name="tarif[specchoice]" id="tarif-specchoice"
-                    <?=$tariff->getData('specchoice') ? "checked=\"true\"" : ""; ?> value="1" />
-                <label for="tarif-specchoice" class="inline">Доступен выбор специалиста</label>
+                <input type="checkbox" name="tariff[specchoice]" id="edit-tariff-specchoice"
+                    <?=$tariff->getData('specchoice') ? "checked=\"true\"" : ""; ?> value="true" />
+                <label for="edit-tariff-specchoice" class="inline">Доступен выбор специалиста</label>
             </td>
         </tr>
-        <tr>
-            <td colspan="2">
-                <label for="tarif-price">Стоимость тарифа (руб.)</label>
-                <input type="text" name="tarif[price]" id="tarif-price" value="<?=$tariff->getData('price')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-            <td colspan="2">
-                <label for="tarif-queue-priority">Приоритет в очереди (0-127)</label>
-                <input type="text" name="tarif[queue_priority]" id="tarif-queue-priority" value="<?=$tariff->getData('queue_priority')?>" maxlength="3"/>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <label for="tarif-minute-count">Количество минут</label>
-                <input type="text" name="tarif[minute_count]" id="tarif-minute-count" value="<?=$tariff->getData('minute_count')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-            <td colspan="2">
-                <label for="tarif-message-count">Количество писем</label>
-                <input type="text" name="tarif[message_count]" id="tarif-message-count" value="<?=$tariff->getData('message_count')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-        </tr>
+        </tbody>
+    </table>
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="25%">
+            <col width="25%">
+            <col width="25%">
+            <col>
+        </colgroup>
+        <tbody>
+            <tr>
+                <td>
+                    <label for="edit-tariff-price">Стоимость тарифа (руб.)</label>
+                    <input type="text" name="tariff[price]" id="edit-tariff-price" value="<?=$tariff->getData('price')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+                <td>
+                    <label for="edit-tariff-queue-priority">Приоритет в очереди (0-127)</label>
+                    <input type="text" name="tariff[queue_priority]" id="edit-tariff-queue-priority" value="<?=$tariff->getData('queue_priority')?>" maxlength="3"/>
+                </td>
+                <td>
+                    <label for="edit-tariff-minute-count">Количество минут</label>
+                    <input type="text" name="tariff[minute_count]" id="edit-tariff-minute-count" value="<?=$tariff->getData('minute_count')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+                <td>
+                    <label for="edit-tariff-message-count">Количество писем</label>
+                    <input type="text" name="tariff[message_count]" id="edit-tariff-message-count" value="<?=$tariff->getData('message_count')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+            </tr>
         </tbody>
     </table>
     <table class="table table-bordered">
@@ -95,51 +102,59 @@ $tariff = $this->data;
         </tr>
         <tr>
             <td>
-                <input type="checkbox" name="tarif[consultation_enabled]" id="tarif-consultation-enabled"
-                    <?=$tariff->getData('consultation_enabled') ? "checked=\"true\"" : ""; ?> value="1"
+                <input type="checkbox" name="tariff[consultation_enabled]" id="edit-tariff-consultation-enabled"
+                    <?=$tariff->getData('consultation_enabled') ? "checked=\"true\"" : ""; ?> value="true"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
-                <label for="tarif-consultation-enabled" class="inline">Консультации разрешены</label>
+                <label for="edit-tariff-consultation-enabled" class="inline">Консультации разрешены</label>
             </td>
             <td>
-                <input type="checkbox" name="tarif[consultation_unlimited]" id="tarif-consultation-unlimited"
-                    <?=$tariff->getData('consultation_unlimited') ? "checked=\"true\"" : ""; ?> value="1"
+                <input type="checkbox" name="tariff[consultation_unlimited]" id="edit-tariff-consultation-unlimited"
+                    <?=$tariff->getData('consultation_unlimited') ? "checked=\"true\"" : ""; ?> value="true"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
-                <label for="tarif-consultation-unlimited" class="inline">Консультации без ограничений</label>
+                <label for="edit-tariff-consultation-unlimited" class="inline">Консультации без ограничений</label>
             </td>
             <td>
-                <input type="checkbox" name="tarif[auto_prolongate]" id="tarif-auto-prolongate"
-                    <?=$tariff->getData('auto_prolongate') ? "checked=\"true\"" : ""; ?> value="1"
+                <input type="checkbox" name="tariff[auto_prolongate]" id="edit-tariff-auto-prolongate"
+                    <?=$tariff->getData('auto_prolongate') ? "checked=\"true\"" : ""; ?> value="true"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
-                <label for="tarif-auto-prolongate" class="inline">Автопродление</label>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="tarif-tmin">Минимальная продолжительность консультации (сек):</label>
-                <input type="text" name="tarif[tmin]" id="tarif-tmin" value="<?=$tariff->getData('tmin')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-            <td>
-                <label for="tarif-tqmin">Нетарифицируемое время (сек.)</label>
-                <input type="text" name="tarif[tqmin]" id="tarif-tqmin" value="<?=$tariff->getData('tqmin')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-            <td>
-                <label for="tarif-tquant">Кратность отсчета времени (сек.)</label>
-                <input type="text" name="tarif[tquant]" id="tarif-tquant" value="<?=$tariff->getData('tquant')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="tarif-minute-price">Стоимость минуты (руб.)</label>
-                <input type="text" name="tarif[minute_price]" id="tarif-minute-price" value="<?=$tariff->getData('minute_price')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-            </td>
-            <td>
-                <label for="tarif-consultation-response">Срок реакции на консультации (сек.)</label>
-                <input type="text" name="tarif[consultation_response]" id="tarif-consultation-response" value="<?=$tariff->getData('consultation_response')?>" maxlength="8" onclick="formatTime(this);"/>
-            </td>
-            <td>
+                <label for="edit-tariff-auto-prolongate" class="inline">Автопродление</label>
             </td>
         </tr>
         </thead>
+    </table>
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="25%">
+            <col width="25%">
+            <col width="25%">
+            <col>
+        </colgroup>
+        <tbody>
+            <tr>
+                <td>
+                    <label for="edit-tariff-tmin">Мин. продолжительность (сек):</label>
+                    <input type="text" name="tariff[tmin]" id="edit-tariff-tmin" value="<?=$tariff->getData('tmin')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+                <td>
+                    <label for="edit-tariff-tqmin">Нетарифицируемое время (сек.)</label>
+                    <input type="text" name="tariff[tqmin]" id="edit-tariff-tqmin" value="<?=$tariff->getData('tqmin')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+                <td>
+                    <label for="edit-tariff-tquant">Кратность отсчета времени (сек.)</label>
+                    <input type="text" name="tariff[tquant]" id="edit-tariff-tquant" value="<?=$tariff->getData('tquant')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+                <td>
+                    <label for="edit-tariff-minute-price">Стоимость минуты (руб.)</label>
+                    <input type="text" name="tariff[minute_price]" id="edit-tariff-minute-price" value="<?=$tariff->getData('minute_price')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <label for="edit-tariff-consultation-response">Срок реакции на консультации (сек.)</label>
+                    <input type="text" name="tariff[consultation_response]" id="edit-tariff-consultation-response" value="<?=$tariff->getData('consultation_response')?>" maxlength="8" onclick="formatTime(this);"/>
+                </td>
+            </tr>
+        </tbody>
     </table>
     <table class="table table-bordered">
         <thead>
@@ -150,24 +165,24 @@ $tariff = $this->data;
         <tbody>
         <tr>
             <td>
-                <input type="checkbox" name="tarif[message_enabled]" id="tarif-message-enabled"
-                    <?=$tariff->getData('message_enabled') ? "checked=\"true\"" : ""; ?> value="1"
+                <input type="checkbox" name="tariff[message_enabled]" id="edit-tariff-message-enabled"
+                    <?=$tariff->getData('message_enabled') ? "checked=\"true\"" : ""; ?> value="true"
                     <?$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-                <label for="tarif-message-enabled" class="inline">Сообщения разрешены</label>
+                <label for="edit-tariff-message-enabled" class="inline">Сообщения разрешены</label>
             </td>
             <td>
-                <input type="checkbox" name="tarif[message_unlimited]" id="tarif-message-unlimited"
-                    <?=$tariff->getData('message_unlimited') ? "checked=\"true\"" : ""; ?> value="1"
+                <input type="checkbox" name="tariff[message_unlimited]" id="edit-tariff-message-unlimited"
+                    <?=$tariff->getData('message_unlimited') ? "checked=\"true\"" : ""; ?> value="true"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
-                <label for="tarif-message-unlimited" class="inline">Сообщения без ограничений</label>
+                <label for="edit-tariff-message-unlimited" class="inline">Сообщения без ограничений</label>
             </td>
             <td>
-                <label for="tarif-message-response">Срок реакции на сообщение(сек.)</label>
-                <input type="text" name="tarif[message_response]" id="tarif-message-response" value="<?=$tariff->getData('message_response')?>"/>
+                <label for="edit-tariff-message-response">Срок реакции на сообщение(сек.)</label>
+                <input type="text" name="tariff[message_response]" id="edit-tariff-message-response" value="<?=$tariff->getData('message_response')?>"/>
             </td>
             <td>
-                <label for="tarif-message-price">Стоимость сообщения (руб.)</label>
-                <input type="text" name="tarif[message_price]" id="tarif-message-price" value="<?=$tariff->getData('message_price')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
+                <label for="edit-tariff-message-price">Стоимость сообщения (руб.)</label>
+                <input type="text" name="tariff[message_price]" id="edit-tariff-message-price" value="<?=$tariff->getData('message_price')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
             </td>
         </tr>
         </tbody>
