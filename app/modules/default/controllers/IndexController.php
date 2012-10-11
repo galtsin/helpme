@@ -38,7 +38,8 @@ class Default_IndexController extends App_Zend_Controller_Action
         //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро 4"));
         //Zend_Debug::dump($this->isValidChain('level', 'name', "Привет Миро @4"));
 
-
+        $b = new HM_Model_Billing_Tariff_Collection();
+        Zend_Debug::dump($b->addEqualFilter('line', 10)->getCollection()->getDataIterator());
 
         $k = new App_Zend_Controller_Action_Helper_Validate('account');
         $f = new Zend_Filter_Input(array('*' => 'StringTrim'), array('name' => 'Alnum'));

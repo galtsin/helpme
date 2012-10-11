@@ -6,7 +6,7 @@
         <date_end type="string"/>
     </agreement_add>
     <tarif_get_identity>
-        <id_tarif type="integer"/>
+        <id_tariff type="integer"/>
     </tarif_get_identity>
     <tarif_update>
         <id_tarif type="integer"/>

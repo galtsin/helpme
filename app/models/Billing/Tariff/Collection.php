@@ -35,7 +35,7 @@ class HM_Model_Billing_Tariff_Collection extends App_Core_Model_Collection_Filte
                 );
                 if($result->rowCount() > 0) {
                     foreach($result->fetchAll() as $row) {
-                        $ids[] = $row['o_id'];
+                        $ids[] = $row['o_id_tariff'];
                     }
                 }
             }

@@ -45,6 +45,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     }
 
     /**
+     * TODO: Пример для подражаения последний
      * Добавить тариф на ЛК
      */
     public function addTariffAction()
@@ -52,7 +53,41 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
         $request = $this->getRequest();
         $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
             ->restore($request->getParam('line'));
-        if($line instanceof HM_Model_Counseling_Structure_Level) {
+        if($line instanceof HM_Model_Counseling_Structure_Line) {
+            if($request->isPost()){
+                if(array_key_exists('tariff', $request->getPost())) {
+                    // Предпроверка данных
+                    $validate = new App_Zend_Controller_Action_Helper_Validate('tariff');
+                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
+                    $filterInput->setData($request->getPost('tariff'));
+
+                    if($filterInput->isValid()){
+                        $tariff = new HM_Model_Billing_Tariff();
+                        $tariff->getData()
+                            ->set('line', $line->getData('id'))
+                            ->set('name', $filterInput->getEscaped('name'));
+                        if($tariff->save()) {
+                            $this->setAjaxResult($tariff->getData('id'));
+                        }
+                    } else {
+                        $this->addAjaxError($filterInput->getMessages(), 'tariff');
+                    }
+                }
+            } else {
+                // Какие то параметры для вывода в шаблоне
+            }
+        }
+    }
+
+    /**
+     * Отрелактировать тариф
+     */
+    public function editTariffInfoAction()
+    {
+        $request = $this->getRequest();
+        $tariff = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Tariff_Factory')
+            ->restore($request->getParam('tariff'));
+        if($tariff instanceof HM_Model_Billing_Tariff){
             if($request->isPost()){
                 if(array_key_exists('tariff', $request->getPost())) {
                     // Предпроверка данных
@@ -62,29 +97,22 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
 
                     if($filterInput->isValid()){
                         // Сохранить результаты
-                        foreach($request->getPost('tariff') as $key => $value) {
-                            if($key !== 'id' && $group->getData($key) !== $value) {
-                                $group->getData()->set($key, $value);
+                        foreach(array_keys($request->getPost('tariff')) as $key) {
+                            if($key !== 'id' && $tariff->getData($key) !== $filterInput->getEscaped($key)) {
+                                $tariff->getData()->set($key, $filterInput->getEscaped($key));
                             }
                         }
-                        if($group->save()) {
-                            $this->setAjaxResult($group->getData('id'));
+                        if($tariff->save()) {
+                            $this->setAjaxResult($tariff->getData('id'));
                         }
                     } else {
-                        $this->addAjaxError($filterInput->getMessages(), 'group');
+                        $this->addAjaxError($filterInput->getMessages(), 'tariff');
                     }
                 }
-            } else {
-
+            } else{
+                // Форма на редактирование
+                $this->view->assign('data', $tariff);
             }
         }
-    }
-
-    /**
-     * Отрелактировать тариф
-     */
-    public function editTariffAction()
-    {
-
     }
 }
