@@ -41,7 +41,7 @@ class Default_IndexController extends App_Zend_Controller_Action
 
 
         $k = new App_Zend_Controller_Action_Helper_Validate('account');
-        $f = new Zend_Filter_Input(array_merge(array('*' => 'StringTrim'),$k->getFilters()), $k->getValidators());
+        $f = new Zend_Filter_Input(array('*' => 'StringTrim'), array('name' => 'Alnum'));
         $f->setData(array('login' => ' dfgo'));
         Zend_Debug::dump($f->isValid());
         Zend_Debug::dump($f->getEscaped('login'));
