@@ -92,7 +92,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
                 if(array_key_exists('tariff', $request->getPost())) {
                     // Предпроверка данных
                     $validate = new App_Zend_Controller_Action_Helper_Validate('tariff');
-                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators()/*, array(), array(Zend_Filter_Input::ALLOW_EMPTY => true)*/);
+                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
                     $filterInput->setDefaultEscapeFilter(new Zend_Filter_StringTrim());
                     $filterInput->setData($request->getPost('tariff'));
 
@@ -113,6 +113,27 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
             } else{
                 // Форма на редактирование
                 $this->view->assign('data', $tariff);
+            }
+        }
+    }
+
+    /**
+     * Удалить тариф
+     */
+    public function removeTariffAction()
+    {
+        $request = $this->getRequest();
+        $tariff = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Tariff_Factory')
+            ->restore($request->getParam('tariff'));
+        if($tariff instanceof HM_Model_Billing_Tariff){
+            if($request->isPost()){
+                if(false == $tariff->getData('used')) {
+                    if($tariff->remove()) {
+                        $this->setAjaxResult($request->getParam('tariff'));
+                    } else {
+                        // TODO: Выдать сообщение об ошибки
+                    }
+                }
             }
         }
     }

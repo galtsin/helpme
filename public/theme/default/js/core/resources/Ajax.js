@@ -12,7 +12,7 @@ require(["core/Loader"], function(Loader){
             responseFormat = responseFormat.toLowerCase();
 
             // Ответ по умолчанию для POST запросов
-            if(method == 'POST' && responseFormat == undefined) {
+            if((method == 'POST' || method == "DELETE") && responseFormat == undefined) {
                 responseFormat = 'json';
             }
 

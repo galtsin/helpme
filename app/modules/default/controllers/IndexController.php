@@ -42,10 +42,11 @@ class Default_IndexController extends App_Zend_Controller_Action
         //Zend_Debug::dump($var1);
         //Zend_Debug::dump($var2);
 
-        $input = new Zend_Filter_Input(array(), $var2);
-        $input->setData(array('name' => ''));
+        $input = new Zend_Filter_Input(array(), $var1);
+        $input->setData(array('igor' => '123'));
         Zend_Debug::dump($input->isValid());
-        Zend_Debug::dump($input->getEscaped('active'));
+        Zend_Debug::dump($input->getEscaped('igor'));
+
     }
 
     public function isValid(array $values)

@@ -9,9 +9,17 @@ require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax, Di
             this.Dialog = new Dialog();
         },
         // Отправить данные на сервер.
-        dataSender: function(url, data){
+        dataSender: function(url, data, method){
+            if(null === data || "object" !== typeof data) {
+                data = {}
+            }
             data['format'] = "json";
-            return this.Ajax.xhr(this.urlCorrect(url), data, "POST", "json");
+            switch(method){
+                case "POST": break;
+                case "DELETE": break;
+                default: method = "POST"; break;
+            }
+            return this.Ajax.xhr(this.urlCorrect(url), data, method, "json");
         },
         // Загрузить данные с сервера JSON-данные
         dataLoader: function(url, params){

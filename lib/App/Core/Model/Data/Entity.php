@@ -111,6 +111,14 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      */
     public function remove()
     {
+        if($this->_remove() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function _remove()
+    {
         return -1;
     }
 }

@@ -53,7 +53,7 @@ class HM_Model_Billing_Tariff_Factory extends App_Core_Model_FactoryAbstract
                 ->set('tquant', $row['o_tquant'])
                 ->set('period', (int)$row['o_period'])
                 ->set('tqmin', $row['o_tqmin'])
-                ->set('active', $row['o_active'])
+                ->set('active', (bool)$row['o_active'])
                 ->set('need_committer', (bool)$row['o_need_committer'])
                 ->set('used', (bool)$row['o_used'])
                 ->set('line', (int)$row['o_id_line']);

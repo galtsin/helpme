@@ -1,16 +1,17 @@
 @charset "UTF-8";
 
 body {
-    padding-top: 110px
+/*    padding-top: 110px*/
 }
 
 #header {
-    position: fixed;
+/*    position: fixed;
     left: 0;
     right: 0;
     top: 0;
     background: #ffffff;
-    z-index: 1030;
+    z-index: 1030;*/
+    margin-bottom: 20px;
 }
 
 .navbar-inner {
@@ -139,6 +140,27 @@ body {
     padding: 25px 0px;
 }
 
+#messenger {
+    width: 100%;
+    position: fixed;
+    z-index: 99999;
+    top: 0;
+    background: transparent;
+}
+#messenger span {
+    display: block;
+    position: relative;
+    width: 300px;
+    margin: auto;
+    text-align: center;
+    padding: 10px 0;
+    background: #FFFFCC;
+    border-left: 1px solid #FFCC00;
+    border-bottom: 1px solid #FFCC00;
+    border-right: 1px solid #FFCC00;
+    font-weight: bold;
+    color: #666666;
+}
 
 .form-element-error {
     border: 2px solid  #B94A48;

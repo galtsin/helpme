@@ -82,4 +82,24 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
 
         return parent::_update();
     }
+
+    /**
+     * @return int
+     */
+    protected function _remove()
+    {
+        if($this->getData()->isDirty()) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('tarif_del', array(
+                    'id_tarif'              => $this->getData('id')
+                )
+            );
+            $row = $result->fetchRow();
+            if((int)$row['o_id_tarif'] == $this->getData('id')) {
+                $this->getData()->clear();
+                return $row['o_id_tarif'];
+            }
+        }
+        return parent::_remove();
+    }
 }

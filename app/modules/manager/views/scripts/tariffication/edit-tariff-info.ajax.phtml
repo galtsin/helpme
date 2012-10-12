@@ -1,6 +1,7 @@
 <?php
 $tariff = $this->data;
 ?>
+<?php if($tariff instanceof HM_Model_Billing_Tariff): ?>
 <form id="edit-tariff-info">
     <input type="hidden" class="hidden" name="tariff[id]" value="<?=$tariff->getData('id')?>">
     <table class="table table-bordered">
@@ -43,22 +44,22 @@ $tariff = $this->data;
         <tr>
             <td>
                 <input type="checkbox" name="tariff[active]" id="edit-tariff-active"
-                    <?=$tariff->getData('active') ? "checked=\"true\"" : ""; ?> value="true" />
+                    <?=$tariff->getData('active') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-active" class="inline">Активен</label>
             </td>
             <td>
                 <input type="checkbox" name="tariff[not_available]" id="edit-tariff-not-available"
-                    <?=$tariff->getData('not_available') ? "checked=\"true\"" : ""; ?> value="true" />
+                    <?=$tariff->getData('not_available') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-not-available" class="inline">Доступен клиенту</label>
             </td>
             <td>
                 <input type="checkbox" name="tariff[need_committer]" id="edit-tariff-need-committer"
-                    <?=$tariff->getData('need_committer') ? "checked=\"true\"" : ""; ?> value="true" />
+                    <?=$tariff->getData('need_committer') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-need-committer" class="inline">Требует подтверждения администратора ЛК</label>
             </td>
             <td>
                 <input type="checkbox" name="tariff[specchoice]" id="edit-tariff-specchoice"
-                    <?=$tariff->getData('specchoice') ? "checked=\"true\"" : ""; ?> value="true" />
+                    <?=$tariff->getData('specchoice') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-specchoice" class="inline">Доступен выбор специалиста</label>
             </td>
         </tr>
@@ -103,19 +104,19 @@ $tariff = $this->data;
         <tr>
             <td>
                 <input type="checkbox" name="tariff[consultation_enabled]" id="edit-tariff-consultation-enabled"
-                    <?=$tariff->getData('consultation_enabled') ? "checked=\"true\"" : ""; ?> value="true"
+                    <?=$tariff->getData('consultation_enabled') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
                 <label for="edit-tariff-consultation-enabled" class="inline">Консультации разрешены</label>
             </td>
             <td>
                 <input type="checkbox" name="tariff[consultation_unlimited]" id="edit-tariff-consultation-unlimited"
-                    <?=$tariff->getData('consultation_unlimited') ? "checked=\"true\"" : ""; ?> value="true"
+                    <?=$tariff->getData('consultation_unlimited') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
                 <label for="edit-tariff-consultation-unlimited" class="inline">Консультации без ограничений</label>
             </td>
             <td>
                 <input type="checkbox" name="tariff[auto_prolongate]" id="edit-tariff-auto-prolongate"
-                    <?=$tariff->getData('auto_prolongate') ? "checked=\"true\"" : ""; ?> value="true"
+                    <?=$tariff->getData('auto_prolongate') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
                 <label for="edit-tariff-auto-prolongate" class="inline">Автопродление</label>
             </td>
@@ -150,7 +151,7 @@ $tariff = $this->data;
             </tr>
             <tr>
                 <td colspan="4">
-                    <label for="edit-tariff-consultation-response">Срок реакции на консультации (сек.)</label>
+                    <label for=edit-tariff-consultation-response">Срок реакции на консультации (сек.)</label>
                     <input type="text" name="tariff[consultation_response]" id="edit-tariff-consultation-response" value="<?=$tariff->getData('consultation_response')?>" maxlength="8" onclick="formatTime(this);"/>
                 </td>
             </tr>
@@ -166,13 +167,13 @@ $tariff = $this->data;
         <tr>
             <td>
                 <input type="checkbox" name="tariff[message_enabled]" id="edit-tariff-message-enabled"
-                    <?=$tariff->getData('message_enabled') ? "checked=\"true\"" : ""; ?> value="true"
+                    <?=$tariff->getData('message_enabled') ? "checked=\"true\"" : ""; ?> value="1"
                     <?$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
                 <label for="edit-tariff-message-enabled" class="inline">Сообщения разрешены</label>
             </td>
             <td>
                 <input type="checkbox" name="tariff[message_unlimited]" id="edit-tariff-message-unlimited"
-                    <?=$tariff->getData('message_unlimited') ? "checked=\"true\"" : ""; ?> value="true"
+                    <?=$tariff->getData('message_unlimited') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
                 <label for="edit-tariff-message-unlimited" class="inline">Сообщения без ограничений</label>
             </td>
@@ -189,5 +190,8 @@ $tariff = $this->data;
     </table>
     <hr/>
     <button type="button" name="send">Сохранить</button>
-    <?php if(false === $tariff->getData('used')): ?><button type="button" onclick="removeTarif(<?=$tariff->getData('id');?>)">Удалить</button><?php endif; ?>
+    <?php if(false === $tariff->getData('used')): ?><button type="button" name="remove">Удалить</button><?php endif; ?>
 </form>
+<?php else: ?>
+<div><em>Выбранный тариф не существует</em></div>
+<?php endif; ?>

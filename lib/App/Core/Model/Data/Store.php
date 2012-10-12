@@ -225,6 +225,7 @@ final class App_Core_Model_Data_Store
     {
         $this->_id = null;
         $this->_data = array();
+        $this->unmarkDirty();
         return $this;
     }
 
