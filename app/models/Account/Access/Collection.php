@@ -13,7 +13,7 @@
 class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filter
 {
     /**
-     * Пустой тип данных
+     * Пустой тип данных по "умолчанию"
      */
     const OBJECT_TYPE = 'EMPTY';
 
@@ -38,7 +38,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      * Установить фильтр доступа к объектам, используя права доступа и их наследование
      * Результирующая выборка произойдет по всем разрешенным правам с соединением ресурсов
      * @param HM_Model_Account_User $user
-     * @param App_Core_Model_Data_Store $role
+     * @param App_Core_Model_Data_Store $role Роль для которой необходимо проверить права пользователя
      * @param int $company
      * @return HM_Model_Account_Access_Collection
      */

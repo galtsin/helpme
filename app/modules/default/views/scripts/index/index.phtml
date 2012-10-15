@@ -3,9 +3,11 @@ $json = $this->json;
 ?>
 <?php
 $jScript = <<<JS
+require([]);
 dojo.ready(function(){
 var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
 console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
+
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')

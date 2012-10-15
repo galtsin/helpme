@@ -8,7 +8,38 @@ require(["core/resources/Ajax", "core/sandbox/layout/Dialog"], function(Ajax, Di
             this.Ajax = new Ajax();
             this.Dialog = new Dialog();
         },
-        // Отправить данные на сервер.
+
+
+        // Отправка данных на сервер (POST, DELETE, PUT)
+        send: function(params){
+            if(false == params.hasOwnProperty('url')){
+                throw new URIError();
+            }
+            var _default = {
+                method: "POST",
+                args: {}
+            };
+            // Форматирование метода
+            if(params.hasOwnProperty('method')){
+                switch(params['method'].toUpperCase()){
+                    case "POST": break;
+                    case "DELETE": break;
+                    case "PUT": break;
+                    default: params['method'] = "POST"; break;
+                }
+            } else {
+                params['method'] = "POST";
+            }
+            return this.Ajax.xhr(this.urlCorrect(params['url']), params['args'], params['method'], "json");
+        },
+
+        // Получение данных с сервера в различных форматах
+        load: function(){},
+
+        // Вставить контент внутрь ноды
+        place: function(){},
+
+        // @Deprecated Отправить данные на сервер.
         dataSender: function(url, data, method){
             if(null === data || "object" !== typeof data) {
                 data = {}

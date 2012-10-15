@@ -41,7 +41,17 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
      */
     public function linesAction()
     {
+        $data = array();
 
+        // line => tariffs
+        $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
+            ->restore(10);
+        if($line instanceof HM_Model_Counseling_Structure_Line) {
+            $tariffColl = new HM_Model_Billing_Tariff_Collection();
+            $tariffColl->addEqualFilter('line', $line->getData('id'));
+            $data[] = array('line' => $line->getData(), 'tariffs' => $tariffColl->getCollection()->getDataIterator());
+        }
+        $this->view->assign('data', $data);
     }
 
     /**
@@ -80,7 +90,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     }
 
     /**
-     * Отрелактировать тариф
+     * Отредактировать тариф
      */
     public function editTariffInfoAction()
     {

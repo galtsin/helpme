@@ -35,6 +35,12 @@ final class App_Core_Model_Data_Store
     private $_dirty = false;
 
     /**
+     * Разрешение на запись объекта
+     * @var bool
+     */
+    private $_writable = true;
+
+    /**
      * Конструктор позволяет инициализировать модель через метод self::set
      * @param array|null $options
      */
@@ -107,24 +113,27 @@ final class App_Core_Model_Data_Store
             throw new Exception("The key must be a string '" . (string)$key . "'. (Неверный формат. Ключ должен быть строкой)");
         }
 
-        switch(strtolower($key)){
-            case 'id':
-                $this->setId($value);
-                break;
-            case 'data':
-                $this->_data = (array)$value;
-                break;
-            default:
-                $this->_data[$key] = $value;
-        }
+        if($this->isWritable()) {
+            switch(strtolower($key)){
+                case 'id':
+                    $this->_setId($value);
+                    break;
+                case 'data':
+                    $this->_data = (array)$value;
+                    break;
+                default:
+                    $this->_data[$key] = $value;
+            }
 
-        // Пометить объект как измененый
-        $this->markDirty();
+            // Пометить объект как измененый
+            $this->markDirty();
+        }
 
         return $this;
     }
 
     /**
+     * TODO: А нужен ли?
      * @param mixed $key
      * @param mixed $value
      * @param bool $recursive
@@ -132,20 +141,23 @@ final class App_Core_Model_Data_Store
      */
     public function add($key, $value, $recursive = false)
     {
-        switch(strtolower($key)){
-            case 'data':
-                $this->_data = $this->merge($this->_data, (array)$value, $recursive);
-                break;
-            default:
-                if(!array_key_exists($key, $this->_data)) {
-                    $this->_data[$key] = $value;
-                } else {
-                    $this->_data[$key] = $this->merge((array)$this->_data[$key], (array)$value, $recursive);
-                }
+        if($this->isWritable()) {
+            switch(strtolower($key)){
+                case 'data':
+                    $this->_data = $this->merge($this->_data, (array)$value, $recursive);
+                    break;
+                default:
+                    if(!array_key_exists($key, $this->_data)) {
+                        $this->_data[$key] = $value;
+                    } else {
+                        $this->_data[$key] = $this->merge((array)$this->_data[$key], (array)$value, $recursive);
+                    }
+            }
+
+            // Пометить объект как измененый
+            $this->markDirty();
         }
 
-        // Пометить объект как измененый
-        $this->markDirty();
         return $this;
     }
 
@@ -178,7 +190,7 @@ final class App_Core_Model_Data_Store
      * @param mixed $id
      * @throws Exception
      */
-    public function setId($id)
+    private function _setId($id)
     {
         if(is_null($this->getId())) {
             $this->_id = $id;
@@ -215,6 +227,26 @@ final class App_Core_Model_Data_Store
     {
         $this->_dirty = false;
         return $this;
+    }
+
+    /**
+     * Проверить записываемый объект или нет
+     * @return bool
+     */
+    public function isWritable()
+    {
+        return $this->_writable;
+    }
+
+    /**
+     * Установить флаг записи
+     * @param bool $flag
+     */
+    public function setWritable($flag)
+    {
+        if(is_bool($flag)) {
+            $this->_writable = $flag;
+        }
     }
 
     /**
