@@ -8,6 +8,15 @@ dojo.ready(function(){
 var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
 console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
 
+var t = new function(){
+    this.test = function(){
+        alert('test');
+    };
+
+    this['test'].call(this, []);
+};
+
+
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')

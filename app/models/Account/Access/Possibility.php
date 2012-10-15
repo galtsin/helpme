@@ -27,6 +27,11 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         );
     }
 
+    protected function _insert()
+    {
+        return parent::_insert();
+    }
+
     /**
      * @param int $entityId
      * @return HM_Model_Account_Access_Possibility

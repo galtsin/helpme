@@ -1,75 +1,73 @@
 /* Менеджер слоев */
 dojo.provide("core.sandbox.Layout");
-require(["core/resources/Ajax", "core/sandbox/layout/Loader", "core/sandbox/layout/Dialog", "core/sandbox/layout/Messenger"],
-    function(Ajax, Loader, Dialog, Messenger){
+require(["core/resources/Ajax", "core/sandbox/layout/Loader", "core/sandbox/layout/Messenger"],
+    function(Ajax, Loader, Messenger){
     core.sandbox.Layout = function(){};
     dojo.declare("core.sandbox.Layout", null, {
         constructor: function(){
-            this.container = [];
             this.Ajax = new Ajax();
-            this.Dialog = new Dialog();
             this.Loader = new Loader();
             this.Messenger = new Messenger();
         },
-
-
         // Отправка данных на сервер (POST, DELETE, PUT)
         send: function(params){
             // Параметры по умолчанию
             var _default = {
                 method: "POST",
                 args: {},
-                process: true
-            };
+                process: true,
+                handleAs: "json",
+                handle: function(results){
+                    if(results['result'] == -1) {
+                        if(true == this.process) {
 
-            var that = this;
+                        }
+                        that.Messenger.show();
+                    }
+                }
+            };
 
             if(false == params.hasOwnProperty('url')){
                 throw new URIError({message: "Url адрес не указан"})
             }
-            _default['url'] = params['url'];
 
-            // Форматирование метода
-            if(params.hasOwnProperty('method')){
-                switch(params['method'].toUpperCase()){
-                    case "POST": break;
-                    case "DELETE": break;
-                    case "PUT": break;
-                    default:
-                        params['method'] = "POST";
-                    break;
+            for(var param in params) {
+                if(params.hasOwnProperty(param) && _default.hasOwnProperty(param)) {
+                    _default[param] = params[param];
                 }
-                _default['method'] = params['method'];
             }
 
-            if(params.hasOwnProperty('args')) {
-                _default['args'] = params['args'];
-            }
-
+            var that = this;
             //this['method'].call(this, args);
+            // _default[param] =  || preferences.max_width || 500
 
             if(true == _default['process']){
-                this.Loader.show();
+                that.Loader.show();
             }
 
-            var call = this.Ajax.xhr(this.urlCorrect(params['url']), params['args'], params['method'], "json");
+            var call = this.Ajax.xhr(_default);
+
             call.addCallback(function(results){
                 // Удалить загрузчик
                 if(true == _default['process']) {
                     that.Loader.hide();
                 }
+                if(results['result'] == -1) {
+
+                }
+
             });
 
             return call;
         },
 
         // Получение данных с сервера в различных форматах
-        load: function(){},
+        load: function(params){},
 
         // Вставить контент внутрь ноды
-        place: function(){},
+        place: function(node, content){},
 
-
+        _initMethod: function(){},
 
         // @Deprecated Отправить данные на сервер.
         dataSender: function(url, data, method){

@@ -58,7 +58,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
                 if(is_bool($key) === false){
                     $possibility = array(
                         'user'          => $user->getData('id'),
-                        'role'          => $access->getRole($roleIdentifier)->getId(), // Привязка идет по рролям пользователя
+                        'role'          => $access->getRole($roleIdentifier)->getId(), // Привязка идет по ролям пользователя, а не переданной в параметре
                         'company'       => $company
                     );
                     $this->addEqualFilter('accessible', $possibility);

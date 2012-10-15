@@ -36,7 +36,6 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
                     $accessColl->resetFilters();
                     $accessColl->setAccessFilter($user, $pageRole, $company)->getCollection();
                     $data[] = array('company' => $company, 'lines' => $accessColl->getIdsIterator());
-                    Zend_Debug::dump($accessColl->getPossibilities());
                 }
             }
 

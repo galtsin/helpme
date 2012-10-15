@@ -126,8 +126,8 @@ body {
     left:0;
     top: 0;
     background: #fff;
-    opacity: 0.7;
-    filter: alpha(Opacity=70);
+    opacity: 0.5;
+    filter: alpha(Opacity=50);
 }
 #loader span {
     display: block;
