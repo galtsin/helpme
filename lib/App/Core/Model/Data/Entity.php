@@ -86,6 +86,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * Делегирование наследникам
      * Добавление нового объекта
      * Возвращает идентификатор вставленной записи или -1 в случае неудачи
      * @return int
@@ -96,6 +97,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * Делегирование наследникам
      * Обновление объекта
      * Возвращает идентификатор обновленной записи или -1 в случае неудачи
      * @return int
@@ -117,6 +119,12 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
         return false;
     }
 
+    /**
+     * Делегирование наследникам
+     * Удаление объекта
+     * Возвращает идентификатор удаленной записи или -1 в случае неудачи
+     * @return int
+     */
     protected function _remove()
     {
         return -1;

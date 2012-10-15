@@ -51,7 +51,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     }
 
     /**
-     * ru: Автозагрузка ресурсов
+     * Автозагрузка ресурсов
      */
     protected function _initAutoloads()
     {
@@ -78,7 +78,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     }
 
     /*
-    * ru: Инициализация плагинов
+    * Инициализация плагинов
     */
     protected function _initPlugins()
     {
@@ -87,10 +87,12 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $front->registerPlugin(new App_Zend_Controller_Plugin_Layout());
         // Плагин REST-Сервиса
         $front->registerPlugin(new App_Zend_Controller_Plugin_Query());
+        // Плагин доступа к страницам
+        $front->registerPlugin(new App_Zend_Controller_Plugin_Access());
     }
 
     /**
-     * ru: Инициализация помощников вида для контроллеров
+     * Инициализация помощников вида для контроллеров
      */
     protected function _initViewHelpers()
     {
@@ -114,7 +116,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
 
     /**
-     * ru: Настройка Почтового транспорта
+     * Настройка Почтового транспорта
      */
     protected function _initEmailTransport()
     {

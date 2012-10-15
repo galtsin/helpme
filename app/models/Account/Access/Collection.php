@@ -23,6 +23,11 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     private $_objectType = null;
 
     /**
+     *
+     */
+    private $_possibilities = array();
+
+    /**
      * Инициализация
      */
     protected function _init()
@@ -64,46 +69,6 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     }
 
     /**
-     * Возможность загрузить ресурсы для всех компаний.
-     * Функция не безопасна из-зи $company = null - можем получить доступ ко всем компаниям
-     * Установить фильтр доступа к объектам, используя права доступа и их наследование
-     * Результирующая выборка произойдет по всем разрешенным правам с соединением ресурсов
-     * @param HM_Model_Account_User $user
-     * @param App_Core_Model_Data_Store $role
-     * @param null|int $company
-     * @return HM_Model_Account_Access_Collection
-     */
-/*    public function setAccessFilter(HM_Model_Account_User $user, App_Core_Model_Data_Store $role, $company = null)
-    {
-        $access = HM_Model_Account_Access::getInstance();
-        $userRoles = $user->getRoles();
-        foreach($userRoles as $roleIdentifier => $companies) {
-            // Учитывается наследование Ролей
-            if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
-                if(null !== $company) {
-                    $_companies = array();
-                    if(in_array($company, $companies)) {
-                        $_companies[] = $company;
-                    }
-                } else {
-                    $_companies = $companies;
-                }
-                if(count($companies) > 0) {
-                    foreach($_companies as $_company){
-                        $possibility = array(
-                            'user'          => $user->getData('id'),
-                            'role'          => $access->getRole($roleIdentifier)->getId(), // Привязка идет по ролям пользователя
-                            'company'       => $_company
-                        );
-                        $this->addEqualFilter('accessible', $possibility);
-                    }
-                }
-            }
-        }
-        return $this;
-    }*/
-
-    /**
      * Установить тип объекта по которому идет ограничение
      * @param $typeIdentifier
      * @return HM_Model_Account_Access_Collection
@@ -127,27 +92,62 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      */
     protected function _doAccessibleEqualFilterCollection()
     {
-        $ids = array();
+        $ids = $possibilities = array();
 
         if(count($this->getEqualFilterValues('accessible')) > 0) {
             foreach($this->getEqualFilterValues('accessible') as $accessible){
                 $type = HM_Model_Account_Access::getInstance()->getType($this->_objectType);
+
+                // Получить Possibility
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('possibility_get_objects', array(
+                    ->execute('possibility_get_identity', array(
                         'id_user'       => $accessible['user'],
                         'id_role'       => $accessible['role'],
                         'id_company'    => $accessible['company'],
-                        'id_object_type'=> $type->get('id')
                     )
                 );
+
                 if($result->rowCount() > 0){
-                    foreach($result->fetchAll() as $row){
-                        $ids[] = (int)$row['id_object'];
+                    $row = $result->fetchRow();
+                    $possibility = new HM_Model_Account_Access_Possibility();
+                    $possibility->getData()
+                        ->set('id', $row['o_id_possibility'])
+                        ->set('user', $accessible['user'])
+                        ->set('role', $accessible['role'])
+                        ->set('company', $accessible['company'])
+                        ->set('type', $type->getId());
+
+                    unset($result);
+                    unset($row);
+
+                    $possibilities[] = $possibility;
+
+                    $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                        ->execute('possibility_get_objects', array(
+                            'id_possibility'    => $possibility->getData('id'),
+                            'id_object_type'    => $type->get('id')
+                        )
+                    );
+
+                    if($result->rowCount() > 0){
+                        foreach($result->fetchAll() as $row){
+                            $ids[] = (int)$row['o_id_object'];
+                            'W' === $row['o_rw'] ? $possibility->addWrite((int)$row['o_id_object']) : $possibility->addRead((int)$row['o_id_object']);
+                        }
                     }
                 }
             }
         }
 
+        $this->_possibilities = $possibilities;
         return array_unique($ids);
+    }
+
+    /**
+     * @return array
+     */
+    public function getPossibilities()
+    {
+        return $this->_possibilities;
     }
 }

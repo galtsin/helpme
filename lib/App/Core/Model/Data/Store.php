@@ -241,12 +241,15 @@ final class App_Core_Model_Data_Store
     /**
      * Установить флаг записи
      * @param bool $flag
+     * @return App_Core_Model_Data_Store
      */
     public function setWritable($flag)
     {
         if(is_bool($flag)) {
             $this->_writable = $flag;
         }
+
+        return $this;
     }
 
     /**

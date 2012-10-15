@@ -59,9 +59,7 @@
     <possibility_get_object_types/>
     <possibility_get_roles/>
     <possibility_get_objects>
-        <id_user type="integer"/>
-        <id_role type="integer"/>
-        <id_company type="integer"/>
+        <id_possibility type="integer"/>
         <id_object_type type="integer"/>
     </possibility_get_objects>
 
@@ -92,5 +90,9 @@
     <get_invited_user_by_email>
         <email type="string"/>
     </get_invited_user_by_email>
-
+    <possibility_get_identity>
+        <id_user type="integer"/>
+        <id_role type="integer"/>
+        <id_company type="integer"/>
+    </possibility_get_identity>
 </functions>

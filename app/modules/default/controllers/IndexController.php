@@ -47,6 +47,27 @@ class Default_IndexController extends App_Zend_Controller_Action
         Zend_Debug::dump($input->isValid());
         Zend_Debug::dump($input->getEscaped('igor'));
 
+        // Получить текущего пользователя
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+
+        // Узнать по какой роли стоит осуществлять поиск
+        // Мы знаем URL-адрес
+        $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $accessColl->setType('LINE')
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
+        $accessColl->setAccessFilter($user, $pageRole, 12)->getCollection();
+        $lines = $accessColl->getDataIterator();
+        $possibility = current($accessColl->getPossibilities())->getData('possibility');
+        foreach($lines as $line) {
+            if(in_array($line->get('id'), $possibility['read'])) {
+                $line->setWritable(false);
+            }
+        }
+        Zend_Debug::dump($lines);
     }
 
     public function isValid(array $values)
