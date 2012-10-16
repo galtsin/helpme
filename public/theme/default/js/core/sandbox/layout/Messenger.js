@@ -8,13 +8,13 @@ require([], function(){
         constructor: function(node){
             this._node = node;
         },
-        show: function(args){
+        send: function(args){
             if(null !== args && "object" == typeof args) {
                 var that = this;
                 this._node.innerHTML = this._getMessage(args.code);
                 if(this._delay > 0) {
                     setTimeout(function(){
-                        that.hide();
+                        that.clear();
                     }, this._delay);
                 }
             }
@@ -22,7 +22,7 @@ require([], function(){
             anim.play();
             //dojo.removeClass(this._node, "hidden");
         },
-        hide: function() {
+        clear: function() {
             var self = this;
             var anim = dojo.fadeOut({node: self._node, duration: 500});
             anim.play();

@@ -1,7 +1,11 @@
 /* Менеджер слоев */
+// this['method'].call(this, args);
+// _default[param] =  || preferences.max_width || 500
 dojo.provide("core.sandbox.Layout");
-require(["core/resources/Ajax", "core/sandbox/layout/Loader", "core/sandbox/layout/Messenger"],
-    function(Ajax, Loader, Messenger){
+require([
+    "core/resources/Ajax",
+    "core/sandbox/layout/Loader",
+    "core/sandbox/layout/Messenger"], function(Ajax, Loader, Messenger){
     core.sandbox.Layout = function(){};
     dojo.declare("core.sandbox.Layout", null, {
         constructor: function(){
@@ -13,22 +17,15 @@ require(["core/resources/Ajax", "core/sandbox/layout/Loader", "core/sandbox/layo
         send: function(params){
             // Параметры по умолчанию
             var _default = {
-                method: "POST",
-                args: {},
-                process: true,
-                handleAs: "json",
-                handle: function(results){
-                    if(results['result'] == -1) {
-                        if(true == this.process) {
-
-                        }
-                        that.Messenger.show();
-                    }
-                }
+                method: 'POST',
+                args: { format: 'json' },
+                process: true
             };
 
-            if(false == params.hasOwnProperty('url')){
-                throw new URIError({message: "Url адрес не указан"})
+            if(params.hasOwnProperty('args')) {
+                if(!params.args.hasOwnProperty('format')){
+                    params.args.format = _default.args.format;
+                }
             }
 
             for(var param in params) {
@@ -37,60 +34,66 @@ require(["core/resources/Ajax", "core/sandbox/layout/Loader", "core/sandbox/layo
                 }
             }
 
-            var that = this;
-            //this['method'].call(this, args);
-            // _default[param] =  || preferences.max_width || 500
+            return this._io(_default);
+        },
+        // Получение данных с сервера в различных форматах
+        load: function(params){
+            // Параметры по умолчанию
+            var _default = {
+                method: 'GET',
+                args: { format: 'json' },
+                process: true
+            };
 
-            if(true == _default['process']){
+            if(params.hasOwnProperty('args')) {
+                if(!params.args.hasOwnProperty('format')){
+                    params.args.format = _default.args.format;
+                }
+            }
+
+            for(var param in params) {
+                if(params.hasOwnProperty(param) && _default.hasOwnProperty(param)) {
+                    _default[param] = params[param];
+                }
+            }
+
+            return this._io(_default);
+        },
+        _io: function(params){
+            var that = this;
+            switch (params.args.format) {
+                case 'json':
+                    params.handleAs = 'json';
+                    break;
+                case 'html':
+                    params.handleAs = 'text';
+                    break;
+            }
+            // Проверка URL
+            if(false == params.hasOwnProperty('url')){
+                throw new URIError({message: "Url адрес не указан"})
+            }
+            // Отобразить загрузчик
+            if(true == params['process']){
                 that.Loader.show();
             }
-
-            var call = this.Ajax.xhr(_default);
-
-            call.addCallback(function(results){
+            // Получить Ajax запрос
+            return this.Ajax.xhr({
+                handleAs: params.handleAs,
+                content: params.args,
+                url: params.url,
+                method: params.method.toUpperCase()
+            }).addBoth(function(results){
                 // Удалить загрузчик
-                if(true == _default['process']) {
-                    that.Loader.hide();
-                }
-                if(results['result'] == -1) {
-
-                }
-
+                if(true == params['process']) { that.Loader.hide(); }
+                // Показать системное сообщение
+                results['result'] == -1 ? that.Messenger.send({message: "Ошибка на севере"}) : that.Messenger.send({message: "Данные успешно обработаны"});
+                return results;
             });
-
-            return call;
         },
-
-        // Получение данных с сервера в различных форматах
-        load: function(params){},
-
-        // Вставить контент внутрь ноды
-        place: function(node, content){},
-
-        _initMethod: function(){},
-
-        // @Deprecated Отправить данные на сервер.
-        dataSender: function(url, data, method){
-            if(null === data || "object" !== typeof data) {
-                data = {}
-            }
-            data['format'] = "json";
-            switch(method){
-                case "POST": break;
-                case "DELETE": break;
-                default: method = "POST"; break;
-            }
-            return this.Ajax.xhr(this.urlCorrect(url), data, method, "json");
-        },
-        // Загрузить данные с сервера JSON-данные
-        dataLoader: function(url, params){
-            params.format = 'json';
-            return this.Ajax.xhr(this.urlCorrect(url), params, "GET", "json");
-        },
-        // Загрузить удаленный контент HTML-данные
-        contentLoader: function(url, params){
-            params.format = 'html';
-            return this.Ajax.xhr(this.urlCorrect(url), params, "GET", "text");
+        // Вставить контент
+        place: function(node, content){
+            node.innerHTML = content;
         },
         // Очистить контейнер с контентом
         clear: function(node){
@@ -98,24 +101,6 @@ require(["core/resources/Ajax", "core/sandbox/layout/Loader", "core/sandbox/layo
                 node.removeChild(node.firstChild);
             }
             node.innerHTML = "";
-        },
-        // Добавить контент в контейнер
-        placeContent: function(node, content) {
-            node.innerHTML = content;
-        },
-        urlCorrect: function(url) {
-            return appConfig.baseUrl + '/' + url;
-        },
-        // Распарсить короткую Ajax ссылку вида: '#!/{action}/{arg}/{arg} ... '
-        parseShortLink: function(hash){
-            var obj = {};
-            var parts = hash.split('/');
-            if(hash.indexOf('#') != -1) {
-                obj['prefix'] = parts.shift().slice(1);
-            }
-            obj['action'] = parts.shift();
-            obj['args'] = parts;
-            return obj;
         }
     });
 });
