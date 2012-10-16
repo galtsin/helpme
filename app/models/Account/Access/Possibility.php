@@ -2,20 +2,19 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 15.10.12
  */
 /**
- * ru:
+ * Привилегии и Доступные объекты
  */
 class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
 {
     /**
-     * Индекс Записи
+     * Индекс Привелегии на Запись
      */
     const WRITE = 'write';
 
     /**
-     * Индекс Чтения
+     * Индекс Привелегии на Чтение
      */
     const READ = 'read';
 
@@ -39,7 +38,43 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
+        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            ->execute('possibility_add', array(
+                'id_user'       => $this->getData('user'),
+                'id_role'       => $this->getData('role'),
+                'id_company'    => $this->getData('company')
+            )
+        );
+
+        if($result->rowCount() > 0) {
+            $row = $result->fetchRow();
+            return (int)$row['o_id_possibility'];
+        }
         return parent::_insert();
+    }
+
+    /**
+     * Обновить
+     * @return int
+     */
+    protected function _update()
+    {
+        if($this->getData()->isDirty()) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('group_update_identity', array(
+                    'id_possibility'    => $this->getData('id'),
+                    'id_user'           => $this->getData('user'),
+                    'id_role'           => $this->getData('role'),
+                    'id_company'        => $this->getData('company')
+                )
+            );
+            $row = $result->fetchRow();
+            if($row['o_id_possibility'] !== -1) {
+                return $this->getData('id');
+            }
+        }
+
+        return parent::_update();
     }
 
     /**
@@ -104,7 +139,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     public function assignPrivileges(App_Core_Model_Data_Store $type, App_Core_Model_Data_Store $data)
     {
         if($this->has($type, $data->get('id'))) {
-            $objects = $this->getObjects($type);
+            $objects = $this->_getObjects($type);
             if(in_array($data->get('id'), $objects[self::WRITE])) {
                 $data->setWritable(true);
             } else {

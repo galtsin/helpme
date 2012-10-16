@@ -101,4 +101,15 @@
     <possibility_by_company>
         <id_company type="integer"/>
     </possibility_by_company>
+    <possibility_add>
+        <id_user type="integer"/>
+        <id_role type="integer"/>
+        <id_company type="integer"/>
+    </possibility_add>
+    <possibility_update>
+        <id_possibility type="integer"/>
+        <id_user type="integer"/>
+        <id_role type="integer"/>
+        <id_company type="integer"/>
+    </possibility_update>
 </functions>

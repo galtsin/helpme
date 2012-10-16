@@ -67,12 +67,12 @@ class Default_IndexController extends App_Zend_Controller_Action
         $possibility = current($accessColl->getPossibilities());
 
         // TODO: если объект находится в possibility, то доступ к нему разрешен!!!
-        Zend_Debug::dump($possibility);
+
         foreach($lines as $line) {
-            //$possibility->setPrivileges($line);
+            $possibility->assignPrivileges(HM_Model_Account_Access::getInstance()->getType('LINE'), $line);
         }
 
-        //Zend_Debug::dump($lines);
+        Zend_Debug::dump($lines);
 
         $pos = array();
 

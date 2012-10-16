@@ -59,7 +59,6 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
             );
             $row = $result->fetchRow();
             if($row['o_id_group'] !== -1) {
-                $this->getData()->unmarkDirty();
                 return $this->getData('id');
             }
         }

@@ -122,6 +122,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     }
 
     /**
+     * Получить объекты Привелегий
      * @return array
      */
     public function getPossibilities()

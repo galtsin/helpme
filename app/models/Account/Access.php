@@ -202,7 +202,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 
     /**
      * Построить цепочку связей ролей снизу вверх c привязкой к роделельским элементам
-     * TODO: Не должно быть использование вызовов self::getRole и self::getRoles т.к. приведет к зацикливанию в автоматической привязке ролей в методе getRoles()
+     * TODO: Не должно быть использование вызовов self::getRole и self::getRoles нутри данной функции т.к. приведет к зацикливанию в автоматической привязке ролей в методе getRoles()
      * @param App_Core_Model_Data_Store $role
      */
     public function linkChainRoles(App_Core_Model_Data_Store $role)
