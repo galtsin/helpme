@@ -71,7 +71,7 @@ require([
             }
             // Проверка URL
             if(false == params.hasOwnProperty('url')){
-                throw new URIError({message: "Url адрес не указан"})
+                throw new URIError({message: "URL is undefined"})
             }
             // Отобразить загрузчик
             if(true == params['process']){

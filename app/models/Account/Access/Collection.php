@@ -96,11 +96,10 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
         if(count($this->getEqualFilterValues('accessible')) > 0) {
             foreach($this->getEqualFilterValues('accessible') as $accessible){
-                $type = HM_Model_Account_Access::getInstance()->getType($this->_objectType);
 
                 // Получить Possibility
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('possibility_get_identity', array(
+                    ->execute('possibility_get_identity_by_urc', array(
                         'id_user'       => $accessible['user'],
                         'id_role'       => $accessible['role'],
                         'id_company'    => $accessible['company'],
@@ -109,32 +108,11 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
                 if($result->rowCount() > 0){
                     $row = $result->fetchRow();
-                    $possibility = new HM_Model_Account_Access_Possibility();
-                    $possibility->getData()
-                        ->set('id', $row['o_id_possibility'])
-                        ->set('user', $accessible['user'])
-                        ->set('role', $accessible['role'])
-                        ->set('company', $accessible['company'])
-                        ->set('type', $type->getId());
-
-                    unset($result);
-                    unset($row);
+                    $possibility = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Access_Possibility_Factory')
+                        ->restore($row['o_id_possibility']);
 
                     $possibilities[] = $possibility;
-
-                    $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                        ->execute('possibility_get_objects', array(
-                            'id_possibility'    => $possibility->getData('id'),
-                            'id_object_type'    => $type->get('id')
-                        )
-                    );
-
-                    if($result->rowCount() > 0){
-                        foreach($result->fetchAll() as $row){
-                            $ids[] = (int)$row['o_id_object'];
-                            'W' === $row['o_rw'] ? $possibility->add((int)$row['o_id_object'], $possibility::WRITE) : $possibility->add((int)$row['o_id_object'], $possibility::READ);
-                        }
-                    }
+                    $ids = array_merge($ids, $possibility->getObjects(HM_Model_Account_Access::getInstance()->getType($this->_objectType)));
                 }
             }
         }

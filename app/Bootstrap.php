@@ -92,6 +92,15 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     }
 
     /**
+     * Инициализация хэлперов
+     */
+    protected function _initHelpers()
+    {
+        // http://framework.zend.com/manual/1.12/en/zend.controller.actionhelpers.html
+        //Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Access());
+    }
+
+    /**
      * Инициализация помощников вида для контроллеров
      */
     protected function _initViewHelpers()

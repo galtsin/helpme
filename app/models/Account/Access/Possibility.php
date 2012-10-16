@@ -20,17 +20,17 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     const READ = 'read';
 
     /**
+     * Список идентификаторов объектов
+     * @var null|array
+     */
+    private $_objects = array();
+
+    /**
      * Инициализация
      */
     protected function _init()
     {
-        parent::_init();
-        $this->setData('possibility', array(
-                'write' => array(),
-                'read'  => array(),
-                'index' => array()
-            )
-        );
+        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
     }
 
     /**
@@ -43,61 +43,87 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * Проверка существования идентификатора
-     * @param $id
+     * @param App_Core_Model_Data_Store $type
+     * @return array
+     */
+    public function getObjects(App_Core_Model_Data_Store $type)
+    {
+        $objects = $this->_getObjects($type);
+        return $objects['index'];
+    }
+
+    /**
+     * Возвращает индекс значений
+     * Получить объекты с типом $type
+     * @param $type
+     */
+    private function _getObjects(App_Core_Model_Data_Store $type)
+    {
+        if(!array_key_exists($type->get('code'), $this->_objects)) {
+
+            $this->_objects[$type->get('code')] = array(
+                self::WRITE => array(),
+                self::READ  => array(),
+                'index' => array()
+            );
+
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('possibility_get_objects', array(
+                    'id_possibility'    => $this->getData('id'),
+                    'id_object_type'    => $type->get('id')
+                )
+            );
+
+            if($result->rowCount() > 0){
+                foreach($result->fetchAll() as $row){
+                    $mode = ('W' === $row['o_rw']) ? self::WRITE : self::READ;
+                    $this->_add($type, (int)$row['o_id_object'], $mode);
+                }
+            }
+        }
+
+        return $this->_objects[$type->get('code')];
+    }
+
+    /**
+     * @param App_Core_Model_Data_Store $type
+     * @param int $id
      * @return bool
      */
-    public function has($id)
+    public function has(App_Core_Model_Data_Store $type, $id)
     {
-        return in_array($id, $this->_getIndex());
+        return in_array($id, $this->getObjects($type));
     }
 
     /**
      * Установка прав на чтение/запись
      * По умолчанию проставляет все объекты как на чтение
-     * @param App_Core_Model_Data_Store $store
+     * @param App_Core_Model_Data_Store $type
+     * @param App_Core_Model_Data_Store $data
      */
-    public function setPrivileges(App_Core_Model_Data_Store $store)
+    public function assignPrivileges(App_Core_Model_Data_Store $type, App_Core_Model_Data_Store $data)
     {
-        if($this->has($store->get('id'))) {
-            $possibility = $this->getData('possibility');
-            if(in_array($store->get('id'), $possibility[self::WRITE])) {
-                $store->setWritable(true);
+        if($this->has($type, $data->get('id'))) {
+            $objects = $this->getObjects($type);
+            if(in_array($data->get('id'), $objects[self::WRITE])) {
+                $data->setWritable(true);
             } else {
-                $store->setWritable(false);
+                $data->setWritable(false);
             }
         }
     }
 
     /**
-     * @param $id
-     * @param string $mode (read|write)
+     * @param App_Core_Model_Data_Store $type
+     * @param int $id
+     * @param string $mode
      * @return HM_Model_Account_Access_Possibility
      */
-    public function add($id, $mode)
+    private function _add(App_Core_Model_Data_Store $type, $id, $mode)
     {
-        if(!$this->has($id)) {
-            if(self::READ === $mode || self::WRITE === $mode) {
-                $possibility = $this->getData('possibility');
-                $possibility[$mode][] = $possibility['index'][] = $id;
-                $this->setData('possibility', $possibility);
-            }
+        if(self::READ === $mode || self::WRITE === $mode) {
+            $this->_objects[$type->get('code')][$mode][] = $this->_objects[$type->get('code')]['index'][] = $id;
         }
         return $this;
     }
-
-    /**
-     * Получить индекс
-     * @return array
-     */
-    protected function _getIndex()
-    {
-        $possibility = $this->getData('possibility');
-        return $possibility['index'];
-    }
-
-    // Восстанавливают объекты
-/*    public function getUser(){}
-    public function getRole(){}
-    public function getCompany(){}*/
 }

@@ -1,9 +1,8 @@
 dojo.provide("core.resources.Ajax");
-require(["core/Loader"], function(Loader){
+require([], function(){
     core.resources.Ajax = function(){};
     dojo.declare("core.resources.Ajax", null, {
         constructor: function(){
-            this.timeout = 10000;
         },
         xhr: function(params){
             var xhr = dojo.xhr(params.method, {

@@ -21,7 +21,7 @@ class App_Zend_Controller_Action_Helper_Access extends Zend_Controller_Action_He
      * @param int $companyOwner
      * @return array
      */
-    public function getPossibilities($type, $companyOwner)
+    public function getPossibilities($type, $companyOwner, /*временно вместо self::getActionAllowedRoles*/$roles)
     {
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
@@ -29,6 +29,7 @@ class App_Zend_Controller_Action_Helper_Access extends Zend_Controller_Action_He
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType($type);
+
         foreach($this->getActionAllowedRoles() as $role) {
             $accessColl->resetFilters();
             $accessColl->setAccessFilter(
