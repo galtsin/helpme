@@ -132,7 +132,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
                     if($result->rowCount() > 0){
                         foreach($result->fetchAll() as $row){
                             $ids[] = (int)$row['o_id_object'];
-                            'W' === $row['o_rw'] ? $possibility->addWrite((int)$row['o_id_object']) : $possibility->addRead((int)$row['o_id_object']);
+                            'W' === $row['o_rw'] ? $possibility->add((int)$row['o_id_object'], $possibility::WRITE) : $possibility->add((int)$row['o_id_object'], $possibility::READ);
                         }
                     }
                 }

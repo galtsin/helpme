@@ -18,4 +18,24 @@ class App_Zend_Controller_Action_Helper_Access extends Zend_Controller_Action_He
             }
         }
     }
+
+    // Получить разешенные для действия роли
+    public function getActionAllowedRoles()
+    {
+
+    }
+
+    // Проверить разрешен ли ресурс
+    public function isAllowed()
+    {
+
+    }
+
+    // Пометить на чтение/запись
+    public function mark()
+    {
+
+    }
+
+
 }

@@ -47,6 +47,7 @@ class Default_IndexController extends App_Zend_Controller_Action
         Zend_Debug::dump($input->isValid());
         Zend_Debug::dump($input->getEscaped('igor'));
 
+
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
@@ -56,23 +57,44 @@ class Default_IndexController extends App_Zend_Controller_Action
         $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
 
+
+
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE')
             ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
         $accessColl->setAccessFilter($user, $pageRole, 15)->getCollection();
         $lines = $accessColl->getDataIterator();
 
-        $possibility = current($accessColl->getPossibilities())->getData('possibility');
+        $possibility = current($accessColl->getPossibilities());
+
 
         // TODO: если объект находится в possibility, то доступ к нему разрешен!!!
 
-
         foreach($lines as $line) {
-            if(in_array($line->get('id'), $possibility['read'])) {
-                $line->setWritable(false);
-            }
+            $possibility->setPrivileges($line);
         }
+
         Zend_Debug::dump($lines);
+
+        // 1. Проверить доступ к функции и получить роли
+        // 2. Получить список доступных ресурсов Possibility
+        // 3. Проставить режимы записи/чтения объектов
+
+        // Определить какой компании принадлежит ресурс - параметр company_owner
+        // user + company_owner + currentFunctionRole
+
+/*        $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
+            ->restore($this->getRequest()->getParam('line'));
+        if($line instanceof HM_Model_Counseling_Structure_Line) {
+            $accessColl = new HM_Model_Account_Access_Collection();
+            $accessColl->setType('LINE');
+            $accessColl->setAccessFilter($user, $pageRole, $line->getData('company_owner'))->getCollection();
+            $possibility = current($accessColl->getPossibilities())->getData('possibility');
+            if(in_array($line->getData('id'), $possibility['read'])) {
+                $line->getData()->setWritable(false);
+            }
+        }*/
+
     }
 
     public function isValid(array $values)
