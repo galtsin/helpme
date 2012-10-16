@@ -93,9 +93,12 @@
     <possibility_get_identity>
         <id_possibility type="int"/>
     </possibility_get_identity>
-    <possibility_get_identity_by_urc>
+    <possibility_by_urc>
         <id_user type="integer"/>
         <id_role type="integer"/>
         <id_company type="integer"/>
-    </possibility_get_identity_by_urc>
+    </possibility_by_urc>
+    <possibility_by_company>
+        <id_company type="integer"/>
+    </possibility_by_company>
 </functions>

@@ -59,12 +59,14 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
             if($this->isIdentity()){
                 // Делегируем обновление записей
                 if($this->_update() > 0) {
+                    $this->getData()->unmarkDirty();
                     return true;
                 }
             } else {
                 $result = $this->_insert();
                 if(is_int($result) && $result > 0) {
                     $this->getData()->set('id', $result);
+                    $this->getData()->unmarkDirty();
                     return true;
                 }
             }

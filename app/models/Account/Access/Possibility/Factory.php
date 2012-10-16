@@ -2,13 +2,15 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 16.10.12
  */
 /**
- * ru:
+ *
  */
 class HM_Model_Account_Access_Possibility_Factory extends App_Core_Model_FactoryAbstract
 {
+    /**
+     * Инициализация
+     */
     protected function _init()
     {
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
@@ -36,6 +38,7 @@ class HM_Model_Account_Access_Possibility_Factory extends App_Core_Model_Factory
                 ->set('user', $row['o_id_user'])
                 ->set('company', $row['o_id_company'])
                 ->set('role', $row['o_id_role']);
+            $possibility->getData()->unmarkDirty();
         }
 
         return $possibility;

@@ -34,6 +34,7 @@ class HM_Model_Counseling_Structure_Level_Factory extends App_Core_Model_Factory
                 ->set('id', $id)
                 ->set('name', $row['o_name'])
                 ->set('priority', $row['o_priority']);
+            $level->getData()->unmarkDirty();
         }
 
         return $level;

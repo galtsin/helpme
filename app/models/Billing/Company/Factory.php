@@ -54,6 +54,7 @@ class HM_Model_Billing_Company_Factory extends App_Core_Model_FactoryAbstract
                 ->set('inn', $row['o_inn'])
                 ->set('kpp', $row['o_kpp'])
                 ->set('user_creator', $row['o_id_creator']);
+            $company->getData()->unmarkDirty();
         }
 
         return $company;

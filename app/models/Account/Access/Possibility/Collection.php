@@ -4,7 +4,7 @@
  * @author: GaltsinAK
  */
 /**
- * ru: Коллекция по сущностям Пользователь
+ * ru: Коллекция по сущностям Possibility
  */
 class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Collection_Filter
 {
@@ -30,7 +30,7 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
             foreach($this->getEqualFilterValues('company') as $company) {
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                     ->execute('possibility_by_company', array(
-                        'company' => $company
+                        'id_company' => $company
                     )
                 );
                 if($result->rowCount() > 0) {

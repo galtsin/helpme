@@ -36,6 +36,7 @@ class HM_Model_Counseling_Structure_Line_Factory extends App_Core_Model_FactoryA
                 ->set('description', $row['o_description'])
                 ->set('logo', $row['o_logo'])
                 ->set('company_owner', (int)$row['o_id_company']);
+            $line->getData()->unmarkDirty();
         }
 
         return $line;

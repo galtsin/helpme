@@ -51,6 +51,7 @@ class HM_Model_Account_User_Factory extends App_Core_Model_FactoryAbstract
                     ->set('logo', $row['logo']);
 
             }
+            $user->getData()->unmarkDirty();
         }
 
         return $user;

@@ -62,9 +62,9 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         if(!array_key_exists($type->get('code'), $this->_objects)) {
 
             $this->_objects[$type->get('code')] = array(
-                self::WRITE => array(),
-                self::READ  => array(),
-                'index' => array()
+                self::WRITE => array(), // идентификаторы на запись
+                self::READ  => array(), // идентификаторы на чтение
+                'index' => array() // общий индекс всех идентификаторов
             );
 
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)

@@ -39,6 +39,7 @@ class HM_Model_Account_InvitedGuest_Factory extends App_Core_Model_FactoryAbstra
                         ->set('middle_name', $row['o_middle_name'])
                         ->set('activated', $row['o_activated'])
                         ->set('create_date',$row['o_create_date']);
+            $invitedGuest->getData()->unmarkDirty();
         }
 
         return $invitedGuest;

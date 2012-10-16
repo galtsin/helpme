@@ -99,7 +99,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
                 // Получить Possibility
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('possibility_get_identity_by_urc', array(
+                    ->execute('possibility_by_urc', array(
                         'id_user'       => $accessible['user'],
                         'id_role'       => $accessible['role'],
                         'id_company'    => $accessible['company'],
