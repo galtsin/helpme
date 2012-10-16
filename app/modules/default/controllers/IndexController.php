@@ -58,7 +58,6 @@ class Default_IndexController extends App_Zend_Controller_Action
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
 
 
-
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE')
             ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
@@ -74,7 +73,11 @@ class Default_IndexController extends App_Zend_Controller_Action
             $possibility->setPrivileges($line);
         }
 
-        Zend_Debug::dump($lines);
+        //Zend_Debug::dump($lines);
+
+        $pos = array();
+
+
 
         // 1. Проверить доступ к функции и получить роли
         // 2. Получить список доступных ресурсов Possibility
@@ -89,10 +92,12 @@ class Default_IndexController extends App_Zend_Controller_Action
             $accessColl = new HM_Model_Account_Access_Collection();
             $accessColl->setType('LINE');
             $accessColl->setAccessFilter($user, $pageRole, $line->getData('company_owner'))->getCollection();
-            $possibility = current($accessColl->getPossibilities())->getData('possibility');
-            if(in_array($line->getData('id'), $possibility['read'])) {
-                $line->getData()->setWritable(false);
+            $possibility = current($accessColl->getPossibilities());
+            if($possibility->has($line->getData('id'))){
+                echo "Объект доступен пользователю";
             }
+            // Расставить режимы на чтение/запись
+            $possibility->setPrivileges($line);
         }*/
 
     }
