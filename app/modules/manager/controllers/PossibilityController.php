@@ -46,6 +46,44 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
     public function getManagerAction()
     {
+        $request = $this->getRequest();
+        $access = HM_Model_Account_Access::getInstance();
+
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        $manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($request->getParam('manager'));
+
+        if($manager instanceof HM_Model_Account_User) {
+            // Получить список компаний от имени которых пользователь может назначать права другим
+            $companiesAllowed = array();
+            foreach($user->getRoles() as $roleIdentifier => $companies) {
+                if($access->getAcl()->inheritsRole($roleIdentifier, 'ADM_COMPANY') || $roleIdentifier === 'ADM_COMPANY') {
+                    $companiesAllowed = array_merge($companies);
+                }
+            }
+            $data = array();
+            $data['manager'] = $manager->getData('id');
+            foreach($manager->getRoles() as $roleIdentifier => $companies) {
+                foreach($companies as $company) {
+                    if(in_array($company, $companiesAllowed)){
+                        $data['roles'][$roleIdentifier][] = $company;
+                    }
+                }
+            }
+            $this->view->assign('data', $data);
+        }
+    }
+
+    public function addManagerAction()
+    {
+
+    }
+
+    public function editPossibilityObjectsAction()
+    {
 
     }
 }

@@ -1,0 +1,38 @@
+<?php
+$data = $this->data;
+$companyFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory');
+$manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+    ->restore($data['manager']);
+$access = HM_Model_Account_Access::getInstance();
+?>
+<table class="table table-bordered">
+    <colgroup>
+        <col width="300"/>
+        <col/>
+    </colgroup>
+    <thead>
+    <tr>
+        <th colspan="2"><?=$manager->getData('email');?> (<?=$manager->getData('last_name');?> <?=$manager->getData('first_name');?> <?=$manager->getData('middle_name');?>) </th>
+    </tr>
+    </thead>
+    <tfoot>
+    <tr>
+        <td colspan="2">
+            <button type="button">Добавить</button>
+        </td>
+    </tr>
+    </tfoot>
+    <tbody>
+    <?php foreach($data['roles'] as $roleIdentifier => $companies): ?>
+    <tr>
+        <td rowspan="<?=count($companies) + 1 ?>"><?=$access->getRole($roleIdentifier)->get('name')?></td>
+        <th>Компании</th>
+    </tr>
+    <?php foreach($companies as $company): ?>
+    <tr>
+        <td><a data-action="edit-possibility-objects"><?=$companyFactory->restore($company)->getData('name')?></a></td>
+    </tr>
+    <?php endforeach; ?>
+    <?php endforeach; ?>
+    </tbody>
+</table>

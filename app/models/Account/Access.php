@@ -53,6 +53,9 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
         $this->_acl = Zend_Registry::get('acl');
         $this->_acl->deny();
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+        // TODO: Необходимо ли?
+        $this->getRoles();
+        $this->getTypes();
     }
 
     /**

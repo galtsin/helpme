@@ -45,7 +45,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
 
         // line => tariffs
         $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
-            ->restore(10);
+            ->restore(11);
         if($line instanceof HM_Model_Counseling_Structure_Line) {
             $tariffColl = new HM_Model_Billing_Tariff_Collection();
             $tariffColl->addEqualFilter('line', $line->getData('id'));
