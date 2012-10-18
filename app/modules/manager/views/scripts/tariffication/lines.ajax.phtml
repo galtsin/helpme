@@ -27,7 +27,7 @@ $data = $this->data;
             </tr>
                 <?php endforeach; ?>
         <tr>
-            <td colspan="3"><div style="text-align: right;"><button type="button" data-action="addTariff/10">Добавить</button></div></td>
+            <td colspan="3"><div style="text-align: right;"><button type="button" data-action="addTariff/<?=$entry['line']->get('id')?>">Добавить</button></div></td>
         </tr>
             <?php endforeach; ?>
         </tbody>

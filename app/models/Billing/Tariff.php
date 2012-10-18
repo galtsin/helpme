@@ -88,7 +88,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
      */
     protected function _remove()
     {
-        if($this->getData()->isDirty()) {
+        if($this->isIdentity()) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('tarif_del', array(
                     'id_tarif'              => $this->getData('id')

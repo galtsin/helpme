@@ -85,6 +85,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
                 }
             } else {
                 // Какие то параметры для вывода в шаблоне
+                $this->view->line = $line->getData();
             }
         }
     }

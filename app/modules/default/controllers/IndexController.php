@@ -44,8 +44,8 @@ class Default_IndexController extends App_Zend_Controller_Action
 
         $input = new Zend_Filter_Input(array(), $var1);
         $input->setData(array('igor' => '123'));
-        Zend_Debug::dump($input->isValid());
-        Zend_Debug::dump($input->getEscaped('igor'));
+        //Zend_Debug::dump($input->isValid());
+        //Zend_Debug::dump($input->getEscaped('igor'));
 
 
         // Получить текущего пользователя
@@ -77,7 +77,7 @@ class Default_IndexController extends App_Zend_Controller_Action
         $b = array();
         $b[] = $a->toArray();
 
-        Zend_Debug::dump(Zend_Json::encode(array('data' => array('count' => 10, 'items' => $b))));
+        //Zend_Debug::dump(Zend_Json::encode(array('data' => array('count' => 10, 'items' => $b))));
 
 
 
