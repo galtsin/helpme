@@ -21,14 +21,9 @@ var t = new function(){
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
-
-<p>Добро пожаловать в систему online помощи - &laquo;Helpme&raquo;</p>
-<form id="testme">
-    <label for="hello">Тестовое поле</label>
-    <input type="text" id="hello" name="level[name]"/>
-    <label for="test">Тестовое поле</label>
-    <input type="text" id="test" name="level[test]"/>
-</form>
+<div style="text-align: center; margin: 20px 0">
+    <img src="<?php echo $this->baseUrl('theme/default/images/hm.jpg')?>"/>
+</div>
 
 <!-- Шаблон для -->
 <script id="entry-template" type="text/x-handlebars-template">

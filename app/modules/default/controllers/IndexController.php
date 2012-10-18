@@ -72,9 +72,12 @@ class Default_IndexController extends App_Zend_Controller_Action
             $possibility->assignPrivileges(HM_Model_Account_Access::getInstance()->getType('LINE'), $line);
         }
 
-        Zend_Debug::dump($lines);
+        $a = new App_Core_Model_Data_Store();
+        $a->set('test2', 'test2');
+        $b = array();
+        $b[] = $a->toArray();
 
-        $pos = array();
+        Zend_Debug::dump(Zend_Json::encode(array('data' => array('count' => 10, 'items' => $b))));
 
 
 

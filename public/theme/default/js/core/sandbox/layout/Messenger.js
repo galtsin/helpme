@@ -34,6 +34,23 @@ require([], function(){
                 case '101':
             }*/
             return "<span>Данные успешно обновлены</span>";
+        },
+        _fillText: function(status){
+            var text = '';
+            switch(status){
+                case 'ok':
+                    text = "Операция выполнена успешно";
+                    break;
+                case 'failed':
+                    text = "Во время выполнения произошла ошибка";
+                    break;
+                case 'disconnect':
+                    text = "Отсутствует соединение с сервером";
+                    break;
+                default:
+                    text = "Статус сообщения неопределен";
+            }
+            return text;
         }
     });
 });

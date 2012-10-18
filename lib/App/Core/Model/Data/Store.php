@@ -134,6 +134,7 @@ final class App_Core_Model_Data_Store
 
     /**
      * TODO: А нужен ли?
+     * @deprecated
      * @param mixed $key
      * @param mixed $value
      * @param bool $recursive
