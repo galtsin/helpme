@@ -1,7 +1,7 @@
-dojo.provide("core.sandbox.layout.Messenger");
+dojo.provide("core.layout.Messenger");
 require([], function(){
-    core.sandbox.layout.Messenger = function(){};
-    dojo.declare("core.sandbox.layout.Messenger", null, {
+    core.layout.Messenger = function(){};
+    dojo.declare("core.layout.Messenger", null, {
         _delay: 2000,
         _timeout: 5000,
         _message: null,

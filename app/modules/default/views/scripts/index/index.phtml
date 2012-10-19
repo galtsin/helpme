@@ -3,7 +3,7 @@ $json = $this->json;
 ?>
 <?php
 $jScript = <<<JS
-require([]);
+require(["core/Layout"]);
 dojo.ready(function(){
 var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
 console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
@@ -16,12 +16,17 @@ var t = new function(){
     //this['test'].call(this, []);
 };
 
+var Layout = core.Layout({messenger: dojo.byId('messenger'), processing: dojo.byId('processing')});
+
+dojo.connect(window, "onkeypress", function(event){
+    console.log(event.keyCode);
+});
 
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
-<div style="text-align: center; margin: 20px 0">
+<div style="text-align: center; margin: 20px 0 0; padding: 100px 0; background: #f3f3f3;">
     <img src="<?php echo $this->baseUrl('theme/default/images/hm.jpg')?>"/>
 </div>
 
