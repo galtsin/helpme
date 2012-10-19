@@ -8,6 +8,7 @@ dojo.ready(function(){
 var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
 console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
 var processing = core.layout.Processing({node: dojo.byId('messenger')});
+console.log(processing);
 processing.show({type: 2});
 
 });

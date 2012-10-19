@@ -3,10 +3,12 @@ require(["dojo/_base/fx"], function(fx){
     core.layout.Processing = function(){};
     dojo.declare("core.layout.Processing", null, {
         constructor: function(options){
-            if(!options.node) throw new Error({message: 'Не указан узел'});
-            this._node      = options.node; // Узел, который отображает процесс
-            this.timeout    = options.timeout || 10000; // Время автоновного завершения процесса
-            this.duration   = 0; // Продолжительность анимации проявления/исчезновения узла
+            this._init = this._intersection({
+                node:       null,   // Узел, который отображает процесс
+                timeout:    10000,  // Время автоновного завершения процесса
+                duration:   100     // Продолжительность анимации проявления/исчезновения узла
+            }, options || {});
+            if(!options.node) throw new Error('Не указан узел node для отображения процессов');
         },
         _intersection: function(recipient, source){
             for(var option in source) {
@@ -16,47 +18,60 @@ require(["dojo/_base/fx"], function(fx){
             }
             return recipient;
         },
-        // Отобразить процесс
-        show: function(options){
+        /**
+         * Отобразить процесс
+         * @param type
+         * @return {*|Number}
+         */
+        show: function(type){
             var that = this;
-            var settings = this._intersection({
-                type:       0
-            }, options || {});
-
-            // Получить
-            switch(settings.type) {
+            switch(type) {
                 case 0:
-                    settings.text = 'отправка данных';
+                    that._fillText('Отправка данных');
                     break;
                 case 1:
-                    settings.text = 'получение данных';
+                    that._fillText('Получение данных');
                     break;
                 default:
-                    settings.text = 'обработка данных';
+                    that._fillText('Обработка данных');
             }
 
-            that._fillText(settings.text);
+            // Показать процесс
             setTimeout(function(){
-                fx.fadeIn({node: that._node, duration: that.duration}).play();
+                fx.fadeIn({
+                    node:       that._init.node,
+                    duration:   that._init.duration
+                }).play();
             }, 0);
 
             // Автономное завершение процесса
             return setTimeout(function(){
                 that.hide();
-            }, that.timeout);
+            }, that._init.timeout);
         },
-        // Скрыть процесс
+        /**
+         * Скрыть процесс
+         */
         hide: function(){
-            fx.fadeOut({node: this._node, duration: this.duration}).play();
+            fx.fadeOut({
+                node:       this._init.node,
+                duration:   this._init.duration
+            }).play();
         },
-        // Описание процесса
+        /**
+         * Текст процесса
+         * @param text
+         * @private
+         */
         _fillText: function(text){
-            this._node.innerHTML = '<span id="processing-data">' + text + '</span>';
+            this._init.node.innerHTML = '<span id="processing-text">' + text + '</span>';
         },
-        // Управление процессом
+        /**
+         * Управление процессом
+         * @param callback
+         */
         process: function(callback){
-            // Открываем доступ к переменным текущего класса
-            callback.call(this);
+            callback.call(this); // Открываем доступ к переменным текущего класса
         }
     });
 });
