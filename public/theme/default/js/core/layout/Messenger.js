@@ -5,10 +5,24 @@ require([], function(){
         _delay: 2000,
         _timeout: 5000,
         _message: null,
-        constructor: function(node){
-            this._node = node;
+        constructor: function(options){
+            if(!options.node) throw new Error({message: 'Не указан узел'});
+            this._node = options.node;
         },
-        send: function(args){
+        _intersection: function(recipient, source){
+            for(var option in source) {
+                if(source.hasOwnProperty(option) && recipient.hasOwnProperty(option)) {
+                    recipient[option] = source[option];
+                }
+            }
+            return recipient;
+        },
+        send: function(options){
+            var settings = this._intersection({
+                duration:   500,
+                delay:      100
+            }, options || {});
+
             if(null !== args && "object" == typeof args) {
                 var that = this;
                 this._node.innerHTML = this._getMessage(args.code);

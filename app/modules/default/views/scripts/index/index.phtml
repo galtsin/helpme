@@ -3,24 +3,12 @@ $json = $this->json;
 ?>
 <?php
 $jScript = <<<JS
-require(["core/Layout"]);
+require(["core/layout/Processing"]);
 dojo.ready(function(){
 var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
 console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
-
-var t = new function(){
-    this.test = function(){
-        alert('test');
-    };
-
-    //this['test'].call(this, []);
-};
-
-var Layout = core.Layout({messenger: dojo.byId('messenger'), processing: dojo.byId('processing')});
-
-dojo.connect(window, "onkeypress", function(event){
-    console.log(event.keyCode);
-});
+var processing = core.layout.Processing({node: dojo.byId('messenger')});
+processing.show({type: 2});
 
 });
 JS;

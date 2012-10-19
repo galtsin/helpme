@@ -1,12 +1,12 @@
-dojo.provide("core.sandbox.layout.Processing");
+dojo.provide("core.layout.Processing");
 require(["dojo/_base/fx"], function(fx){
-    core.sandbox.layout.Processing = function(){};
-    dojo.declare("core.sandbox.layout.Processing", null, {
+    core.layout.Processing = function(){};
+    dojo.declare("core.layout.Processing", null, {
         constructor: function(options){
-            if(!options.node) {
-                throw new Error({message: 'Не указан узел'});
-            }
-            this._node = options.node;
+            if(!options.node) throw new Error({message: 'Не указан узел'});
+            this._node      = options.node; // Узел, который отображает процесс
+            this.timeout    = options.timeout || 10000; // Время автоновного завершения процесса
+            this.duration   = 0; // Продолжительность анимации проявления/исчезновения узла
         },
         _intersection: function(recipient, source){
             for(var option in source) {
@@ -16,52 +16,42 @@ require(["dojo/_base/fx"], function(fx){
             }
             return recipient;
         },
-        // Показать процесс
+        // Отобразить процесс
         show: function(options){
             var that = this;
             var settings = this._intersection({
-                timeout:    10000,
-                duration:   500,
                 type:       0
             }, options || {});
 
             // Получить
             switch(settings.type) {
                 case 0:
-                    settings.text = 'обработка данных';
-                    break;
-                case 1:
                     settings.text = 'отправка данных';
                     break;
-                case 3:
+                case 1:
                     settings.text = 'получение данных';
                     break;
+                default:
+                    settings.text = 'обработка данных';
             }
 
-            this._node.appendChild(this._fillText(settings.text));
+            that._fillText(settings.text);
             setTimeout(function(){
-                fx.fadeIn({node: this._node, duration: settings.duration}).play();
+                fx.fadeIn({node: that._node, duration: that.duration}).play();
             }, 0);
 
             // Автономное завершение процесса
             return setTimeout(function(){
                 that.hide();
-            }, settings.timeout);
+            }, that.timeout);
         },
         // Скрыть процесс
-        hide: function(options){
-            var settings = this._intersection({
-                timeout: 10000,
-                duration: 500
-            }, options || {});
-            fx.fadeOut({node: this._node, duration: settings.duration}).play();
+        hide: function(){
+            fx.fadeOut({node: this._node, duration: this.duration}).play();
         },
         // Описание процесса
         _fillText: function(text){
-            var span = document.createElement('span');
-            span.setAttribute('id', 'data-processing');
-            span.innerHTML = text;
-            return span;
+            this._node.innerHTML = '<span id="processing-data">' + text + '</span>';
         },
         // Управление процессом
         process: function(callback){

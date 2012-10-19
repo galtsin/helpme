@@ -5,13 +5,18 @@ require([
     core.Layout = function(){};
     dojo.declare("core.Layout", null, {
         constructor: function(options) {
-            var initialization = this._intersection({
+            this.init = this._intersection({
+                timeout: options.timeout || 10000,
                 messenger: {},
-                processing: {}
+                processing: {
+                    timeout: options.timeout || 10000
+                }
             }, options);
 
-            this.Messenger = new Messenger(initialization.messenger);
-            this.Processing = new Processing(initialization.processing);
+            this.init.processing.timeout = this.init.timeout;
+
+            this.Messenger = new Messenger(this.init.messenger);
+            this.Processing = new Processing(this.init.processing);
         },
         /**
          * Отправить данные на сервер
@@ -73,7 +78,7 @@ require([
             // Инициализация
             var that = this;
             var requestParams = {
-                timeout:        10000,
+                timeout:        that.init.timeout,
                 content:        options.args || {},
                 url:            options.url,
                 preventCache:   options.preventCache || false
@@ -103,12 +108,13 @@ require([
             that.Processing.process(function(){
                 var self = this;
                 if(options.process){
-                    var showOptions = {timeout: requestParams.timeout};
-                    if('POST' == options.method || 'PUT' || 'DELETE'){
+                    var showOptions = {};
+
+                    if('POST' == options.method || 'PUT' || 'DELETE')
+                        showOptions.type = 0;
+                    else
                         showOptions.type = 1;
-                    } else {
-                        showOptions.type = 2;
-                    }
+
                     var handleTimeout = self.show(showOptions);
                     deferred.addBoth(function(response){
                         clearTimeout(handleTimeout);
