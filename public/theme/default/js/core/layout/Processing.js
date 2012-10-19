@@ -9,6 +9,18 @@ require(["dojo/_base/fx"], function(fx){
                 duration:   100     // Продолжительность анимации проявления/исчезновения узла
             }, options || {});
             if(!options.node) throw new Error('Не указан узел node для отображения процессов');
+
+            // Типы процессов
+            this.types = {
+                SEND:       0,
+                LOAD:       1,
+                PROCESSING: 2,
+                _values:     [
+                    'Отправка данных',
+                    'Получение данных',
+                    'Обработка данных'
+                ]
+            };
         },
         _intersection: function(recipient, source){
             for(var option in source) {
@@ -20,21 +32,12 @@ require(["dojo/_base/fx"], function(fx){
         },
         /**
          * Отобразить процесс
-         * @param type
+         * @param code
          * @return {*|Number}
          */
-        show: function(type){
+        show: function(code){
             var that = this;
-            switch(type) {
-                case 0:
-                    that._fillText('Отправка данных');
-                    break;
-                case 1:
-                    that._fillText('Получение данных');
-                    break;
-                default:
-                    that._fillText('Обработка данных');
-            }
+            that._fillText(code);
 
             // Показать процесс
             setTimeout(function(){
@@ -60,11 +63,16 @@ require(["dojo/_base/fx"], function(fx){
         },
         /**
          * Текст процесса
-         * @param text
+         * @param code
          * @private
          */
-        _fillText: function(text){
-            this._init.node.innerHTML = '<span id="processing-text">' + text + '</span>';
+        _fillText: function(code){
+            if('number' == typeof code && (0 <= code >= this.types._values.length)) {
+                this._init.node.innerHTML = '<span id="processing-text">' + this.types._values[code] + '</span>';
+            } else {
+                throw new Error('Указан неверный тип процесса');
+            }
+            // TODO: доделать!!!!!!!
         },
         /**
          * Управление процессом
