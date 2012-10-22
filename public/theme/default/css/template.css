@@ -126,8 +126,8 @@ body {
     left:0;
     top: 0;
     background: #fff;
-    opacity: 0.5;
-    filter: alpha(Opacity=50);
+    opacity: 0.6;
+    filter: alpha(Opacity=60);
 }
 #loader span {
     display: block;
@@ -150,7 +150,7 @@ body {
 #messenger span {
     display: block;
     position: relative;
-    width: 300px;
+    width: 350px;
     margin: auto;
     text-align: center;
     padding: 10px 0;

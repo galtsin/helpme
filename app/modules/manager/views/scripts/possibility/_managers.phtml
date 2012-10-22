@@ -1,0 +1,168 @@
+<?php
+$data = $this->data;
+?>
+<?php
+$jScript = <<<JS
+require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level", "core/Sandbox",
+"core/sandbox/helpers/Validate", "core/sandbox/helpers/Form", "core/sandbox/layout/Messenger"]);
+dojo.ready(function(){
+    //Первоначальная инициализация
+    (function(){
+        dojo.hash('!/managers');
+        Sandbox = new core.Sandbox();
+        Messenger = new core.sandbox.layout.Messenger(dojo.byId("messenger"));
+    })();
+
+
+
+    dojo.subscribe('getManager', function(args){
+        Sandbox.Layout.contentLoader('manager/possibility/get-manager', args).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentManagers'), results);
+            dojo.behavior.apply();
+        });
+    });
+
+    dojo.subscribe('editTariffInfo', function(args){
+        Sandbox.Layout.contentLoader('manager/tariffication/edit-tariff-info', args).addCallback(function(results){
+            Sandbox.Layout.placeContent(dojo.byId('contentTariffs'), results);
+            dojo.behavior.apply();
+            // TODO: Только если тип доступа == writable
+            var formNode = dojo.byId("edit-tariff-info");
+            if(null !== formNode && "object" === typeof formNode) {
+
+                // Обновление тарифа
+                var Validate = new core.sandbox.helpers.Validate(formNode);
+                var formSendHandle = dojo.connect(formNode["send"], 'onclick', function(){
+                    Validate.clear();
+                    Sandbox.Layout.dataSender('manager/tariffication/edit-tariff-info/tariff/' + args.tariff, dojo.formToObject(formNode)).addCallback(function(results){
+                        if(results['result'] == args.tariff){
+                            setTimeout(function(){
+                                Messenger.send({});
+                            }, 600);
+                        } else {
+                            Validate.display(results['error']['messages']);
+                        }
+                    });
+                });
+
+                // Удаление тарифа
+                if(true == formNode.hasOwnProperty("remove")) {
+                    var remove = dojo.connect(formNode["remove"], "onclick", function(event){
+                        Sandbox.Layout.dataSender('manager/tariffication/remove-tariff/tariff/' + args.tariff).addCallback(function(results){
+                            if(results['result'] == args.tariff){
+                                dojo.disconnect(remove);
+                                dojo.disconnect(formSendHandle);
+                                dojo.publish('getTariffs');
+                            }
+                        });
+                    });
+                }
+            }
+
+            return results;
+        });
+    });
+
+    dojo.subscribe('addManager', function(args){
+        // Форма добавления Пользователей в Группу
+        Sandbox.Layout.contentLoader('manager/possibility/add-manager', {}).addCallback(function(results){
+            Sandbox.Layout.Dialog.set("title", "Добавление менеджера");
+            Sandbox.Layout.Dialog.set("content", results);
+            Sandbox.Layout.Dialog.show();
+            var formNode = dojo.byId("add-tariff");
+            var Validate = new core.sandbox.helpers.Validate(formNode);
+            var formSendHandle = dojo.connect(formNode["send"], "onclick", function(event){
+                Sandbox.Layout.dataSender('manager/tariffication/add-tariff', dojo.formToObject(formNode)).addCallback(function(results){
+                    Validate.clear();
+                    if(results['result'] == -1){
+                        Validate.display(results['error']['messages']);
+                        //dojo.disconnect(formSendHandle);
+                    } else {
+                        Sandbox.Layout.Dialog.hide();
+                        // Выполнить по истечении срока исчезновения диалога
+                        setTimeout(function(){
+                            // Обновить группы
+                           dojo.publish('getTariffs');
+                        }, /*Sandbox.Layout.Dialog.delay + */Sandbox.Layout.Dialog.duration);
+                    }
+                });
+            });
+            //Закрыть диалог
+            var dialogHideHandle = dojo.connect(Sandbox.Layout.Dialog, "hide", function(){
+                // Отсоединяем все обработчики событий текущего диалога
+                dojo.disconnect(formSendHandle);
+                dojo.disconnect(dialogHideHandle);
+            });
+            return results;
+        });
+    });
+
+    dojo.behavior.add({
+        // Получить панель управления ЛК
+        '[data-action^="#!/getManager"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['manager']);
+            }
+        },
+        // Получить панель управления ЛК
+        '[data-action^="addManager"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), []);
+            }
+        },
+        '[data-action^="#!/removeManager"]': {
+            onclick: function(event){
+                event.preventDefault();
+                dispatcher(event.target.getAttribute("data-action"), ['tariff']);
+            }
+        }
+    });
+
+    dojo.behavior.apply();
+
+    // Диспетчер событий и обработчиков
+    function dispatcher(shortLink, argsIndex) {
+        var actionParams = Sandbox.Layout.parseShortLink(shortLink);
+        dojo.publish(actionParams['action'], Sandbox.Base.indexing(actionParams['args'], argsIndex));
+        if(actionParams.hasOwnProperty('prefix')){
+            dojo.hash(shortLink);
+        }
+    }
+
+
+});
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript')
+?>
+<div id="contentManagers">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="50">
+            <col>
+        </colgroup>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Пользователь</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td colspan="2">
+                    <button type="button" data-action="addManager" name="add">Добавить</button>
+                    <button type="button" data-action="removeManager" name="remove">Удалить</button>
+                </td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <?php foreach($data['managers'] as $manager): ?>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td><a data-action="#!/getManager/<?=$manager->get('id')?>"><?=$manager->get('email')?></a></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

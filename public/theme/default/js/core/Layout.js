@@ -6,7 +6,7 @@ require([
     ], function(lang, Messenger, Processing){
     core.Layout = function(){};
     dojo.declare("core.Layout", null, {
-        _delay: 800,   // Системная задержка. Не изменяется
+        _delay: 500,   // Системная задержка. Не изменяется. Для визуального отображения Процесса
         constructor: function(options) {
             this._init = this._intersection({
                 timeout: 10000,
