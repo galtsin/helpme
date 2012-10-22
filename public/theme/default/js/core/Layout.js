@@ -1,22 +1,26 @@
 dojo.provide("core.Layout");
 require([
+    "dojo/_base/lang",
     "core/layout/Messenger",
-    "core/layout/Processing"], function(Messenger, Processing){
+    "core/layout/Processing"
+    ], function(lang, Messenger, Processing){
     core.Layout = function(){};
     dojo.declare("core.Layout", null, {
+        _delay: 800,   // Системная задержка. Не изменяется
         constructor: function(options) {
-            this.init = this._intersection({
-                timeout: options.timeout || 10000,
+            this._init = this._intersection({
+                timeout: 10000,
                 messenger: {},
-                processing: {
-                    timeout: options.timeout || 10000
-                }
+                processing: {}
             }, options);
 
-            this.init.processing.timeout = this.init.timeout;
-
-            this.Messenger = new Messenger(this.init.messenger);
-            this.Processing = new Processing(this.init.processing);
+            this._init.processing.timeout = this._init.timeout;
+            try {
+                this.Messenger = new Messenger(this._init.messenger);
+                this.Processing = new Processing(this._init.processing);
+            } catch (e){
+                throw new Error('Не указаны обязательные параметры');
+            }
         },
         /**
          * Отправить данные на сервер
@@ -25,12 +29,13 @@ require([
          */
         send: function(options){
             return this._request(this._intersection({
+                url:            '',
                 method:         'POST',
                 format:         'json',
                 args:           {},
                 process:        true,
                 preventCache:   false
-            }, options));
+            }, options || {}));
         },
         /**
          * Загрузить информацию (контент или данные)
@@ -39,14 +44,16 @@ require([
          */
         load: function(options){
             return this._request(this._intersection({
+                url:            '',
                 method:         'GET',
                 format:         'json',
                 args:           {},
                 process:        true,
                 preventCache:   true,
                 node:           null
-            }, options));
+            }, options || {}));
         },
+        // TODO: заменить на dojo.lang::mixin
         /**
          * Передать свойства источника, свойству приемника при условии совпадения свойств
          * @param recipient
@@ -69,16 +76,9 @@ require([
          * @private
          */
         _request: function(options){
-
-            // Проверка URL
-            if(false == options.hasOwnProperty('url')){
-                throw new URIError({message: "URL is undefined"})
-            }
-
             // Инициализация
-            var that = this;
             var requestParams = {
-                timeout:        that.init.timeout,
+                timeout:        this._init.timeout,
                 content:        options.args || {},
                 url:            options.url,
                 preventCache:   options.preventCache || false
@@ -95,7 +95,7 @@ require([
                     requestParams.handleAs = 'text';
             }
 
-
+            var that = this;
             var deferred = new dojo.Deferred(/* Здесь можно указать функцию отмены */ function(){
                 dojo.connect(window, "onkeypress", function(event){
                     if(event.keyCode == dojo.keys.ESCAPE) {
@@ -105,17 +105,13 @@ require([
             });
 
             // Отобразить процесс обработки данных
+            // Порядок действий определяется в deferred
             that.Processing.process(function(){
                 var self = this;
                 if(options.process){
-                    var showOptions = {};
-
-                    if('POST' == options.method || 'PUT' || 'DELETE')
-                        showOptions.type = 0;
-                    else
-                        showOptions.type = 1;
-
-                    var handleTimeout = self.show(showOptions);
+                    var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'SEND' : 'LOAD';
+                    var handleTimeout = self.show(status);
+                    // Первым делом убираем загрузчик
                     deferred.addBoth(function(response){
                         clearTimeout(handleTimeout);
                         self.hide();
@@ -125,14 +121,16 @@ require([
 
                 // Обработать сообщения Приложения
                 deferred.addCallback(function(response){
-                    if(response.result) {
-                        switch (response.status) {
-                            case 'ok':
-                                that.Messenger.send({status: 'PROCESS_OK'});
-                                break;
-                            case 'failed':
-                                that.Messenger.send({status: 'PROCESS_FAILED'});
-                                break;
+                    if(null !== response && 'object' == typeof response) {
+                        if(response.result) {
+                            switch (response.status) {
+                                case 'ok':
+                                    that.Messenger.send('PROCESS_OK');
+                                    break;
+                                case 'failed':
+                                    that.Messenger.send('PROCESS_FAILED');
+                                    break;
+                            }
                         }
                     }
                     return response;
@@ -140,7 +138,7 @@ require([
 
                 // Обработать сообщения Сервера
                 deferred.addErrback(function(ioArgs){
-                    that.Messenger.send({status: 'SERVER_ERROR'});
+                    that.Messenger.send('SERVER_ERROR');
                     return ioArgs;
                 });
 
@@ -167,9 +165,11 @@ require([
             };
 
             // Отправить запрос на сервер
-            dojo.xhr(options.method, requestParams);
-            // TODO :или dojo.xhr(options.method, requestParams);
-            return deferred;
+            setTimeout(function(){
+                dojo.xhr(options.method, requestParams);
+            }, that._delay);
+
+            return deferred; // TODO :или dojo.xhr(options.method, requestParams);
         },
         /**
          * Вставить контент внутрь узла

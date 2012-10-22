@@ -1,14 +1,30 @@
 dojo.provide("core.layout.Messenger");
-require([], function(){
+require([
+    "dojo/_base/lang",
+    "dojo/_base/fx"
+    ], function(lang, fx){
     core.layout.Messenger = function(){};
     dojo.declare("core.layout.Messenger", null, {
-        _delay: 2000,
-        _timeout: 5000,
-        _message: null,
-        constructor: function(options){
-            if(!options.node) throw new Error({message: 'Не указан узел'});
-            this._node = options.node;
+        _statuses: {
+            PROCESS_OK:         'Операция выполнена успешно',
+            PROCESS_FAILED:     'Во время выполнения операции произошла ошибка',
+            SERVER_DISCONNECT:  'Не удалось получить ответ от сервера',
+            SERVER_ERROR:       'Ошибка на сервере'
         },
+        /**
+         * Инициализация модуля
+         * @param options
+         */
+        constructor: function(options){
+            this._init = this._intersection({
+                node:       null,   // Узел, который отображает процесс
+                timeout:    3000,   // Время автоновного завершения процесса
+                duration:   500,    // Продолжительность анимации проявления/исчезновения узла
+                delay:      500     // Задержка проявления сообщения
+            }, options || {});
+            if(!options.node) throw new Error('Не выбран узел node');
+        },
+        // TODO: заменить на dojo.lang::mixin
         _intersection: function(recipient, source){
             for(var option in source) {
                 if(source.hasOwnProperty(option) && recipient.hasOwnProperty(option)) {
@@ -17,57 +33,51 @@ require([], function(){
             }
             return recipient;
         },
-        send: function(options){
-            var settings = this._intersection({
-                duration:   500,
-                delay:      100
-            }, options || {});
+        /**
+         * Отобразить сообщение
+         * @param code
+         * @return {*|Number}
+         */
+        send: function(code){
+            var that = this;
+            that._fillText(code);
 
-            if(null !== args && "object" == typeof args) {
-                var that = this;
-                this._node.innerHTML = this._getMessage(args.code);
-                if(this._delay > 0) {
-                    setTimeout(function(){
-                        that.clear();
-                    }, this._delay);
-                }
-            }
-            var anim = dojo.fadeIn({node: this._node, duration: 500});
-            anim.play();
-            //dojo.removeClass(this._node, "hidden");
+            // Показать процесс
+            setTimeout(function(){
+                fx.fadeIn({
+                    node:       that._init.node,
+                    duration:   that._init.duration,
+                    delay:      that._init.delay
+                }).play();
+            }, 0);
+
+            // Автономное завершение процесса
+            return setTimeout(function(){
+                that.clear();
+            }, that._init.timeout);
         },
+        /**
+         * Очистить сообщения
+         */
         clear: function() {
-            var self = this;
-            var anim = dojo.fadeOut({node: self._node, duration: 500});
-            anim.play();
-            //setTimeout(function(){dojo.addClass(self._node, "hidden");}, self._delay);
+            fx.fadeOut({
+                node:       this._init.node,
+                duration:   this._init.duration,
+                delay:      this._init.delay
+            }).play();
         },
-        _getMessage: function(code){
-            var message = '';
-/*            switch (code) {
-                case '101':
-            }*/
-            return "<span>Данные успешно обновлены</span>";
-        },
+        /**
+         * Текст процесса
+         * @param status
+         * @return {*}
+         * @private
+         */
         _fillText: function(status){
-            var text = '';
-            switch(status){
-                case 'PROCESS_OK':
-                    text = "Операция выполнена успешно";
-                    break;
-                case 'PROCESS_FAILED':
-                    text = "Во время выполнения операции произошла ошибка";
-                    break;
-                case 'SERVER_DISCONNECT':
-                    text = "Не удалось получить ответ от сервера";
-                    break;
-                case 'SERVER_ERROR':
-                    text = "Ошибка на сервере";
-                    break;
-                default:
-                    text = "Статус сообщения неопределен";
+            if(!this._statuses.hasOwnProperty(status)) {
+                throw new Error('Статус сообщения неопределен1');
             }
-            return text;
+            this._init.node.innerHTML = '<span id="messenger-text">' + this._statuses[status] + '</span>';
+            return this._init.node;
         }
     });
 });

@@ -1,27 +1,29 @@
 dojo.provide("core.layout.Processing");
-require(["dojo/_base/fx"], function(fx){
+require([
+    "dojo/_base/lang",
+    "dojo/_base/fx",
+    "dojo/dom-style",
+    "dojo/window"
+    ], function(lang, fx, domStyle, window){
     core.layout.Processing = function(){};
     dojo.declare("core.layout.Processing", null, {
+        _statuses: {
+            SEND:           'Отправка данных',
+            LOAD:           'Получение данных',
+            PROCESSING:     'Обработка данных'
+        },
+        /**
+         * Инициализация модуля
+         * @param options
+         */
         constructor: function(options){
             this._init = this._intersection({
                 node:       null,   // Узел, который отображает процесс
-                timeout:    10000,  // Время автоновного завершения процесса
-                duration:   100     // Продолжительность анимации проявления/исчезновения узла
+                timeout:    10000   // Время автонмного завершения процесса
             }, options || {});
-            if(!options.node) throw new Error('Не указан узел node для отображения процессов');
-
-            // Типы процессов
-            this.types = {
-                SEND:       0,
-                LOAD:       1,
-                PROCESSING: 2,
-                _values:     [
-                    'Отправка данных',
-                    'Получение данных',
-                    'Обработка данных'
-                ]
-            };
+            if(!options.node) throw new Error('Не выбран узел node');
         },
+        // TODO: заменить на dojo.lang::mixin
         _intersection: function(recipient, source){
             for(var option in source) {
                 if(source.hasOwnProperty(option) && recipient.hasOwnProperty(option)) {
@@ -32,19 +34,24 @@ require(["dojo/_base/fx"], function(fx){
         },
         /**
          * Отобразить процесс
-         * @param code
+         * @param status
          * @return {*|Number}
          */
-        show: function(code){
+        show: function(status){
             var that = this;
-            that._fillText(code);
+            that._fillText(status);
+
+            domStyle.set(this._init.node, {
+                'width': window.getBox().w + 'px',
+                'height': window.getBox().h + 'px' // Для абсолютного позиционирования. Для статического - можно указать смещение.
+            });
 
             // Показать процесс
             setTimeout(function(){
-                fx.fadeIn({
-                    node:       that._init.node,
-                    duration:   that._init.duration
-                }).play();
+                domStyle.set(that._init.node, {
+                    'display': 'block',
+                    'visibility': 'visible'
+                });
             }, 0);
 
             // Автономное завершение процесса
@@ -56,23 +63,22 @@ require(["dojo/_base/fx"], function(fx){
          * Скрыть процесс
          */
         hide: function(){
-            fx.fadeOut({
-                node:       this._init.node,
-                duration:   this._init.duration
-            }).play();
+            domStyle.set(this._init.node, {
+                'display': 'none',
+                'visibility': 'hidden'
+            });
         },
         /**
          * Текст процесса
-         * @param code
+         * @param status
          * @private
          */
-        _fillText: function(code){
-            if('number' == typeof code && (0 <= code >= this.types._values.length)) {
-                this._init.node.innerHTML = '<span id="processing-text">' + this.types._values[code] + '</span>';
-            } else {
-                throw new Error('Указан неверный тип процесса');
+        _fillText: function(status){
+            if(!this._statuses.hasOwnProperty(status)) {
+                throw new Error('Статус сообщения неопределен2');
             }
-            // TODO: доделать!!!!!!!
+            this._init.node.innerHTML = '<span id="processing-text">' + this._statuses[status] + '</span>';
+            return this._init.node;
         },
         /**
          * Управление процессом

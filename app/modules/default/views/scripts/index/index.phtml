@@ -3,15 +3,35 @@ $json = $this->json;
 ?>
 <?php
 $jScript = <<<JS
-require(["core/layout/Processing"]);
+require(["core/layout/Processing", "core/layout/Messenger", "core/Layout", "dojo/_base/lang"]);
 dojo.ready(function(){
 var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
 console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
-var processing = core.layout.Processing({node: dojo.byId('messenger')});
-console.log(processing.types._values[0]);
-processing.show(9);
+/*var processing = core.layout.Processing({node: dojo.byId('loader')});
+processing.show('SEND');*/
 
-dojo.keys
+/*var messenger = new core.layout.Messenger({node: dojo.byId('messenger')});
+messenger.send('PROCESS_OK');*/
+
+var Layout = new core.Layout({
+    timeout: 3000,
+    messenger: {
+        node: dojo.byId('messenger')
+    },
+    processing: {
+        node: dojo.byId('loader')
+    }
+});
+
+var a = {opt1: 1, opt2: 2};
+var b = {opt3: 3, opt4: 4, opt1: '_1'};
+dojo.mixin(a,b);
+console.log(a);
+
+Layout.load().addCallback(function(results){
+console.log(results);
+});
+
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
