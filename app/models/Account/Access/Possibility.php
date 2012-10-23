@@ -62,10 +62,10 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         if($this->getData()->isDirty()) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('group_update_identity', array(
-                    'id_possibility'    => $this->getData('id'),
-                    'id_user'           => $this->getData('user'),
-                    'id_role'           => $this->getData('role'),
-                    'id_company'        => $this->getData('company')
+                    'id_possibility'    => (int)$this->getData('id'),
+                    'id_user'           => (int)$this->getData('user'),
+                    'id_role'           => (int)$this->getData('role'),
+                    'id_company'        => (int)$this->getData('company')
                 )
             );
             $row = $result->fetchRow();

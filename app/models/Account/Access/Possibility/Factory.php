@@ -35,9 +35,9 @@ class HM_Model_Account_Access_Possibility_Factory extends App_Core_Model_Factory
             $possibility = new HM_Model_Account_Access_Possibility();
             $possibility->getData()
                 ->set('id', $id)
-                ->set('user', $row['o_id_user'])
-                ->set('company', $row['o_id_company'])
-                ->set('role', $row['o_id_role']);
+                ->set('user', (int)$row['o_id_user'])
+                ->set('company', (int)$row['o_id_company'])
+                ->set('role', (int)$row['o_id_role']);
             $possibility->getData()->unmarkDirty();
         }
 
