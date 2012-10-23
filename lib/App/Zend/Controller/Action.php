@@ -28,7 +28,7 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
      * Статус доступности
      * @var string ok | error
      */
-    private $_status = 'ok';
+    private $_status = 'failed';
 
     /**
      * Инициализация контекста
@@ -58,6 +58,26 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
             }
             $this->view->assign($vars);
         }
+
+
+
+        /*        $this->view->assign('data2', new App_Core_Model_Data_Store());
+        $ar = array();
+        foreach($this->view->getVars() as $_var => $value) {
+            if($value instanceof App_Core_Model_Data_Entity || $value instanceof App_Core_Model_Data_Store) {
+                $ar[$_var] = $value->toArray();
+            } elseif (is_array($value)) {
+                $_ar = array();
+                foreach($value as $val) {
+                    if($val instanceof App_Core_Model_Data_Entity || $val instanceof App_Core_Model_Data_Store) {
+                        $_ar[] = $val->toArray();
+                    }
+                }
+                $ar[$_var] = $_ar;
+            }
+        }
+        Zend_Debug::dump(Zend_Json::encode($ar));*/
+
     }
 
     /**

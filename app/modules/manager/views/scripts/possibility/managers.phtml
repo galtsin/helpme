@@ -1,19 +1,42 @@
 <?php
-$data = $this->data;
+$rolesArray = $companiesArray = $managers = array();
+$userColl = new HM_Model_Account_User_Collection();
+$companyColl = new HM_Model_Billing_Company_Collection();
+
+// Справочник ролей
+foreach(HM_Model_Account_Access::getInstance()->getRoles() as $role) {
+    $rolesArray[] = $role->toArray();
+}
+
+// Справочник компаний
+foreach($this->companies as $company) {
+    $companiesArray[] = $companyColl->load($company)->getData()->toArray();
+}
+
+// Список менеджеров
+foreach($this->managers as $manager) {
+    $managers[] = $userColl->load($manager)->getData();
+}
+
+$rolesJson = Zend_Json::encode($rolesArray);
+$companiesJson = Zend_Json::encode($companiesArray);
+$referenceRC = Zend_Json::encode($this->referenceRC);
 ?>
 <?php
 $jScript = <<<JS
 require([
     "dojo/dom",
+    "dojo/dom-attr",
     "dojo/dom-form",
     "dojo/on",
     "dojo/_base/lang",
     "dojo/query",
     "dojo/router",
+    "dojo/store/Memory",
     "core/Layout",
     "core/helper/Validation",
     "dijit/Dialog"
-], function(dom, domForm, on, lang, query, router, coreLayout, coreValidation, dijitDialog){
+], function(dom, domAttr, domForm, on, lang, query, router, storeMemory, coreLayout, coreValidation, dijitDialog){
     dojo.ready(function(){
 
         var Layout = new coreLayout({
@@ -26,15 +49,38 @@ require([
                 }
         });
 
-        var DialogBox = new dijitDialog();
+        // Хранилище системных ролей
+        var storeRoles = new storeMemory({data: $rolesJson});
 
-        // #main
+        // Хранилище информации о компаниях доступных текущему администратору
+        var storeCompanies = new storeMemory({data: $companiesJson});
+
+        // Связка связи Роль-Компания
+        var storeReferenceRC = new storeMemory({data: $referenceRC});
+
+        var DialogBox = new dijitDialog();
+        var dialogTitles = [
+            "Добавление менеджера"
+        ];
+
+
+
+        storeRoles.query({'id': 0}).forEach(function(items){
+            console.log(items);
+        });
+
+
+
+
+
+        // #Страница с менеджерами
         router.register('main', function(){
+            // Получение менеджера
             query('[data-action^="getManager/"]').on('click', function(event){
                 event.preventDefault();
                 router.go(event.target.getAttribute("data-action"));
             });
-
+            // Добавление менеджера
             query('[data-action^="addManager"]').on('click', function(event){
                 event.preventDefault();
                 Layout.load({
@@ -45,22 +91,32 @@ require([
                     DialogBox.set('title', "Добавление менеджера");
                     DialogBox.show();
                 }).then(function(){
-                    on(dom.byId("add-manager")['send'], 'click', function(event){
+                    var form = dom.byId("add-manager");
+                    var Validation = new coreValidation(form);
+                    on(form['send'], 'click', function(event){
                         event.preventDefault();
-                        //var formObject = domForm.toObject(event.target.form);
-                        console.log(domForm.toObject(event.target.form));
-                        //if(formObject['account'].length && formObject['company'])
-/*                        Layout.send({
-                            url:    appConfig.baseUrl + '/manager/possibility/add-manager',
-                            args:   formObject
-                        });*/
+                        if(Validation.isValid()) {
+                            // Отправить сообщение на сервер
+                            Layout.send({
+                                url:    appConfig.baseUrl + '/manager/possibility/add-manager',
+                                args:   domForm.toObject(form)
+                            }).then(function(response){
+                                if(response.result && response.result != -1) {
+                                    DialogBox.hide();
+                                    // TODO: Перегрузить список менеджеров
+                                } else {
+                                    Validation.clear();
+                                    Validation.setMessages(response.error);
+                                }
+                            });
+                        }
                       });
                 })
             });
-
         });
 
-        router.register('getManager/:manager', function(event){
+        // #Страница с настройками одного менеджера
+        router.register('getManagerBoard/:manager', function(event){
             Layout.load({
                 url:    '../../../manager/possibility/get-manager',
                 format: 'html',
@@ -71,6 +127,24 @@ require([
                 // Навешиваем события
                 query('[data-action^="edit-possibility-objects"]').on('click', function(event){
                     event.preventDefault();
+                    alert('resources');
+                });
+            }).then(function(){
+                query('[data-action^="addManagerRole"]').on('click', function(event){
+                    event.preventDefault();
+
+                    Layout.load({
+                        url:    appConfig.baseUrl + '/manager/possibility/add-manager-role',
+                        format: 'html',
+                        args:   {manager: domAttr.get(event.target, "data-action").split('/')[1]}
+                    }).then(function(){
+                        // Обработчик на изменение Роли
+                        query('[data-action^="changeRole"]').on('change', function(event){
+                            storeReferenceRC.query(domForm.fieldToObject(event.target)).forEach(function(items){
+
+                            })
+                         })
+                    })
                 });
             })
         });
@@ -78,6 +152,7 @@ require([
         // Startup must be called in order to "activate" the router
         router.startup();
         router.go('main');
+
 
     });
 });
@@ -106,10 +181,10 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </tr>
         </tfoot>
         <tbody>
-            <?php foreach($data['managers'] as $manager): ?>
+            <?php foreach($managers as $manager): ?>
             <tr>
                 <td><input type="checkbox"/></td>
-                <td><a data-action="getManager/<?=$manager->get('id')?>"><?=$manager->get('email')?></a></td>
+                <td><a data-action="getManagerBoard/<?=$manager->get('id')?>"><?=$manager->get('email')?></a></td>
             </tr>
             <?php endforeach; ?>
         </tbody>

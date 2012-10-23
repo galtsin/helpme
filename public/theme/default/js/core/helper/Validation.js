@@ -12,9 +12,15 @@ require([
         _systemErrorClass: "system-error",
         constructor: function(formNode){
             this._formNode = formNode;
-            this._responseMessages = null;
+            this._responseMessages = {};
             this._anchors = [];
             this._tooltip = new Tooltip();
+
+            if(!formNode) throw new Error('Не выбран узел node');
+            this._init = {
+                node: formNode
+            };
+
         },
         clear: function(){
             // Очищаем подсветку ошибок
@@ -22,7 +28,7 @@ require([
                 this.highlightRemove(this._formNode.elements[i]);
             }
             this._removeAnchors();
-            this._responseMessages = null;
+            this._responseMessages = {};
         },
         setMessages: function(messages){
             this._responseMessages = messages;
@@ -110,8 +116,13 @@ require([
             }
             return result;
         },
-        valid: function(){
-            return this.checkRequired();
+        isValid: function(){
+            this.clear();
+            var result = this.checkRequired();
+            if(!result) {
+                this.display();
+            }
+            return result;
         }
     });
 });

@@ -5,6 +5,7 @@ $manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Fac
     ->restore($data['manager']);
 $access = HM_Model_Account_Access::getInstance();
 ?>
+<form id="edit-manager-possibility">
 <table class="table table-bordered">
     <colgroup>
         <col width="300"/>
@@ -15,13 +16,6 @@ $access = HM_Model_Account_Access::getInstance();
         <th colspan="2"><?=$manager->getData('email');?> (<?=$manager->getData('last_name');?> <?=$manager->getData('first_name');?> <?=$manager->getData('middle_name');?>) </th>
     </tr>
     </thead>
-    <tfoot>
-    <tr>
-        <td colspan="2">
-            <button type="button">Добавить</button>
-        </td>
-    </tr>
-    </tfoot>
     <tbody>
     <?php foreach($data['roles'] as $roleIdentifier => $companies): ?>
     <tr>
@@ -33,6 +27,10 @@ $access = HM_Model_Account_Access::getInstance();
         <td><a data-action="edit-possibility-objects"><?=$companyFactory->restore($company)->getData('name')?></a></td>
     </tr>
     <?php endforeach; ?>
+    <tr>
+        <td colspan="2"><button type="button">Добавить компанию</button></td>
+    </tr>
     <?php endforeach; ?>
     </tbody>
 </table>
+</form>

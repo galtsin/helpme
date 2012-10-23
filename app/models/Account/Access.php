@@ -190,14 +190,22 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Получить массив ролей от которых происходит наследование
      * @param App_Core_Model_Data_Store $role
+     * @param bool $recursive
      * @return array App_Core_Model_Data_Store
      */
-    public function getInheritsRoles(App_Core_Model_Data_Store $role)
+    public function getInheritsRoles(App_Core_Model_Data_Store $role, $recursive = false)
     {
         $inherits = array();
         foreach($this->getRoles() as $_role) {
-            if(is_int($_role->get('pid')) && $_role->get('pid') === $role->get('id')) {
+            if(is_int($_role->get('pid')) && $_role->get('pid') == $role->get('id')) {
                 array_push($inherits, $_role);
+            }
+        }
+        if(true === $recursive) {
+            foreach($inherits as $inherit) {
+                if($inherit->get('pid')) {
+                    $inherits = array_merge($inherits, $this->getInheritsRoles($inherit, true));
+                }
             }
         }
         return $inherits;

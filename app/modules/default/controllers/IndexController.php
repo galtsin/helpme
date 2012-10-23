@@ -102,6 +102,27 @@ class Default_IndexController extends App_Zend_Controller_Action
             $possibility->setPrivileges($line);
         }*/
 
+
+
+        $access = HM_Model_Account_Access::getInstance();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        Zend_Debug::dump(array_keys($user->getRoles()));
+        $allowedRoles = array();
+        foreach($user->getRoles() as $roleIdentifier => $companies) {
+            foreach($access->getRoles() as $role){
+                if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
+                    if(!array_key_exists($role->get('code'), $allowedRoles)) {
+                        $allowedRoles[$role->get('code')] = $companies;
+                    }
+                }
+            }
+        }
+
+        Zend_Debug::dump($access->getInheritsRoles($access->getRole('USER'), true));
+
     }
 
     public function isValid(array $values)

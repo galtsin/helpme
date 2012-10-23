@@ -7,7 +7,7 @@ require([
     dojo.declare("core.layout.Messenger", null, {
         _statuses: {
             PROCESS_OK:         'Операция выполнена успешно',
-            PROCESS_FAILED:     'Во время выполнения операции произошла ошибка',
+            PROCESS_FAILED:     'Операция не выполнена',
             SERVER_DISCONNECT:  'Не удалось получить ответ от сервера',
             SERVER_ERROR:       'Ошибка на сервере'
         },
