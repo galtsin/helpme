@@ -53,7 +53,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
      */
     private function ___g()
     {
-        // Получить текущего пользователя
+        // Получить текущего пользователяа
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
 
