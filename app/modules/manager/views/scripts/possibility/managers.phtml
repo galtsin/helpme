@@ -1,7 +1,8 @@
 <?php
-$rolesArray = $companiesArray = $managers = array();
+$rolesArray = array();
 $userColl = new HM_Model_Account_User_Collection();
 $companyColl = new HM_Model_Billing_Company_Collection();
+$possibilities = $this->possibilities;
 
 // Справочник ролей
 foreach(HM_Model_Account_Access::getInstance()->getRoles() as $role) {
@@ -9,17 +10,17 @@ foreach(HM_Model_Account_Access::getInstance()->getRoles() as $role) {
 }
 
 // Справочник компаний
-foreach($this->companies as $company) {
-    $companiesArray[] = $companyColl->load($company)->getData()->toArray();
+foreach($possibilities as $possibility) {
+    $companyColl->load($possibility['company']);
 }
 
 // Список менеджеров
-foreach($this->managers as $manager) {
-    $managers[] = $userColl->load($manager)->getData();
+foreach($possibilities as $possibility) {
+    $userColl->load($possibility['user']);
 }
 
 $rolesJson = Zend_Json::encode($rolesArray);
-$companiesJson = Zend_Json::encode($companiesArray);
+$companiesJson = Zend_Json::encode($companyColl->toArray());
 $referenceRC = Zend_Json::encode($this->referenceRC);
 ?>
 <?php
@@ -76,7 +77,7 @@ require([
         // #Страница с менеджерами
         router.register('main', function(){
             // Получение менеджера
-            query('[data-action^="getManager/"]').on('click', function(event){
+            query('[data-action^="getManagerBoard/"]').on('click', function(event){
                 event.preventDefault();
                 router.go(event.target.getAttribute("data-action"));
             });
@@ -181,7 +182,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </tr>
         </tfoot>
         <tbody>
-            <?php foreach($managers as $manager): ?>
+            <?php foreach($userColl->getDataIterator() as $manager): ?>
             <tr>
                 <td><input type="checkbox"/></td>
                 <td><a data-action="getManagerBoard/<?=$manager->get('id')?>"><?=$manager->get('email')?></a></td>

@@ -123,6 +123,8 @@ class Default_IndexController extends App_Zend_Controller_Action
 
         Zend_Debug::dump($access->getInheritsRoles($access->getRole('USER'), true));
 
+
+
     }
 
     public function isValid(array $values)

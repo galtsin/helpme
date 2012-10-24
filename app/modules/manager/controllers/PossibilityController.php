@@ -8,47 +8,18 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
      */
     public function managersAction()
     {
-        // Получить текущего пользователя
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $access = HM_Model_Account_Access::getInstance();
-
-        // Роль текущей страницы
-        $pageRole = 'ADM_COMPANY';
-        $userColl = new HM_Model_Account_User_Collection();
-
         // TODO: Проверить, есть ли право у пользователя работать с текущей страницей
-
-        if($userColl->load($account['user']) instanceof HM_Model_Account_User) {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        if(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']) instanceof HM_Model_Account_User) {
             // Определить роли текущего Менеджера, где он является Администратором Компании или выше
             // и получить список компаний, в которых он может назначать права другим Менеджерам
-            $allowedCompanies = array();
-            foreach($userColl->load($account['user'])->getRoles() as $userRoleIdentifier => $companies) {
-                if($access->getAcl()->inheritsRole($userRoleIdentifier, 'ADM_COMPANY') || $userRoleIdentifier === 'ADM_COMPANY') {
-                    $allowedCompanies = array_merge($allowedCompanies, $companies);
-                }
-            }
-            if(count($allowedCompanies) > 0) {
-                // Получаем список Менеджеров, ролями которых текущий Менеджер может управлять
-                $allowedManagers = array();
-                $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
-                foreach(array_unique($allowedCompanies) as $company) {
-                    $possibilityColl->addEqualFilter('company', $company);
-                }
-                $possibilityColl->getCollection();
-                foreach($possibilityColl->getObjectsIterator() as $possibility) {
-                    $allowedManagers[] = $possibility->getData('user');
-                }
-                $this->view->assign('managers', array_unique($allowedManagers));
-                $this->view->assign('companies', array_unique($allowedCompanies));
-            }
+            $this->view->assign('possibilities', $this->___g());
         }
-
-        Zend_Debug::dump($userColl->load(4)->getRoles());
-        Zend_Debug::dump($this->___g());
     }
 
     /**
-     * TODO: Готово
+     * TODO: Готово. На базе данной функции релизовать дальнейшее функционирование
+     * Можно еще сгруппировать
      * @return array
      */
     private function ___g()
@@ -61,7 +32,6 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         $pageRole = 'ADM_COMPANY';
         $userColl = new HM_Model_Account_User_Collection();
         $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
-        // TODO: Проверить, есть ли право у пользователя работать с текущей страницей
 
         $allowedManagers = array();
 
@@ -69,7 +39,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
             // Определить роли текущего Менеджера, где он является Администратором Компании или выше
             // и получить список компаний, в которых он может назначать права другим Менеджерам
             foreach($userColl->load($account['user'])->getRoles() as $userRoleIdentifier => $companies) {
-                if($access->getAcl()->inheritsRole($userRoleIdentifier, 'ADM_COMPANY') || $userRoleIdentifier == 'ADM_COMPANY') {
+                if($access->getAcl()->inheritsRole($userRoleIdentifier, $pageRole) || $userRoleIdentifier == $pageRole) {
                     foreach($companies as $company) {
                         $possibilityColl->resetFilters()
                             ->addEqualFilter('company', $company)
@@ -79,7 +49,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                             if($access->getAcl()->inheritsRole($userRoleIdentifier, $access->getRole($possibility->getData('role'))->get('code'))
                                 || $userRoleIdentifier === $access->getRole($possibility->getData('role'))->get('code')) {
                                 $allowedManagers[] = array(
-                                    'manager'   => $possibility->getData('user'),
+                                    'user'   => $possibility->getData('user'),
                                     'role'      => $access->getRole($possibility->getData('role'))->get('code'),
                                     'company'   => $company
                                 );
