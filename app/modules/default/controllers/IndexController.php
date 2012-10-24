@@ -142,14 +142,8 @@ class Default_IndexController extends App_Zend_Controller_Action
         }
         //Zend_Debug::dump($_roles);
 
-        $userColl = new HM_Model_Account_User_Collection();
-        $userColl->addEqualFilter('login', 'galtsin')
-            ->getCollection();
-        $userColl->resetFilters();
-        $userColl->addEqualFilter('login', 'ivan')
-            ->getCollection();
-
-        Zend_Debug::dump($userColl->getDataIterator());
+        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
+        Zend_Debug::dump($possibilityColl->getObjectsIterator());
 
     }
 

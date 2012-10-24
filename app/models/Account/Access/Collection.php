@@ -95,37 +95,19 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     protected function _doAccessibleEqualFilterCollection()
     {
         $ids = $possibilities = array();
-
+        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
         if(count($this->getEqualFilterValues('accessible')) > 0) {
-            $possibilityColl = new HM_Model_Account_Access_Collection();
+
             foreach($this->getEqualFilterValues('accessible') as $accessible){
-                // TODO: Доделать
-/*                $possibilityColl->clear();
-                $possibilityColl->resetFilters()
-                    ->addEqualFilter('urs', $accessible)
-                    ->getCollection();*/
-
-                // Получить Possibility
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('possibility_by_urc', array(
-                        'id_user'       => $accessible['user'],
-                        'id_role'       => $accessible['role'],
-                        'id_company'    => $accessible['company'],
-                    )
-                );
-
-                if($result->rowCount() > 0){
-                    $row = $result->fetchRow();
-                    $possibility = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Access_Possibility_Factory')
-                        ->restore($row['o_id_possibility']);
-
-                    $possibilities[] = $possibility;
-                    $ids = array_merge($ids, $possibility->getObjects(HM_Model_Account_Access::getInstance()->getType($this->_objectType)));
-                }
+                $possibilityColl->addEqualFilter('urc', $accessible);
+            }
+            $possibilityColl->getCollection();
+            foreach($possibilityColl->getObjectsIterator() as $_possibility) {
+                $ids = array_merge($ids, $_possibility->getObjects(HM_Model_Account_Access::getInstance()->getType($this->_objectType)));
             }
         }
 
-        $this->_possibilities = $possibilities;
+        $this->_possibilities = $possibilityColl->getObjectsIterator();
         return array_unique($ids);
     }
 
