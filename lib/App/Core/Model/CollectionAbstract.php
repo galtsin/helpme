@@ -57,7 +57,7 @@ abstract class App_Core_Model_CollectionAbstract
      */
     public function getCollection()
     {
-        $this->clear();
+        $this->clear(); // TODO: А нужно ли очищать? Можно накапливать. А сбрасывать по принуждению
         $this->_idsCollection = $this->_doCollection();
         return $this;
     }

@@ -53,7 +53,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
         $userRoles = $user->getRoles();
         foreach($userRoles as $roleIdentifier => $companies) {
             // Учитывается наследование Ролей
-            if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier == $role->get('code')) {
                 $key = array_search($company, $companies);
                 if(is_bool($key) === false){
                     $possibility = array(
@@ -76,7 +76,9 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     public function setType($typeIdentifier)
     {
         try{
-            $this->_objectType = HM_Model_Account_Access::getInstance()->getType($typeIdentifier)->get('code');
+            $this->_objectType = HM_Model_Account_Access::getInstance()
+                ->getType($typeIdentifier)
+                ->get('code');
         } catch (Exception $ex) {
             $class = get_called_class();
             $this->_objectType = $class::OBJECT_TYPE;
@@ -95,7 +97,10 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
         $ids = $possibilities = array();
 
         if(count($this->getEqualFilterValues('accessible')) > 0) {
+            $possibilityColl = new HM_Model_Account_Access_Collection();
             foreach($this->getEqualFilterValues('accessible') as $accessible){
+                $possibilityColl->resetFilters()
+                    ->addEqualFilter('urs', $accessible);
 
                 // Получить Possibility
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)

@@ -88,9 +88,9 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * Возвращает индекс значений
-     * Получить объекты с типом $type
-     * @param $type
+     * Получить идектификаторы объектов с типом $type
+     * @param App_Core_Model_Data_Store $type
+     * @return array('type' => array('write' => array(), 'read' => array(), 'index' => array()))
      */
     private function _getObjects(App_Core_Model_Data_Store $type)
     {
@@ -118,6 +118,14 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         }
 
         return $this->_objects[$type->get('code')];
+    }
+
+    /**
+     * TODO: В разработке
+     */
+    public function updateObjects()
+    {
+
     }
 
     /**

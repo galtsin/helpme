@@ -217,8 +217,63 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     public function addManagerRole(){}
     public function removeManagerRole(){}
 
+    /**
+     * TODO: текущая отладка
+     */
     public function editPossibilityObjectsAction()
     {
+        $request = $this->getRequest();
+        $access = HM_Model_Account_Access::getInstance();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+
+        // Роль текущей страницы
+        $pageRole = 'ADM_COMPANY';
+        $objectType = 'LINE';
+        $userColl = new HM_Model_Account_User_Collection();
+        $accessColl = new HM_Model_Account_Access_Collection();
+
+        // 1. Получить русурсы принадлежащие компании
+        // 2. Получить ресурсы принадлежащие текущему Менеджеру
+        // 3. Получить пересечение ресурсов. Это пересечение - доступные текущему Менеджеру ресурсы
+        // 4. Определить ресурсы уже отмеченные для редактируемого менеджера
+
+        $companyLines = $userLines = array();
+
+        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
+        $possibility = $possibilityColl->load($request->getParam('possibility'));
+
+        // 1. Получить русурсы принадлежащие компании
+        $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
+        $lineColl->addEqualFilter('company', $possibility->getData('company'));
+        $companyLines = $lineColl->getCollection()
+            ->getIdsIterator();
+
+        $companyLines = array(11, 15);
+        // 2. Получить ресурсы принадлежащие текущему Менеджеру
+
+        foreach(array_keys($userColl->load($account['user'])->getRoles()) as $roleIdentifier) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
+                $accessColl->clear();
+                $accessColl->resetFilters();
+                $accessColl->setType($objectType);
+                $accessColl->setAccessFilter($userColl->load($account['user']), $access->getRole($pageRole), $possibility->getData('company'));
+                $userLines = array_merge($userLines, $accessColl->getCollection()->getIdsIterator());
+            }
+        }
+
+
+        // 3. Получить пересечение ресурсов
+        $resources = array_intersect($companyLines, $userLines);
+
+        // 4. Определить ресурсы уже отмеченные для редактируемого менеджера
+        //Zend_Debug::dump($possibility->getObjects($access->getType($objectType)));
+
+        $this->view->assign('resources', $resources);
+        $this->view->assign('possibility', $possibility);
+
+        if($request->isPost()){
+
+        }
 
     }
 

@@ -128,7 +128,7 @@ require([
                 // Навешиваем события
                 query('[data-action^="editPossibilityObjects"]').on('click', function(event){
                     event.preventDefault();
-                    dojo.publish('editPossibilityObjects');
+                    dojo.publish('editPossibilityObjects', {possibility: domAttr.get(event.target, "data-action").split('/')[1]});
                 });
             }).then(function(){
                 query('[data-action^="addManagerRole"]').on('click', function(event){
@@ -156,8 +156,9 @@ require([
 
         dojo.subscribe('editPossibilityObjects', function(args){
             Layout.load({
-                url:    appConfig.baseUrl + '/manager/possibility/add-manager',
-                format: 'html'
+                url:    appConfig.baseUrl + '/manager/possibility/edit-possibility-objects',
+                format: 'html',
+                args:   args
             }).then(function(response){
                 DialogBox.set('content', response);
                 DialogBox.set('title', "Добавление менеджера");
