@@ -140,7 +140,16 @@ class Default_IndexController extends App_Zend_Controller_Action
             }
             $index[] = $role->get('id');
         }
-        Zend_Debug::dump($_roles);
+        //Zend_Debug::dump($_roles);
+
+        $userColl = new HM_Model_Account_User_Collection();
+        $userColl->addEqualFilter('login', 'galtsin')
+            ->getCollection();
+        $userColl->resetFilters();
+        $userColl->addEqualFilter('login', 'ivan')
+            ->getCollection();
+
+        Zend_Debug::dump($userColl->getDataIterator());
 
     }
 

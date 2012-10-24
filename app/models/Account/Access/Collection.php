@@ -99,8 +99,11 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
         if(count($this->getEqualFilterValues('accessible')) > 0) {
             $possibilityColl = new HM_Model_Account_Access_Collection();
             foreach($this->getEqualFilterValues('accessible') as $accessible){
+                // TODO: Доделать
+/*                $possibilityColl->clear();
                 $possibilityColl->resetFilters()
-                    ->addEqualFilter('urs', $accessible);
+                    ->addEqualFilter('urs', $accessible)
+                    ->getCollection();*/
 
                 // Получить Possibility
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)

@@ -11,7 +11,7 @@
  * Можно также использовать результаты итераторов для дальнейших преобразований
  * Например: new ArrayObject(self::getCollection()->getObjectsIterator());
  */
-abstract class App_Core_Model_CollectionAbstract
+abstract class App_Core_Model__CollectionAbstract
 {
 	/**
      * @var array App_Core_Model_Data_Entity
@@ -21,7 +21,7 @@ abstract class App_Core_Model_CollectionAbstract
     /**
      * @var array|null IDs
      */
-    private $_idsCollection = array();
+    private $_idsCollection = null;
 
     /**
      * @var App_Core_Model_FactoryAbstract|null
@@ -57,8 +57,15 @@ abstract class App_Core_Model_CollectionAbstract
      */
     public function getCollection()
     {
-        $idsCollection = array_merge($this->_idsCollection, $this->_doCollection());
-        $this->_idsCollection = array_unique($idsCollection);
+        $this->clear(); // TODO: А нужно ли очищать? Можно накапливать. А сбрасывать по принуждению.
+        $this->_idsCollection = $this->_doCollection(); // В таком случае array_merge()
+        return $this;
+    }
+
+    private function _getCollection()
+    {
+        // TODO: Сделать $this->_idsCollection = array()
+        $this->_idsCollection = array_merge($this->_idsCollection, $this->_doCollection());
         return $this;
     }
 
@@ -74,11 +81,13 @@ abstract class App_Core_Model_CollectionAbstract
      */
     public function getIdsIterator()
     {
+        if(!is_array($this->_idsCollection)) {
+            $this->_idsCollection = array();
+        }
         return $this->_idsCollection;
     }
 
     /**
-     * Центральный загрузочный метод
      * @param int $id
      * @return App_Core_Model_Data_Entity|null
      */
@@ -134,7 +143,7 @@ abstract class App_Core_Model_CollectionAbstract
      */
     public function clear()
     {
-        $this->_idsCollection = array();
+        $this->_idsCollection = null;
         $this->_objectsCollection = array();
         return $this;
     }
