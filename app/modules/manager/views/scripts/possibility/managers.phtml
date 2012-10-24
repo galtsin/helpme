@@ -119,16 +119,16 @@ require([
         // #Страница с настройками одного менеджера
         router.register('getManagerBoard/:manager', function(event){
             Layout.load({
-                url:    '../../../manager/possibility/get-manager',
+                url:    '../../../manager/possibility/get-manager-board',
                 format: 'html',
                 args:   event.params
             }).then(function(response){
                 Layout.place(dom.byId('contentManagers'), response);
             }).then(function(){
                 // Навешиваем события
-                query('[data-action^="edit-possibility-objects"]').on('click', function(event){
+                query('[data-action^="editPossibilityObjects"]').on('click', function(event){
                     event.preventDefault();
-                    alert('resources');
+                    dojo.publish('editPossibilityObjects');
                 });
             }).then(function(){
                 query('[data-action^="addManagerRole"]').on('click', function(event){
@@ -154,6 +154,16 @@ require([
         router.startup();
         router.go('main');
 
+        dojo.subscribe('editPossibilityObjects', function(args){
+            Layout.load({
+                url:    appConfig.baseUrl + '/manager/possibility/add-manager',
+                format: 'html'
+            }).then(function(response){
+                DialogBox.set('content', response);
+                DialogBox.set('title', "Добавление менеджера");
+                DialogBox.show();
+            })
+        });
 
     });
 });

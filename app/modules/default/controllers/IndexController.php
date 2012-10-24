@@ -121,9 +121,26 @@ class Default_IndexController extends App_Zend_Controller_Action
             }
         }
 
-        Zend_Debug::dump($access->getInheritsRoles($access->getRole('USER'), true));
 
-
+        $_roles = array();
+        foreach(array_keys($user->getRoles()) as $roleIdentifier) {
+            $_roles = array_merge(
+                $_roles,
+                $access->getInheritsRoles($access->getRole($roleIdentifier), true),
+                array($access->getRole($roleIdentifier))
+            );
+        }
+        // Исключить повторяющиеся роли.
+        $index = array();
+        $__roles = $_roles;
+        foreach($__roles as $key => $role) {
+            if(in_array($role->get('id'), $index)) {
+                unset($_roles[$key]);
+                continue;
+            }
+            $index[] = $role->get('id');
+        }
+        Zend_Debug::dump($_roles);
 
     }
 

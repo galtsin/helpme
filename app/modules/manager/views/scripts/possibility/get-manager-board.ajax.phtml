@@ -1,10 +1,9 @@
 <?php
-$data = $this->data;
-$companyFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory');
-$manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-    ->restore($data['manager']);
+$companyColl = new HM_Model_Billing_Company_Collection();
+$userColl = new HM_Model_Account_User_Collection();
+$possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
 
-
+Zend_Debug::dump($userColl->load(4)->getRoles());
 
 $roles = array();
 $account = HM_Model_Account_Auth::getInstance()->getAccount();
@@ -28,7 +27,14 @@ foreach($_roles as $key => $role) {
     }
     $index[] = $role->get('id');
 }
-Zend_Debug::dump($roles);
+Zend_Debug::dump($this->possibility);
+$possibility =$this->possibility;
+//Zend_Debug::dump($roles);
+
+
+
+
+
 ?>
 <form id="edit-manager-possibility">
 <table class="table table-bordered">
@@ -38,11 +44,14 @@ Zend_Debug::dump($roles);
     </colgroup>
     <thead>
     <tr>
-        <th colspan="2"><?=$manager->getData('email');?> (<?=$manager->getData('last_name');?> <?=$manager->getData('first_name');?> <?=$manager->getData('middle_name');?>) </th>
+        <th colspan="2">
+            <?php $manager = $userColl->load($possibility['user'])?>
+            <?=$manager->getData('email');?> (<?=$manager->getData('last_name');?> <?=$manager->getData('first_name');?> <?=$manager->getData('middle_name');?>)
+        </th>
     </tr>
     </thead>
     <tbody>
-    <?php foreach($data['roles'] as $roleIdentifier => $companies): ?>
+    <?php foreach($possibility['roles'] as $roleIdentifier => $companies): ?>
     <tr>
         <td rowspan="<?=count($companies) + 1 ?>"><?=$access->getRole($roleIdentifier)->get('name')?></td>
         <th>Компании</th>
@@ -50,7 +59,17 @@ Zend_Debug::dump($roles);
     <?php foreach($companies as $company): ?>
     <tr>
         <td>
-            <a data-action="editPossibilityObjects/"><?=$companyFactory->restore($company)->getData('name')?></a>
+            <?php
+                $possibilityColl->clear();
+                $possibilityColl->resetFilters()
+                    ->addEqualFilter('urc', array(
+                        'user'      => $manager->getData('id'),
+                        'role'      => $access->getRole($roleIdentifier)->getId(),
+                        'company'   => $company
+                    )
+                );
+            ?>
+            <a data-action="editPossibilityObjects/<?=current($possibilityColl->getCollection()->getIdsIterator())?>"><?=$companyColl->load($company)->getData('name')?></a>
         </td>
     </tr>
     <?php endforeach; ?>

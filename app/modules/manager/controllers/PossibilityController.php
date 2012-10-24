@@ -18,8 +18,13 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     }
 
     /**
+     * Good
      * TODO: Готово. На базе данной функции релизовать дальнейшее функционирование
+     * Получить список Менеджеров, с которыми можно производить работу (с их ролями и компаниями)
+     * Роль текущего Менеджера должна быть выше или равна роли редактируемого Менеджера и находится в одной и той же компании
      * Можно еще сгруппировать
+     * Совпадение окмпании - один к одному
+     * Совпадение ролей - через наследование
      * @return array
      */
     private function ___g()
@@ -47,7 +52,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                         foreach($possibilityColl->getObjectsIterator() as $possibility) {
                             // Если роль администрирующего Менеджера выше или равна менеджеру, то он имеет право на управление его ролями
                             if($access->getAcl()->inheritsRole($userRoleIdentifier, $access->getRole($possibility->getData('role'))->get('code'))
-                                || $userRoleIdentifier === $access->getRole($possibility->getData('role'))->get('code')) {
+                                || $userRoleIdentifier == $access->getRole($possibility->getData('role'))->get('code')) {
                                 $allowedManagers[] = array(
                                     'user'   => $possibility->getData('user'),
                                     'role'      => $access->getRole($possibility->getData('role'))->get('code'),
@@ -64,27 +69,60 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     }
 
     /**
+     * Good
+     * Получить доступные для редактирования текущим Администратором Роли Менеджера с привязкой к компаниям
+     * @param HM_Model_Account_User $manager
+     * @return array
+     */
+    private function _intersection(HM_Model_Account_User $manager)
+    {
+        // Получить текущего пользователяа
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+
+        // Роль текущей страницы
+        $pageRole = 'ADM_COMPANY';
+        $userColl = new HM_Model_Account_User_Collection();
+
+        $allowed = array();
+
+        if($userColl->load($account['user']) instanceof HM_Model_Account_User) {
+            foreach($userColl->load($account['user'])->getRoles() as $userRoleIdentifier => $userCompanies) {
+                foreach($manager->getRoles() as $managerRoleIdentifier => $managerCompanies) {
+                    // Роли
+                    if( ($access->getAcl()->inheritsRole($userRoleIdentifier, $pageRole) || $userRoleIdentifier == $pageRole)
+                        &&
+                        ($access->getAcl()->inheritsRole($userRoleIdentifier, $managerRoleIdentifier) || $userRoleIdentifier == $managerRoleIdentifier)) {
+                            if(!array_key_exists($managerRoleIdentifier, $allowed)){
+                                 $allowed[$managerRoleIdentifier] = array();
+                            }
+                            foreach($userCompanies as $company) {
+                                if(in_array($company, $managerCompanies) && !in_array($company, $allowed[$managerRoleIdentifier])){
+                                     $allowed[$managerRoleIdentifier][] = $company;
+                                }
+                            }
+                    }
+                }
+            }
+        }
+        return $allowed;
+    }
+
+
+    /**
+     * Good
      * Получить панель управления отдельным Менеджером
      */
     public function getManagerBoardAction()
     {
-        // Получить текущего пользователя
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $request = $this->getRequest();
-        $userColl = new HM_Model_Account_User_Collection();
-
-        // TODO: Проверить иммем ли мы право администрировать данного Менеджера
-        if($userColl->load($account['user']) instanceof HM_Model_Account_User) {
-            foreach($userColl->load($account['user'])->getRoles() as $userRoleIdentifier => $companies) {
-
-            }
-        }
-        $manager = $userColl->load($request->getPost('manager'));
+        $manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($request->getQuery('manager'));
         if($manager instanceof HM_Model_Account_User) {
+            // Определить роли текущего Менеджера, где он является Администратором Компании или выше
+            // и получить список компаний, в которых он может назначать права другим Менеджерам
+            $this->view->assign('possibility', array('user' => $manager->getData('id'), 'roles' => $this->_intersection($manager)));
 
         }
-        // Получить список ролей редактируемого Менеджера с привязкой к компаниям
-
     }
 
     /**

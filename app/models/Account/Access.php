@@ -85,6 +85,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 $type->set('id', $row['id'])
                      ->set('code', $row['code'])
                      ->set('name', $row['name']);
+                $type->unmarkDirty();
                 array_push($types, $type);
             }
             $this->_types = $types;
@@ -112,6 +113,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                      ->set('pid', $row['pid']) // может быть null
                      ->set('code', $row['code'])
                      ->set('name', $row['name']);
+                $role->unmarkDirty();
                 array_push($roles, $role);
 
                 // Определяем корневую роль, у которой в БД запись = NULL.
