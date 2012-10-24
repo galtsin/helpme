@@ -10,6 +10,8 @@
  * TODO:!
  * Можно также использовать результаты итераторов для дальнейших преобразований
  * Например: new ArrayObject(self::getCollection()->getObjectsIterator());
+ * TODO:!
+ * Так же можно передавать коллекции в качестве массивов объектов в вид
  */
 abstract class App_Core_Model_CollectionAbstract
 {

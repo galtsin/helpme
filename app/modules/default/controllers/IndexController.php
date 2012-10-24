@@ -143,7 +143,13 @@ class Default_IndexController extends App_Zend_Controller_Action
         //Zend_Debug::dump($_roles);
 
         $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
-        Zend_Debug::dump($possibilityColl->getObjectsIterator());
+        $possibilityColl->addEqualFilter('urc', array(
+            'user' => 4,
+            'role'  => 5,
+            'company' => 12
+        ));
+        $possibilityColl->getCollection();
+        Zend_Debug::dump(Zend_Json::encode($possibilityColl));
 
     }
 
