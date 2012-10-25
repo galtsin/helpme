@@ -311,9 +311,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                 $objectType = null;
         }
 
-        $objectType = 'LINE';
-
-        // Получить ресурсы принадлежащие текущему Менеджеру
+        //$objectType = 'LINE';
+        // TODO: МОЖНО сделать HELPER + PAGEROLES
+        // Получить ресурсы принадлежащие текущему Администратору
         $accessColl = new HM_Model_Account_Access_Collection();
         if(is_string($objectType)) {
             foreach(array_keys($userColl->load($account['user'])->getRoles()) as $roleIdentifier) {
@@ -329,15 +329,23 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
             }
         }
 
-        $this->view->assign('adminResourcesColl', $accessColl->getCollection());
-        $this->view->assign('type', $objectType);
-        $this->view->assign('possibility',$possibilityColl->load($request->getParam('possibility')));
+
 
         if($request->isPost()){
-
+            array_intersect($request->getParam('objects'), $accessColl->getCollection()->getIdsIterator());
+        } else {
+            $this->view->assign('adminResourcesColl', $accessColl->getCollection());
+            $this->view->assign('type', $objectType);
+            $this->view->assign('possibility',$possibilityColl->load($request->getParam('possibility')));
         }
 
     }
+
+    public function addPossibilityAction()
+    {
+
+    }
+
 
     /**
      * TODO: rename

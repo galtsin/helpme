@@ -50,6 +50,13 @@ $possibility =$this->possibility;
         </th>
     </tr>
     </thead>
+    <tfoot>
+        <tr>
+            <td colspan="2">
+                <button type="button" data-action="addPossibility/<?=$manager->getData('id')?>">Добавить</button>
+            </td>
+        </tr>
+    </tfoot>
     <tbody>
     <?php foreach($possibility['roles'] as $roleIdentifier => $companies): ?>
     <tr>
@@ -73,9 +80,6 @@ $possibility =$this->possibility;
         </td>
     </tr>
     <?php endforeach; ?>
-    <tr>
-        <td colspan="2"><button type="button">Добавить компанию</button></td>
-    </tr>
     <?php endforeach; ?>
     </tbody>
 </table>

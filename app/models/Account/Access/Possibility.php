@@ -139,7 +139,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * Установка прав на чтение/запись
+     * Установка прав передаваемых объектов на чтение/запись
      * По умолчанию проставляет все объекты как на чтение
      * @param App_Core_Model_Data_Store $type
      * @param App_Core_Model_Data_Store $data

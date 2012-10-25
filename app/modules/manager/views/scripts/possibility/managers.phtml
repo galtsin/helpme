@@ -41,7 +41,6 @@ require([
     dojo.ready(function(){
 
         var Layout = new coreLayout({
-            timeout: 3000,
             messenger: {
                 node: dom.byId('messenger')
                 },
@@ -131,21 +130,9 @@ require([
                     dojo.publish('editPossibilityObjects', {possibility: domAttr.get(event.target, "data-action").split('/')[1]});
                 });
             }).then(function(){
-                query('[data-action^="addManagerRole"]').on('click', function(event){
+                query('[data-action^="addPossibility"]').on('click', function(event){
                     event.preventDefault();
-
-                    Layout.load({
-                        url:    appConfig.baseUrl + '/manager/possibility/add-manager-role',
-                        format: 'html',
-                        args:   {manager: domAttr.get(event.target, "data-action").split('/')[1]}
-                    }).then(function(){
-                        // Обработчик на изменение Роли
-                        query('[data-action^="changeRole"]').on('change', function(event){
-                            storeReferenceRC.query(domForm.fieldToObject(event.target)).forEach(function(items){
-
-                            })
-                         })
-                    })
+                    dojo.publish('addPossibility', {manager: domAttr.get(event.target, "data-action").split('/')[1]});
                 });
             })
         });
@@ -154,9 +141,34 @@ require([
         router.startup();
         router.go('main');
 
+        // Действие на редактирование объектов
         dojo.subscribe('editPossibilityObjects', function(args){
             Layout.load({
                 url:    appConfig.baseUrl + '/manager/possibility/edit-possibility-objects',
+                format: 'html',
+                args:   args
+            }).then(function(response){
+                DialogBox.set('content', response);
+                DialogBox.set('title', "Редактирование ресурсов");
+                DialogBox.show();
+            }).then(function(){
+                on(dom.byId('_d_'), 'click', function(event){
+                    Layout.send({
+                        url:    appConfig.baseUrl + '/manager/possibility/edit-possibility-objects',
+                        args:   domForm.toObject(event.target.form)
+                    }).then(function(response){
+                        if(response.result && response.result != -1) {
+                            DialogBox.hide();
+                        }
+                    });
+                })
+            })
+        });
+
+        // Действие на добавление нового POssibility
+        dojo.subscribe('addPossibility', function(args){
+            Layout.load({
+                url:    appConfig.baseUrl + '/manager/possibility/add-possibility',
                 format: 'html',
                 args:   args
             }).then(function(response){

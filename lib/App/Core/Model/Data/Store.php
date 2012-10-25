@@ -248,6 +248,7 @@ final class App_Core_Model_Data_Store
     {
         if(is_bool($flag)) {
             $this->_writable = $flag;
+            $this->markDirty();
         }
 
         return $this;
@@ -262,6 +263,7 @@ final class App_Core_Model_Data_Store
         $this->_id = null;
         $this->_data = array();
         $this->unmarkDirty();
+
         return $this;
     }
 

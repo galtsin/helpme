@@ -154,7 +154,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 return $type;
             }
         }
-        throw new Exception("Type the identifier '" . $typeIdentifier . "' is not found (Тип с идентификатором '" . $typeIdentifier . "' не найден)");
+        throw new Exception("Type the identifier '" . $typeIdentifier . "' is not found (Тип с идентификатором '" . (string)$typeIdentifier . "' не найден)");
     }
 
     /**
@@ -178,6 +178,29 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             }
         }
         throw new Exception("Role the identifier '" . $roleIdentifier . "' is not found (Роль с идентификатором '" . $roleIdentifier . "' не найдена)");
+    }
+
+    /**
+     * Проверить, существует ли указанный тип объектов
+     * @param $typeIdentifier
+     * @return bool
+     */
+    public function hasType($typeIdentifier)
+    {
+        if(is_int($typeIdentifier)) {
+            $field = 'id';
+        } else {
+            settype($typeIdentifier, 'string');
+            $field = 'code';
+        }
+
+        foreach($this->getTypes() as $type) {
+            if($typeIdentifier === $type->get($field)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
