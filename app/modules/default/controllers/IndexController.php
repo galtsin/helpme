@@ -149,7 +149,11 @@ class Default_IndexController extends App_Zend_Controller_Action
             'company' => 12
         ));
         $possibilityColl->getCollection();
-        Zend_Debug::dump(Zend_Json::encode($possibilityColl));
+        $possibilityColl->load('368');
+        $possibilityColl->load('398');
+        $possibilityColl->load('398');
+        $possibilityColl->load('398');
+        Zend_Debug::dump($possibilityColl);
 
     }
 

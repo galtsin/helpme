@@ -46,21 +46,20 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
             foreach($userColl->load($account['user'])->getRoles() as $userRoleIdentifier => $companies) {
                 if($access->getAcl()->inheritsRole($userRoleIdentifier, $pageRole) || $userRoleIdentifier == $pageRole) {
                     foreach($companies as $company) {
-                        $possibilityColl->resetFilters()
-                            ->addEqualFilter('company', $company)
-                            ->getCollection();
-                        foreach($possibilityColl->getObjectsIterator() as $possibility) {
-                            // Если роль администрирующего Менеджера выше или равна менеджеру, то он имеет право на управление его ролями
-                            if($access->getAcl()->inheritsRole($userRoleIdentifier, $access->getRole($possibility->getData('role'))->get('code'))
-                                || $userRoleIdentifier == $access->getRole($possibility->getData('role'))->get('code')) {
-                                $allowedManagers[] = array(
-                                    'user'   => $possibility->getData('user'),
-                                    'role'      => $access->getRole($possibility->getData('role'))->get('code'),
-                                    'company'   => $company
-                                );
-                            }
+                        $possibilityColl->addEqualFilter('company', $company);
+                    }
+                    foreach($possibilityColl->getCollection()->getObjectsIterator() as $possibility) {
+                        // Если роль администрирующего Менеджера выше или равна менеджеру, то он имеет право на управление его ролями
+                        if($access->getAcl()->inheritsRole($userRoleIdentifier, $access->getRole($possibility->getData('role'))->get('code'))
+                            || $userRoleIdentifier == $access->getRole($possibility->getData('role'))->get('code')) {
+                            $allowedManagers[] = array(
+                                'user'   => $possibility->getData('user'),
+                                'role'      => $access->getRole($possibility->getData('role'))->get('code'),
+                                'company'   => $company
+                            );
                         }
                     }
+
                 }
             }
         }
@@ -220,7 +219,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     /**
      * TODO: текущая отладка
      */
-    public function editPossibilityObjectsAction()
+    private function _editPossibilityObjectsAction()
     {
         $request = $this->getRequest();
         $access = HM_Model_Account_Access::getInstance();
@@ -237,6 +236,8 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         // 3. Получить пересечение ресурсов. Это пересечение - доступные текущему Менеджеру ресурсы
         // 4. Определить ресурсы уже отмеченные для редактируемого менеджера
 
+        // QUICK способ Используем укороченный вариант только пункты 2 и 4
+
         $companyLines = $userLines = array();
 
         $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
@@ -250,7 +251,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
         $companyLines = array(11, 15);
         // 2. Получить ресурсы принадлежащие текущему Менеджеру
-
+        // Постоянная часть
         foreach(array_keys($userColl->load($account['user'])->getRoles()) as $roleIdentifier) {
             if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
                 $accessColl->clear();
@@ -275,6 +276,77 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
         }
 
+    }
+
+    /**
+     * 1. Получить русурсы принадлежащие компании
+     * 2. Получить ресурсы принадлежащие текущему Менеджеру
+     * 3. Получить пересечение ресурсов. Это пересечение - доступные текущему Менеджеру ресурсы
+     * 4. Определить ресурсы уже отмеченные для редактируемого менеджера
+     * В функции используется укороченный вариант (2 и 4 пункты)
+     */
+    public function editPossibilityObjectsAction()
+    {
+        $request = $this->getRequest();
+        $access = HM_Model_Account_Access::getInstance();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+
+        // Роль текущей страницы
+        $pageRole = 'ADM_COMPANY';
+
+        $userColl = new HM_Model_Account_User_Collection();
+        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
+
+        switch($access->getRole($possibilityColl->load($request->getParam('possibility'))->getData('role'))->get('code')) {
+            case 'ADM_LINE':
+                $objectType = 'LINE';
+                break;
+            case 'ADM_TARIFF':
+                $objectType = 'TARIFF';
+                break;
+            case 'ADM_GROUP':
+                $objectType = 'GROUP';
+                break;
+            default:
+                $objectType = null;
+        }
+
+        $objectType = 'LINE';
+
+        // Получить ресурсы принадлежащие текущему Менеджеру
+        $accessColl = new HM_Model_Account_Access_Collection();
+        if(is_string($objectType)) {
+            foreach(array_keys($userColl->load($account['user'])->getRoles()) as $roleIdentifier) {
+                if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
+                    $accessColl->resetFilters();
+                    $accessColl->setType($objectType);
+                    $accessColl->setAccessFilter(
+                        $userColl->load($account['user']),
+                        $access->getRole($pageRole),
+                        $possibilityColl->load($request->getParam('possibility'))->getData('company')
+                    );
+                }
+            }
+        }
+
+        $this->view->assign('adminResourcesColl', $accessColl->getCollection());
+        $this->view->assign('type', $objectType);
+        $this->view->assign('possibility',$possibilityColl->load($request->getParam('possibility')));
+
+        if($request->isPost()){
+
+        }
+
+    }
+
+    /**
+     * TODO: rename
+     */
+    private function _getManagerPossibilityObjects($objectType)
+    {
+        switch ($objectType) {
+
+        }
     }
 
     public function getManagerAllowedRolesAction()

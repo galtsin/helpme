@@ -12,6 +12,8 @@
  * Например: new ArrayObject(self::getCollection()->getObjectsIterator());
  * TODO:!
  * Так же можно передавать коллекции в качестве массивов объектов в вид
+ *
+ * count(data) = count(objects) = count(ids)
  */
 abstract class App_Core_Model_CollectionAbstract
 {
