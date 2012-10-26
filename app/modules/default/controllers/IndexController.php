@@ -109,52 +109,59 @@ class Default_IndexController extends App_Zend_Controller_Action
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
             ->restore($account['user']);
 
-        Zend_Debug::dump(array_keys($user->getRoles()));
+       // Zend_Debug::dump($user->getRoles());
+        //Zend_Debug::dump($this->_getRelationRoleAndCompany($user));
+
+        $a = new App_Core_Model_Data_Store(array(
+            'name'  => 'igor',
+            'id'    => 5,
+            'middle'=> 'sdf'
+        ));
+        Zend_Debug::dump($a);
+
+
+    }
+
+    private function _getHierarchyRoleAndCompany(HM_Model_Account_User $user)
+    {
+        $access = HM_Model_Account_Access::getInstance();
         $allowedRoles = array();
         foreach($user->getRoles() as $roleIdentifier => $companies) {
             foreach($access->getRoles() as $role){
-                if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
+                if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier == $role->get('code')) {
                     if(!array_key_exists($role->get('code'), $allowedRoles)) {
                         $allowedRoles[$role->get('code')] = $companies;
+                    } else {
+                        $allowedRoles[$role->get('code')] = array_unique(array_merge($allowedRoles[$role->get('code')], $companies));
                     }
                 }
             }
         }
+        return $allowedRoles;
+    }
 
-
-        $_roles = array();
+    private function _getHierarchyRoles(HM_Model_Account_User $user)
+    {
+        $access = HM_Model_Account_Access::getInstance();
+        $roles = $_index = array();
+        // Построить иерархию Ролей
         foreach(array_keys($user->getRoles()) as $roleIdentifier) {
-            $_roles = array_merge(
-                $_roles,
+            $roles = array_merge(
+                $roles,
                 $access->getInheritsRoles($access->getRole($roleIdentifier), true),
                 array($access->getRole($roleIdentifier))
             );
         }
-        // Исключить повторяющиеся роли.
-        $index = array();
-        $__roles = $_roles;
-        foreach($__roles as $key => $role) {
-            if(in_array($role->get('id'), $index)) {
-                unset($_roles[$key]);
+        // Исключить повторяющиеся Роли.
+        foreach($roles as $key => $role) {
+            if(in_array($role->get('id'), $_index)) {
+                unset($roles[$key]);
                 continue;
             }
-            $index[] = $role->get('id');
+            $_index[] = $role->get('id');
         }
-        //Zend_Debug::dump($_roles);
 
-        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
-        $possibilityColl->addEqualFilter('urc', array(
-            'user' => 4,
-            'role'  => 5,
-            'company' => 12
-        ));
-        $possibilityColl->getCollection();
-        $possibilityColl->load('368');
-        $possibilityColl->load('398');
-        $possibilityColl->load('398');
-        $possibilityColl->load('398');
-        Zend_Debug::dump($possibilityColl);
-
+        return $roles;
     }
 
     public function isValid(array $values)

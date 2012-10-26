@@ -1,5 +1,13 @@
 <?php
-
+/**
+ *
+ */
+/**
+ * В классе расматриваются 2 вида прав и пользователь.
+ * Первый: Администратор. Это тот кто редактирует права других.
+ * Все ресурсы подчиненных менеджеров назначаются - наследниками ролей текущего администратора
+ * Второй: Менеджер. Тот кому происходит назначение прав
+ */
 class Manager_PossibilityController extends App_Zend_Controller_Action
 {
     /**
@@ -14,7 +22,18 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
             // Определить роли текущего Менеджера, где он является Администратором Компании или выше
             // и получить список компаний, в которых он может назначать права другим Менеджерам
             $this->view->assign('possibilities', $this->___g());
+            $this->view->assign(
+                'hierarchyRoleAndCompanies',
+                $this->_getHierarchyRoleAndCompanies(
+                    App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user'])
+                )
+            );
         }
+    }
+
+    public function getManagersAction()
+    {
+
     }
 
     /**
@@ -165,54 +184,6 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         }
     }
 
-    /**
-     * Добавление нового менеджера
-     */
-    public function addManagerAction()
-    {
-        $request = $this->getRequest();
-        $access = HM_Model_Account_Access::getInstance();
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
-
-        if($user instanceof HM_Model_Account_User) {
-            $companiesAllowed = array();
-            foreach($user->getRoles() as $roleIdentifier => $companies) {
-                if($access->getAcl()->inheritsRole($roleIdentifier, 'ADM_COMPANY') || $roleIdentifier === 'ADM_COMPANY') {
-                    $companiesAllowed = array_merge($companies);
-                }
-            }
-
-            if($request->isPost()) {
-                $userColl = new HM_Model_Account_User_Collection();
-                $userColl->addEqualFilter('email', $request->getPost('account'))
-                    ->getCollection();
-                if(count($userColl->getObjectsIterator()) > 0) {
-                    $user = current($userColl->getObjectsIterator());
-                    if($user instanceof HM_Model_Account_User && in_array($request->getPost('company'), $companiesAllowed)) {
-                        $possibility = new HM_Model_Account_Access_Possibility();
-                        $possibility->getData()
-                            ->set('user', $user->getData('id'))
-                            ->set('company', $request->getPost('company'))
-                            ->set('role', $access->getRole('USER')->getId());
-                        $this->setAjaxStatus('ok');
-                        if($possibility->save()) {
-                            $this->setAjaxResult($possibility->getData('id'));
-                        }
-                    }
-                }
-
-
-            } else {
-                $this->view->assign('companies', $companiesAllowed);
-            }
-
-        }
-
-
-    }
-
     public function addManagerRole(){}
     public function removeManagerRole(){}
 
@@ -343,9 +314,109 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
     public function addPossibilityAction()
     {
+        $request = $this->getRequest();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $userColl = new HM_Model_Account_User_Collection();
+        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
 
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        if($user instanceof HM_Model_Account_User) {
+            if($request->isPost()) {
+                $possibilityParams = $request->getPost('possibility');
+                if(empty($possibilityParams['user'])) {
+                    // Восстанавливаем
+                    $userColl->addEqualFilter('email', $possibilityParams['account'])->getCollection();
+                    $userColl->resetFilters()
+                        ->addEqualFilter('login', $possibilityParams['account'])
+                        ->getCollection();
+                    $manager = current($userColl->getObjectsIterator());
+
+                } else {
+                    $manager = $userColl->load($possibilityParams['user']);
+                }
+
+                if($manager instanceof HM_Model_Account_User){
+                    $possibility = new HM_Model_Account_Access_Possibility();
+                    $possibility->setData(array(
+                            'user'      => $manager->getData('id'),
+                            'role'      => HM_Model_Account_Access::getInstance()->getRole((int)$possibilityParams['role'])->getId(),
+                            'company'   => $possibilityParams['company']
+                        )
+                    );
+                    if($possibility->save()) {
+                        $this->setAjaxResult($possibility->getData('id'));
+                        $this->setAjaxStatus('ok');
+                    }
+                }
+            } else {
+                $this->view->assign('hierarchyRoles', $this->_getHierarchyRoles($user));
+                $this->view->assign('manager', $request->getQuery('manager'));
+            }
+        }
     }
 
+
+    public function removePossibilityAction()
+    {
+        $request = $this->getRequest();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+        if($user instanceof HM_Model_Account_User) {
+            if($request->isPost()) {
+                $possibility = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Access_Possibility_Factory')
+                    ->restore($request->getPost('possibility'));
+                if($possibility->remove()) {
+                    $this->setAjaxResult($request->getPost('possibility'));
+                    $this->setAjaxStatus('ok');
+                }
+            }
+        }
+    }
+
+    private function _getHierarchyRoleAndCompanies(HM_Model_Account_User $user)
+    {
+        $access = HM_Model_Account_Access::getInstance();
+        $allowedRoles = array();
+        foreach($user->getRoles() as $roleIdentifier => $companies) {
+            foreach($access->getRoles() as $role){
+                if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier == $role->get('code')) {
+                    if(!array_key_exists($role->get('code'), $allowedRoles)) {
+                        $allowedRoles[$role->get('code')] = $companies;
+                    } else {
+                        $allowedRoles[$role->get('code')] = array_unique(array_merge($allowedRoles[$role->get('code')], $companies));
+                    }
+                }
+            }
+        }
+        return $allowedRoles;
+    }
+
+    private function _getHierarchyRoles(HM_Model_Account_User $user)
+    {
+        $access = HM_Model_Account_Access::getInstance();
+        $roles = $_index = array();
+        // Построить иерархию Ролей
+        foreach(array_keys($user->getRoles()) as $roleIdentifier) {
+            $roles = array_merge(
+                $roles,
+                $access->getInheritsRoles($access->getRole($roleIdentifier), true),
+                array($access->getRole($roleIdentifier))
+            );
+        }
+        // Исключить повторяющиеся Роли.
+        foreach($roles as $key => $role) {
+            if(in_array($role->get('id'), $_index)) {
+                unset($roles[$key]);
+                continue;
+            }
+            $_index[] = $role->get('id');
+        }
+
+        return $roles;
+    }
 
     /**
      * TODO: rename

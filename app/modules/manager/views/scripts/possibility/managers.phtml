@@ -9,10 +9,6 @@ foreach(HM_Model_Account_Access::getInstance()->getRoles() as $role) {
     $rolesArray[] = $role->toArray();
 }
 
-// Справочник компаний
-foreach($possibilities as $possibility) {
-    $companyColl->load($possibility['company']);
-}
 
 // Список менеджеров
 foreach($possibilities as $possibility) {
@@ -20,8 +16,23 @@ foreach($possibilities as $possibility) {
 }
 
 $rolesJson = Zend_Json::encode($rolesArray);
-$companiesJson = Zend_Json::encode($companyColl->toArray());
+
 $referenceRC = Zend_Json::encode($this->referenceRC);
+
+
+$hierarchyRoleAndCompanies = array();
+foreach($this->hierarchyRoleAndCompanies as $roleIdentifier => $companies) {
+    $hierarchyRoleAndCompanies[] = array(
+        'code'      => $roleIdentifier,
+        'companies' => $companies
+    );
+    foreach($companies as $company) {
+        $companyColl->load($company);
+    }
+}
+$companiesJson = Zend_Json::encode($companyColl->toArray());
+$hierarchyRoleAndCompaniesJson = Zend_Json::encode($hierarchyRoleAndCompanies);
+
 ?>
 <?php
 $jScript = <<<JS
@@ -56,22 +67,9 @@ require([
         var storeCompanies = new storeMemory({data: $companiesJson});
 
         // Связка связи Роль-Компания
-        var storeReferenceRC = new storeMemory({data: $referenceRC});
+        var storeHierarchyRoleAndCompanies = new storeMemory({data: $hierarchyRoleAndCompaniesJson});
 
         var DialogBox = new dijitDialog();
-        var dialogTitles = [
-            "Добавление менеджера"
-        ];
-
-
-
-        storeRoles.query({'id': 0}).forEach(function(items){
-            console.log(items);
-        });
-
-
-
-
 
         // #Страница с менеджерами
         router.register('main', function(){
@@ -80,47 +78,31 @@ require([
                 event.preventDefault();
                 router.go(event.target.getAttribute("data-action"));
             });
-            // Добавление менеджера
-            query('[data-action^="addManager"]').on('click', function(event){
+
+            query('[data-action^="addPossibility"]').on('click', function(event){
                 event.preventDefault();
-                Layout.load({
-                    url:    appConfig.baseUrl + '/manager/possibility/add-manager',
-                    format: 'html'
-                }).then(function(response){
-                    DialogBox.set('content', response);
-                    DialogBox.set('title', "Добавление менеджера");
-                    DialogBox.show();
-                }).then(function(){
-                    var form = dom.byId("add-manager");
-                    var Validation = new coreValidation(form);
-                    on(form['send'], 'click', function(event){
-                        event.preventDefault();
-                        if(Validation.isValid()) {
-                            // Отправить сообщение на сервер
-                            Layout.send({
-                                url:    appConfig.baseUrl + '/manager/possibility/add-manager',
-                                args:   domForm.toObject(form)
-                            }).then(function(response){
-                                if(response.result && response.result != -1) {
-                                    DialogBox.hide();
-                                    // TODO: Перегрузить список менеджеров
-                                } else {
-                                    Validation.clear();
-                                    Validation.setMessages(response.error);
-                                }
-                            });
-                        }
-                      });
-                })
+                dojo.publish('addPossibility');
             });
         });
 
         // #Страница с настройками одного менеджера
         router.register('getManagerBoard/:manager', function(event){
+            dojo.publish('getManagerBoard', event.params);
+        });
+
+        // Startup must be called in order to "activate" the router
+        router.startup();
+        router.go('main');
+
+        dojo.subscribe('getManagers', function(){
+
+        });
+
+        dojo.subscribe('getManagerBoard', function(args){
             Layout.load({
                 url:    '../../../manager/possibility/get-manager-board',
                 format: 'html',
-                args:   event.params
+                args:   args
             }).then(function(response){
                 Layout.place(dom.byId('contentManagers'), response);
             }).then(function(){
@@ -134,12 +116,17 @@ require([
                     event.preventDefault();
                     dojo.publish('addPossibility', {manager: domAttr.get(event.target, "data-action").split('/')[1]});
                 });
+            }).then(function(){
+                query('[data-action^="removePossibility"]').on('click', function(event){
+                    event.preventDefault();
+                    dojo.publish('removePossibility', {
+                            possibility: domAttr.get(event.target, "data-action").split('/')[1],
+                            manager: args['manager']
+                        }
+                    );
+                });
             })
         });
-
-        // Startup must be called in order to "activate" the router
-        router.startup();
-        router.go('main');
 
         // Действие на редактирование объектов
         dojo.subscribe('editPossibilityObjects', function(args){
@@ -165,7 +152,18 @@ require([
             })
         });
 
-        // Действие на добавление нового POssibility
+        dojo.subscribe('removePossibility', function(args){
+            Layout.send({
+                url:    appConfig.baseUrl + '/manager/possibility/remove-possibility',
+                args:   args
+            }).then(function(response){
+                if(response.result && response.result != -1) {
+                    dojo.publish('getManagerBoard', args);
+                }
+            })
+        });
+
+        // Действие на добавление нового Possibility
         dojo.subscribe('addPossibility', function(args){
             Layout.load({
                 url:    appConfig.baseUrl + '/manager/possibility/add-possibility',
@@ -174,8 +172,48 @@ require([
             }).then(function(response){
                 DialogBox.set('content', response);
                 DialogBox.set('title', "Редактирование ресурсов");
-                DialogBox.show();
-            })
+
+                var form = dom.byId('add-possibility');
+                var Validation = new coreValidation(form);
+                var formEvents = {
+                    changeRole: function(){
+                        storeHierarchyRoleAndCompanies.query({'code': storeRoles.get(domForm.fieldToObject(form['possibility[role]']))['data']['code']}).forEach(function(items){
+                            var html = '';
+                            dojo.forEach(items['companies'], function(company){
+                                html += '<option value="' + company + '" >' + storeCompanies.get(company)['data']['name'] + '</option>';
+                            });
+                            form['possibility[company]'].length = 0;
+                            form['possibility[company]'].innerHTML = html;
+                        });
+                    },
+                    onSend: function(){
+                        if(Validation.isValid()) {
+                            Layout.send({
+                                url:    appConfig.baseUrl + '/manager/possibility/add-possibility',
+                                args:   domForm.toObject(form)
+                            }).then(function(response){
+                                 if(response.result && response.result != -1) {
+                                    DialogBox.hide();
+                                    setTimeout(function(){
+                                        dojo.publish('getManagerBoard', {manager: domForm.fieldToObject(form['possibility[user]'])});
+                                    }, Layout._delay);
+                                } else {
+                                    Validation.clear();
+                                    Validation.setMessages(response.error);
+                                }
+                            });
+                        }
+                    }
+                };
+
+                on(form['possibility[role]'], 'change', formEvents.changeRole);
+                on(form['send'], 'click', formEvents.onSend);
+
+                (function(){
+                    formEvents.changeRole();
+                    DialogBox.show();
+                })();
+            });
         });
 
     });
@@ -199,7 +237,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <tfoot>
             <tr>
                 <td colspan="2">
-                    <button type="button" data-action="addManager" name="add">Добавить</button>
+                    <button type="button" data-action="addPossibility" name="add">Добавить</button>
                     <button type="button" data-action="removeManager" name="remove" id="testme">Удалить</button>
                 </td>
             </tr>

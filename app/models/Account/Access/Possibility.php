@@ -40,12 +40,11 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     {
         $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
             ->execute('possibility_add', array(
-                'id_user'       => $this->getData('user'),
-                'id_role'       => $this->getData('role'),
-                'id_company'    => $this->getData('company')
+                'id_user'       => (int)$this->getData('user'),
+                'id_role'       => (int)$this->getData('role'),
+                'id_company'    => (int)$this->getData('company')
             )
         );
-
         if($result->rowCount() > 0) {
             $row = $result->fetchRow();
             return (int)$row['o_id_possibility'];
@@ -75,6 +74,28 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         }
 
         return parent::_update();
+    }
+
+    /**
+     * Удалить Possibility
+     * @return int
+     */
+    protected function _remove()
+    {
+        if($this->isIdentity()) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('possibility_del', array(
+                    'id_possibility' => $this->getData('id')
+                )
+            );
+
+            $row = $result->fetchRow();
+            if((int)$row['o_id_possibility'] == $this->getData('id')) {
+                $this->getData()->clear();
+                return $row['o_id_possibility'];
+            }
+        }
+        return parent::_remove();
     }
 
     /**

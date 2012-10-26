@@ -44,7 +44,7 @@ $possibility =$this->possibility;
     </colgroup>
     <thead>
     <tr>
-        <th colspan="2">
+        <th colspan="3">
             <?php $manager = $userColl->load($possibility['user'])?>
             <?=$manager->getData('email');?> (<?=$manager->getData('last_name');?> <?=$manager->getData('first_name');?> <?=$manager->getData('middle_name');?>)
         </th>
@@ -52,7 +52,7 @@ $possibility =$this->possibility;
     </thead>
     <tfoot>
         <tr>
-            <td colspan="2">
+            <td colspan="3">
                 <button type="button" data-action="addPossibility/<?=$manager->getData('id')?>">Добавить</button>
             </td>
         </tr>
@@ -62,21 +62,28 @@ $possibility =$this->possibility;
     <tr>
         <td rowspan="<?=count($companies) + 1 ?>"><?=$access->getRole($roleIdentifier)->get('name')?></td>
         <th>Компании</th>
+        <th>Опции</th>
     </tr>
     <?php foreach($companies as $company): ?>
     <tr>
         <td>
-            <?php
-                $possibilityColl->clear();
-                $possibilityColl->resetFilters()
-                    ->addEqualFilter('urc', array(
-                        'user'      => $manager->getData('id'),
-                        'role'      => $access->getRole($roleIdentifier)->getId(),
-                        'company'   => $company
-                    )
-                );
-            ?>
-            <a data-action="editPossibilityObjects/<?=current($possibilityColl->getCollection()->getIdsIterator())?>"><?=$companyColl->load($company)->getData('name')?></a>
+            <?=$companyColl->load($company)->getData('name')?>
+        </td>
+        <td>
+        <?php
+            $possibilityColl->clear();
+            $possibilityColl->resetFilters()
+                ->addEqualFilter('urc', array(
+                    'user'      => $manager->getData('id'),
+                    'role'      => $access->getRole($roleIdentifier)->getId(),
+                    'company'   => $company
+                )
+            );
+        ?>
+        <?php if($roleIdentifier != 'ADM_COMPANY'): ?>
+            <a data-action="editPossibilityObjects/<?=current($possibilityColl->getCollection()->getIdsIterator())?>">ресурсы</a> |
+        <?php endif; ?>
+            <a data-action="removePossibility/<?=current($possibilityColl->getCollection()->getIdsIterator())?>">удалить</a>
         </td>
     </tr>
     <?php endforeach; ?>

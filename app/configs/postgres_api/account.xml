@@ -113,6 +113,6 @@
         <id_company type="integer"/>
     </possibility_update>
     <possibility_del>
-        <id_possibility type="intefer"/>
+        <id_possibility type="integer"/>
     </possibility_del>
 </functions>

@@ -58,9 +58,9 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
                 if(is_array($urc)) {
                     $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                         ->execute('possibility_by_urc', array(
-                            'id_user'       => $urc['user'],
-                            'id_role'       => $urc['role'],
-                            'id_company'    => $urc['company']
+                            'id_user'       => (int)$urc['user'],
+                            'id_role'       => (int)$urc['role'],
+                            'id_company'    => (int)$urc['company']
                         )
                     );
                     if($result->rowCount() > 0) {

@@ -41,10 +41,27 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      * @param mixed $value
      * @return App_Core_Model_Data_Entity
      */
-    public function setData($key, $value)
+/*    public function setData($key, $value)
     {
         $this->getData()->set($key, $value);
         return $this;
+    }*/
+
+    /**
+     * Установить данные в сущность
+     * @param array $options
+     */
+    public function setData(array $options)
+    {
+        if($this->_data instanceof App_Core_Model_Data_Store) {
+            foreach($options as $key => $value) {
+                if(is_string($key) || is_int($key)) {
+                    $this->getData()->set($key, $value);
+                }
+            }
+        } else {
+            $this->_data = new App_Core_Model_Data_Store($options);
+        }
     }
 
     /**
