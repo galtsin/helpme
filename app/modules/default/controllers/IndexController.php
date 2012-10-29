@@ -119,14 +119,17 @@ class Default_IndexController extends App_Zend_Controller_Action
         ));
         Zend_Debug::dump($a);
 
+        foreach($user->getPossibilityCollection()->getObjectsIterator() as $obj) {
+            Zend_Debug::dump($obj->getObjects());
+        }
 
-        $acl = new Zend_Acl();
-        $acl->addRole('guest');
-        $acl->addRole('user', 'guest');
-        $acl->addResource('page');
-        $acl->allow('guest', 'page', 'read');
-        $acl->allow('user', 'page', 'write');
-        Zend_Debug::dump($acl->isAllowed('user', 'page', array('write')));
+
+/*        $accessColl = new HM_Model_Account_Access_Collection();
+        $accessColl->setType('LINE');
+        $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())
+            ->getCollection();
+        Zend_Debug::dump($accessColl->getIdsIterator());*/
+
 
     }
 

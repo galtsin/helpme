@@ -133,20 +133,25 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     {
         $ids = array();
 
-        $acl = new Zend_Acl();
         $access = HM_Model_Account_Access::getInstance();
+        $access->getAcl()->allow('ADM_COMPANY', 'LINE', array('R', 'W'));
         if(count($this->getEqualFilterValues('possibility')) > 0) {
             foreach($this->getEqualFilterValues('possibility') as $possibility){
-                if($possibility instanceof HM_Model_Account_Access_Possibility) {
-                    // Общая проверка доступности роли и ресурса без привязки к привилегиям
-                    if(    $acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'write')
-                        || $acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'read')
-                    ) {
-                        $ids = array_merge($ids, $possibility->getObjects($this->_objectType));
+                if(!$possibility instanceof HM_Model_Account_Access_Possibility_Collection) {
+                    $possibilityCollection = new HM_Model_Account_Access_Possibility_Collection();
+                    if($possibility instanceof HM_Model_Account_Access_Possibility) {
+                        $possibilityCollection->addToCollection($possibility);
                     }
-                } elseif ($possibility instanceof HM_Model_Account_Access_Possibility_Collection) {
-                    foreach($possibility->getObjectsIterator() as $object) {
+                } else {
+                    $possibilityCollection = $possibility;
+                }
 
+                foreach($possibilityCollection->getObjectsIterator() as $_possibility) {
+                    // Общая проверка доступности роли и ресурса без привязки к привилегиям
+                    if(    $access->getAcl()->isAllowed($access->getRole($_possibility->getData('role'))->get('code'), $this->_objectType, 'W')
+                        || $access->getAcl()->isAllowed($access->getRole($_possibility->getData('role'))->get('code'), $this->_objectType, 'R')
+                    ) {
+                        $ids = array_merge($ids, $_possibility->getObjects($access->getType($this->_objectType)));
                     }
                 }
             }
@@ -167,9 +172,9 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
             foreach($this->getEqualFilterValues('possibility') as $possibility){
                 if($possibility instanceof HM_Model_Account_Access_Possibility) {
                     // Проверка доступности роли и ресурса с привязкой к привилегиям на объекты (чтение/запись)
-                    if($acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'write')) {
+                    if($acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'W')) {
                         $object->getData()->setWritable(true);
-                    } elseif ($acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'read')) {
+                    } elseif ($acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'R')) {
                         $object->getData()->setWritable(false);
                     } else {
                         unset($objectsCollection[$key]);

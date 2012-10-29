@@ -9,6 +9,8 @@
 
 class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 {
+    const RESOURCE_NAMESPACE = 'account_access';
+
     /**
      * Массив ТипоОбъектов.
      * Null используется для отложенной загрузки
@@ -53,9 +55,17 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
         $this->_acl = Zend_Registry::get('acl');
         $this->_acl->deny();
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+
         // TODO: Необходимо ли?
         $this->getRoles();
         $this->getTypes();
+
+        // Выставить доступ
+        $this->getAcl()
+            ->allow('ADM_TARIFF', 'TARIFF', array('W', 'R'))
+            ->allow('ADM_GROUP', 'GROUP', array('W', 'R'))
+            ->allow('ADM_LINE', 'LINE', array('W', 'R'));
+
     }
 
     /**
@@ -78,20 +88,25 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     {
         if(null === $this->_types) {
             $types = array();
+
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('possibility_get_object_types', array());
+
             foreach($result->fetchAll() as $row) {
-                $type = new App_Core_Model_Data_Store();
-                $type->set('id', $row['id'])
-                     ->set('code', $row['code'])
-                     ->set('name', $row['name']);
-                $type->unmarkDirty();
-                // TODO: Пристыковать типы к ACL
+                $type = new App_Core_Model_Data_Store(array(
+                        'id'    => (int)$row['id'],
+                        'code'  => $row['code'],
+                        'name'  => $row['name']
+                    )
+                );
+
                 $this->getAcl()->addResource($type->get('code'));
-                array_push($types, $type);
+                $types[] = $type;
             }
+
             $this->_types = $types;
         }
+
         return $this->_types;
     }
 
@@ -110,16 +125,17 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 ->execute('possibility_get_roles', array());
 
             foreach($result->fetchAll() as $row) {
-                $role = new App_Core_Model_Data_Store();
-                $role->set('id', $row['id'])
-                     ->set('pid', $row['pid']) // может быть null
-                     ->set('code', $row['code'])
-                     ->set('name', $row['name']);
-                $role->unmarkDirty();
-                array_push($roles, $role);
+                $role = new App_Core_Model_Data_Store(array(
+                        'id'    => (int)$row['id'],
+                        'pid'   => $row['pid'],
+                        'code'  => $row['code'],
+                        'name'  => $row['name']
+                    )
+                );
+                $roles[] = $role;
 
                 // Определяем корневую роль, у которой в БД запись = NULL.
-                // При отсутствии данной записи - необходимо использовать ручную привязку ролей
+                // TODO: При отсутствии данной записи - необходимо использовать ручную привязку ролей
                 if(is_null($role->get('pid'))){
                     $rootRole = $role;
                 }
@@ -148,6 +164,8 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             $field = 'id';
         } elseif(is_string($typeIdentifier)) {
             $field = 'code';
+        } elseif($typeIdentifier instanceof App_Core_Model_Data_Store) {
+            return $this->getType((int)$typeIdentifier->getId());
         } else{
             throw new Exception("Type incorrect identifier value (Некорректное значение идентификатора типа)");
         }
@@ -171,6 +189,8 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             $field = 'id';
         } elseif(is_string($roleIdentifier)) {
             $field = 'code';
+        } elseif($roleIdentifier instanceof App_Core_Model_Data_Store) {
+            return $this->getRole((int)$roleIdentifier->getId());
         } else{
             throw new Exception("Role incorrect identifier value (Некорректное значение идентификатора роли)");
         }
@@ -207,7 +227,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 
     /**
      * Вернуть Zend_Acl
-     * @return mixed|null|Zend_Acl
+     * @return Zend_Acl
      */
     public function getAcl()
     {

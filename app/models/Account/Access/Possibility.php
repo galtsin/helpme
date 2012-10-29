@@ -11,12 +11,12 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     /**
      * Индекс Привелегии на Запись
      */
-    const WRITE = 'write';
+    const WRITE = 'W';
 
     /**
      * Индекс Привелегии на Чтение
      */
-    const READ = 'read';
+    const READ = 'R';
 
     /**
      * Список идентификаторов объектов
@@ -30,6 +30,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     protected function _init()
     {
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+        $this->addResource(HM_Model_Account_Access::getInstance(), HM_Model_Account_Access::RESOURCE_NAMESPACE);
     }
 
     /**
@@ -99,57 +100,100 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * @param App_Core_Model_Data_Store $type
-     * @return array
+     * Получить объекты
+     * @param $typeIdentifier
+     * @return array|null
      */
-    public function getObjects(App_Core_Model_Data_Store $type)
+    public function getObjects($typeIdentifier = null)
     {
-        $objects = $this->_getObjects($type);
-        return $objects['index'];
-    }
-
-    /**
-     * Получить идектификаторы объектов с типом $type
-     * @param App_Core_Model_Data_Store $type
-     * @return array('type' => array('write' => array(), 'read' => array(), 'index' => array()))
-     */
-    private function _getObjects(App_Core_Model_Data_Store $type)
-    {
-        if(!array_key_exists($type->get('code'), $this->_objects)) {
-
-            $this->_objects[$type->get('code')] = array(
-                self::WRITE => array(), // идентификаторы на запись
-                self::READ  => array(), // идентификаторы на чтение
-                'index' => array() // общий индекс всех идентификаторов
-            );
-
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                ->execute('possibility_get_objects', array(
-                    'id_possibility'    => $this->getData('id'),
-                    'id_object_type'    => $type->get('id')
-                )
-            );
-
-            if($result->rowCount() > 0){
-                foreach($result->fetchAll() as $row){
-                    $mode = ('W' === $row['o_rw']) ? self::WRITE : self::READ;
-                    $this->_add($type, (int)$row['o_id_object'], $mode);
+        if($this->isIdentity()) {
+            $access = $this->getResource(HM_Model_Account_Access::RESOURCE_NAMESPACE);
+            if($access instanceof HM_Model_Account_Access){
+                if(null === $typeIdentifier) {
+                    $objects = array();
+                    foreach($access->getTypes() as $type) {
+                        if(array_key_exists($access->getType($type)->get('code'), $this->_objects)){
+                            $objects = array_merge($objects, $this->_objects[$access->getType($type)->get('code')]);
+                        } else {
+                            $this->_objects[$access->getType($type)->get('code')] = $this->_getObjects($type);
+                            $objects = array_merge($objects, $this->_objects[$access->getType($type)->get('code')]);
+                        }
+                    }
+                    return $objects;
+                } else {
+                    if(array_key_exists($access->getType($typeIdentifier)->get('code'), $this->_objects)){
+                        return $this->_objects[$access->getType($typeIdentifier)->get('code')];
+                    } else {
+                        $this->_objects[$access->getType($typeIdentifier)->get('code')] = $this->_getObjects($typeIdentifier);
+                        return $this->_objects[$access->getType($typeIdentifier)->get('code')];
+                    }
                 }
             }
         }
 
-        return $this->_objects[$type->get('code')];
+        return null;
     }
 
     /**
-     * TODO: В разработке
+     * @param $typeIdentifier
+     * @return array|null
      */
-    public function updateObjects()
+    private function _getObjects($typeIdentifier)
+    {
+        if($this->isIdentity()) {
+            $access = $this->getResource(HM_Model_Account_Access::RESOURCE_NAMESPACE);
+            if($access instanceof HM_Model_Account_Access){
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('possibility_get_objects', array(
+                        'id_possibility'    => $this->getData('id'),
+                        'id_object_type'    => $access->getType($typeIdentifier)->getId()
+                    )
+                );
+                $objects = array();
+                if($result->rowCount() > 0){
+                    foreach($result->fetchAll() as $row){
+                        $object = new App_Core_Model_Data_Store(array(
+                                'id'    => (int)$row['o_id_object'],
+                                'rw'    => ('W' === $row['o_rw']) ? self::WRITE : self::READ,
+                                'type'  => $access->getType($typeIdentifier)
+                            )
+                        );
+                        $object->setWritable(('W' === $row['o_rw']) ? true : false)
+                            ->unmarkDirty();
+                        $objects[$object->getId()] = $object;
+                    }
+                }
+                return $objects;
+            }
+        }
+
+        return null;
+    }
+
+
+    public function assignObject(App_Core_Model_Data_Store $object)
     {
 
     }
 
-    /**
+    public function saveObjects()
+    {
+        foreach($this->getObjects() as $object) {
+
+        }
+    }
+
+    private function _insertObject($object)
+    {
+
+    }
+
+    private function _removeObject($object)
+    {
+
+    }
+
+      /**
      * @param App_Core_Model_Data_Store $type
      * @param int $id
      * @return bool
@@ -157,37 +201,5 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     public function has(App_Core_Model_Data_Store $type, $id)
     {
         return in_array($id, $this->getObjects($type));
-    }
-
-    /**
-     * Установка прав передаваемых объектов на чтение/запись
-     * По умолчанию проставляет все объекты как на чтение
-     * @param App_Core_Model_Data_Store $type
-     * @param App_Core_Model_Data_Store $data
-     */
-    public function assignPrivileges(App_Core_Model_Data_Store $type, App_Core_Model_Data_Store $data)
-    {
-        if($this->has($type, $data->get('id'))) {
-            $objects = $this->_getObjects($type);
-            if(in_array($data->get('id'), $objects[self::WRITE])) {
-                $data->setWritable(true);
-            } else {
-                $data->setWritable(false);
-            }
-        }
-    }
-
-    /**
-     * @param App_Core_Model_Data_Store $type
-     * @param int $id
-     * @param string $mode
-     * @return HM_Model_Account_Access_Possibility
-     */
-    private function _add(App_Core_Model_Data_Store $type, $id, $mode)
-    {
-        if(self::READ === $mode || self::WRITE === $mode) {
-            $this->_objects[$type->get('code')][$mode][] = $this->_objects[$type->get('code')]['index'][] = $id;
-        }
-        return $this;
     }
 }

@@ -46,7 +46,7 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
     }
 
     /**
-     * Фильтр по связке пользователь+роль+компания
+     * Фильтр по связке пользователь + роль + компания
      * @return array
      */
     protected function _doUrcEqualFilterCollection()
@@ -59,7 +59,7 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
                     $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                         ->execute('possibility_by_urc', array(
                             'id_user'       => (int)$urc['user'],
-                            'id_role'       => (int)$urc['role'],
+                            'id_role'       => HM_Model_Account_Access::getInstance()->getRole($urc['role'])->getId(),
                             'id_company'    => (int)$urc['company']
                         )
                     );

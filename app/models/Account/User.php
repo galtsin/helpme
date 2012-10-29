@@ -16,6 +16,11 @@ class HM_Model_Account_User extends App_Core_Model_Data_Entity
     protected $_roles = null;
 
     /**
+     * @var null|App_Core_Model_CollectionAbstract
+     */
+    private $_possibilityCollection = null;
+
+    /**
      * Инициализация
      */
     protected function _init()
@@ -70,5 +75,31 @@ class HM_Model_Account_User extends App_Core_Model_Data_Entity
         }
 
         return $this->_roles;
+    }
+
+    /**
+     * Получить коллекцию Possibility
+     * @return App_Core_Model_CollectionAbstract|null
+     */
+    public function getPossibilityCollection()
+    {
+        if($this->isIdentity()) {
+            if(null === $this->_roles) {
+                $collection = new HM_Model_Account_Access_Possibility_Collection();
+                foreach($this->getRoles() as $roleIdentifier => $companies) {
+                    foreach($companies as $company) {
+                        $collection->addEqualFilter('urc', array(
+                                'user'      => $this->getData('id'),
+                                'role'      => $roleIdentifier,
+                                'company'   => $company
+                            )
+                        );
+                    }
+                }
+                $this->_possibilityCollection = $collection->getCollection();
+            }
+        }
+
+        return $this->_possibilityCollection;
     }
 }
