@@ -284,6 +284,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
         //$objectType = 'LINE';
         // TODO: МОЖНО сделать HELPER + PAGEROLES
+        // Good
         // Получить ресурсы принадлежащие текущему Администратору
         $accessColl = new HM_Model_Account_Access_Collection();
         if(is_string($objectType)) {
@@ -303,7 +304,12 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
 
         if($request->isPost()){
-            array_intersect($request->getParam('objects'), $accessColl->getCollection()->getIdsIterator());
+            if($request->getParam('objects')) {
+                $intersect = array_intersect($request->getParam('objects'), $accessColl->getCollection()->getIdsIterator());
+                // Сохранить пересечения
+            } else {
+                // Отключить все объекты
+            }
         } else {
             $this->view->assign('adminResourcesColl', $accessColl->getCollection());
             $this->view->assign('type', $objectType);

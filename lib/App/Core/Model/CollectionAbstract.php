@@ -133,6 +133,42 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
+     * Добавить запись или набор записей в текущую коллекцию
+     * @param mixed $set
+     * @return App_Core_Model_CollectionAbstract
+     */
+    public function addToCollection($set)
+    {
+        if(is_array($set)) {
+            foreach($set as $entry) {
+                $this->_addToCollection($entry);
+            }
+        } else {
+            $this->_addToCollection($set);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Определить тип добавляемой записи и вставить в коллекцию
+     * @param mixed $entry
+     */
+    private function _addToCollection($entry)
+    {
+        if(is_int($entry)) {
+            if(!in_array($entry, $this->getIdsIterator())) {
+                $this->_idsCollection[] = $entry;
+            }
+        } elseif ($entry instanceof App_Core_Model_Data_Entity) {
+            if(!array_key_exists($entry->getData()->getId(), $this->getObjectsIterator()) && !in_array($entry->getData()->getId(), $this->getIdsIterator())) {
+                $this->_idsCollection[] = $entry->getData()->getId();
+                $this->_objectsCollectionp[$entry->getData()->getId()] = $entry;
+            }
+        }
+    }
+
+    /**
      * ru: Очистить коллекцию
      * @return App_Core_Model_CollectionAbstract
      */

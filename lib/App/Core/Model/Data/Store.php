@@ -51,6 +51,8 @@ final class App_Core_Model_Data_Store
                 foreach($options as $key => $value) {
                     $this->set($key, $value);
                 }
+                // Считаем, что инициализация объекта - это не изменение объекта, а его наполнение
+                $this->unmarkDirty();
             }
         }
     }

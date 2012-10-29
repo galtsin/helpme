@@ -120,6 +120,14 @@ class Default_IndexController extends App_Zend_Controller_Action
         Zend_Debug::dump($a);
 
 
+        $acl = new Zend_Acl();
+        $acl->addRole('guest');
+        $acl->addRole('user', 'guest');
+        $acl->addResource('page');
+        $acl->allow('guest', 'page', 'read');
+        $acl->allow('user', 'page', 'write');
+        Zend_Debug::dump($acl->isAllowed('user', 'page', array('write')));
+
     }
 
     private function _getHierarchyRoleAndCompany(HM_Model_Account_User $user)

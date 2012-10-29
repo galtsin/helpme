@@ -34,6 +34,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     {
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'accessible');
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'possibility');
 
         $class = get_called_class(); //  Для доступа наследуемым классам
         $this->setType($class::OBJECT_TYPE);
@@ -42,6 +43,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     /**
      * Установить фильтр доступа к объектам, используя права доступа и их наследование
      * Результирующая выборка произойдет по всем разрешенным правам с соединением ресурсов
+     * @deprecated
      * @param HM_Model_Account_User $user
      * @param App_Core_Model_Data_Store $role Роль для которой необходимо проверить права пользователя
      * @param int $company
@@ -118,5 +120,63 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     public function getPossibilities()
     {
         return $this->_possibilities;
+    }
+
+    public function setInheritRole(){}
+
+    /**
+     * TODO: Самая правильная схема реализации
+     * Фильтр по Possibility
+     * @return array
+     */
+    protected function _doPossibilityEqualFilterCollection()
+    {
+        $ids = array();
+
+        $acl = new Zend_Acl();
+        $access = HM_Model_Account_Access::getInstance();
+        if(count($this->getEqualFilterValues('possibility')) > 0) {
+            foreach($this->getEqualFilterValues('possibility') as $possibility){
+                if($possibility instanceof HM_Model_Account_Access_Possibility) {
+                    // Общая проверка доступности роли и ресурса без привязки к привилегиям
+                    if(    $acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'write')
+                        || $acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'read')
+                    ) {
+                        $ids = array_merge($ids, $possibility->getObjects($this->_objectType));
+                    }
+                } elseif ($possibility instanceof HM_Model_Account_Access_Possibility_Collection) {
+                    foreach($possibility->getObjectsIterator() as $object) {
+
+                    }
+                }
+            }
+        }
+
+        return array_unique($ids);
+    }
+
+    /**
+     * Переопределяем родительский метод
+     */
+    public function _getObjectsIterator()
+    {
+        $acl = new Zend_Acl();
+        $access = HM_Model_Account_Access::getInstance();
+        $objectsCollection = parent::getObjectsIterator();
+        foreach($objectsCollection as $key => $object) {
+            foreach($this->getEqualFilterValues('possibility') as $possibility){
+                if($possibility instanceof HM_Model_Account_Access_Possibility) {
+                    // Проверка доступности роли и ресурса с привязкой к привилегиям на объекты (чтение/запись)
+                    if($acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'write')) {
+                        $object->getData()->setWritable(true);
+                    } elseif ($acl->isAllowed($access->getRole($possibility->getData('role'))->get('code'), $this->_objectType, 'read')) {
+                        $object->getData()->setWritable(false);
+                    } else {
+                        unset($objectsCollection[$key]);
+                    }
+                }
+            }
+        }
+        return $objectsCollection;
     }
 }
