@@ -36,19 +36,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Добавить идентификационные данные в сущность
-     * @param string $key
-     * @param mixed $value
-     * @return App_Core_Model_Data_Entity
-     */
-/*    public function setData($key, $value)
-    {
-        $this->getData()->set($key, $value);
-        return $this;
-    }*/
-
-    /**
-     * Установить данные в сущность
+     * Назначить данные в сущность
      * @param array $options
      */
     public function setData(array $options)
@@ -74,12 +62,20 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     {
         if($this->getData() instanceof App_Core_Model_Data_Store) {
             if($this->isIdentity()){
-                // Делегируем обновление записей
-                if($this->_update() > 0) {
-                    $this->getData()->unmarkDirty();
-                    return true;
+                if($this->getData()->isRemoved()) {
+                    // Удаление записи
+                    if($this->_remove() > 0) {
+                        return true;
+                    }
+                } elseif($this->getData()->isDirty()) {
+                    // Обновление записи
+                    if($this->_update() > 0) {
+                        $this->getData()->unmarkDirty();
+                        return true;
+                    }
                 }
             } else {
+                // Добавление записи
                 $result = $this->_insert();
                 if(is_int($result) && $result > 0) {
                     $this->getData()->set('id', $result);
@@ -127,19 +123,6 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Удаление объекта
-     * @return int
-     */
-    public function remove()
-    {
-        if($this->_remove() > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Делегирование наследникам
      * Удаление объекта
      * Возвращает идентификатор удаленной записи или -1 в случае неудачи
      * @return int

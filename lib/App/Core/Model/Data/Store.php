@@ -41,6 +41,12 @@ final class App_Core_Model_Data_Store
     private $_writable = true;
 
     /**
+     * Пометка на удаление объекта
+     * @var bool
+     */
+    private $_removed = false;
+
+    /**
      * Конструктор позволяет инициализировать модель через метод self::set
      * @param array|null $options
      */
@@ -250,6 +256,30 @@ final class App_Core_Model_Data_Store
     {
         if(is_bool($flag)) {
             $this->_writable = $flag;
+            $this->markDirty();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Установить флаг на удаление
+     * @return bool
+     */
+    public function isRemoved()
+    {
+        return $this->_removed;
+    }
+
+    /**
+     * Установить флаг на удаление объекта
+     * @param $flag
+     * @return App_Core_Model_Data_Store
+     */
+    public function setRemoved($flag)
+    {
+        if(is_bool($flag)) {
+            $this->_removed = $flag;
             $this->markDirty();
         }
 

@@ -119,10 +119,14 @@ class Default_IndexController extends App_Zend_Controller_Action
         ));
         Zend_Debug::dump($a);
 
-        foreach($user->getPossibilityCollection()->getObjectsIterator() as $obj) {
-            Zend_Debug::dump($obj->getObjects());
-        }
+        $a = $b = array();
+        $a[9] = 'igor';
+        $a[4] = 'name';
 
+        $b[2] = 'g';
+        $b[5] = 'b';
+
+        Zend_Debug::dump(array_merge($a, $b));
 
 /*        $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE');

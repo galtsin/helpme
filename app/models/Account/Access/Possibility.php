@@ -100,86 +100,74 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * Получить объекты
+     * Получить объекты по их типу
      * @param $typeIdentifier
      * @return array|null
      */
     public function getObjects($typeIdentifier = null)
     {
+
         if($this->isIdentity()) {
             $access = $this->getResource(HM_Model_Account_Access::RESOURCE_NAMESPACE);
+            $objects = array();
             if($access instanceof HM_Model_Account_Access){
                 if(null === $typeIdentifier) {
-                    $objects = array();
-                    foreach($access->getTypes() as $type) {
-                        if(array_key_exists($access->getType($type)->get('code'), $this->_objects)){
-                            $objects = array_merge($objects, $this->_objects[$access->getType($type)->get('code')]);
-                        } else {
-                            $this->_objects[$access->getType($type)->get('code')] = $this->_getObjects($type);
-                            $objects = array_merge($objects, $this->_objects[$access->getType($type)->get('code')]);
-                        }
+                    foreach($this->_objects as $_objects) {
+                        $objects = array_merge($objects, $_objects);
                     }
-                    return $objects;
                 } else {
-                    if(array_key_exists($access->getType($typeIdentifier)->get('code'), $this->_objects)){
-                        return $this->_objects[$access->getType($typeIdentifier)->get('code')];
-                    } else {
-                        $this->_objects[$access->getType($typeIdentifier)->get('code')] = $this->_getObjects($typeIdentifier);
-                        return $this->_objects[$access->getType($typeIdentifier)->get('code')];
+                    if(!array_key_exists($access->getType($typeIdentifier)->get('code'), $this->_objects)){
+                        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                            ->execute('possibility_get_objects', array(
+                                'id_possibility'    => $this->getData('id'),
+                                'id_object_type'    => $access->getType($typeIdentifier)->getId()
+                            )
+                        );
+                        if($result->rowCount() > 0){
+                            foreach($result->fetchAll() as $row){
+                                $_object = new App_Core_Model_Data_Store(array(
+                                        'id'    => (int)$row['o_id_object'],
+                                        'type'  => $access->getType($typeIdentifier)
+                                    )
+                                );
+                                $_object->setWritable(('W' === $row['o_rw']) ? true : false)
+                                    ->unmarkDirty();
+                                $objects[] = $_object;
+                            }
+                        }
+                        $this->_objects[$access->getType($typeIdentifier)->get('code')] = $objects;
                     }
                 }
             }
+            return $objects;
         }
-
         return null;
     }
 
     /**
-     * @param $typeIdentifier
-     * @return array|null
+     * Добавить объект к набору
+     * @param App_Core_Model_Data_Store $object
      */
-    private function _getObjects($typeIdentifier)
+    public function addObject(App_Core_Model_Data_Store $object)
     {
-        if($this->isIdentity()) {
-            $access = $this->getResource(HM_Model_Account_Access::RESOURCE_NAMESPACE);
-            if($access instanceof HM_Model_Account_Access){
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('possibility_get_objects', array(
-                        'id_possibility'    => $this->getData('id'),
-                        'id_object_type'    => $access->getType($typeIdentifier)->getId()
-                    )
-                );
-                $objects = array();
-                if($result->rowCount() > 0){
-                    foreach($result->fetchAll() as $row){
-                        $object = new App_Core_Model_Data_Store(array(
-                                'id'    => (int)$row['o_id_object'],
-                                'rw'    => ('W' === $row['o_rw']) ? self::WRITE : self::READ,
-                                'type'  => $access->getType($typeIdentifier)
-                            )
-                        );
-                        $object->setWritable(('W' === $row['o_rw']) ? true : false)
-                            ->unmarkDirty();
-                        $objects[$object->getId()] = $object;
-                    }
-                }
-                return $objects;
+        $addFlag = false;
+        foreach($this->getObjects($object->get('type')) as $_object) {
+            if($object->getId() === $_object->getId()) {
+                $addFlag = true;
             }
+            $object->markDirty();
+            $this->_objects[$object->get('type')->get('code')][$object->getId()] = $object;
         }
-
-        return null;
-    }
-
-
-    public function assignObject(App_Core_Model_Data_Store $object)
-    {
-
     }
 
     public function saveObjects()
     {
         foreach($this->getObjects() as $object) {
-
+            if($object->isRemoved()) {
+                $this->_removeObject($object);
+            } elseif ($object->isDirty()) {
+                $this->_insertObject($object);
+            }
         }
     }
 
@@ -189,6 +177,11 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     private function _removeObject($object)
+    {
+
+    }
+
+    private function _getObject()
     {
 
     }
