@@ -1,40 +1,12 @@
 <?php
+// Сгруппировать возможности
+$possibilityGroupByRole = array();
+foreach($this->possibilities as $possibility) {
+    $possibilityGroupByRole[$possibility->getData('role')->get('code')][] = $possibility;
+}
 $companyColl = new HM_Model_Billing_Company_Collection();
-$userColl = new HM_Model_Account_User_Collection();
-$possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
-
-Zend_Debug::dump($userColl->load(4)->getRoles());
-
-$roles = array();
-$account = HM_Model_Account_Auth::getInstance()->getAccount();
 $access = HM_Model_Account_Access::getInstance();
-
-$user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
-foreach(array_keys($user->getRoles()) as $roleIdentifier) {
-    $roles = array_merge(
-        $roles,
-        $access->getInheritsRoles($access->getRole($roleIdentifier), true),
-        array($access->getRole($roleIdentifier))
-    );
-}
-// Исключить повторяющиеся роли.
-$index = array();
-$_roles = $roles;
-foreach($_roles as $key => $role) {
-    if(in_array($role->get('id'), $index)) {
-        unset($roles[$key]);
-        continue;
-    }
-    $index[] = $role->get('id');
-}
-Zend_Debug::dump($this->possibility);
-$possibility =$this->possibility;
-//Zend_Debug::dump($roles);
-
-
-
-
-
+$manager = $this->manager;
 ?>
 <form id="edit-manager-possibility">
 <table class="table table-bordered">
@@ -45,7 +17,6 @@ $possibility =$this->possibility;
     <thead>
     <tr>
         <th colspan="3">
-            <?php $manager = $userColl->load($possibility['user'])?>
             <?=$manager->getData('email');?> (<?=$manager->getData('last_name');?> <?=$manager->getData('first_name');?> <?=$manager->getData('middle_name');?>)
         </th>
     </tr>
@@ -58,35 +29,27 @@ $possibility =$this->possibility;
         </tr>
     </tfoot>
     <tbody>
-    <?php foreach($possibility['roles'] as $roleIdentifier => $companies): ?>
+    <?php foreach($possibilityGroupByRole as $roleIdentifier => $possibilities): ?>
+    <?php if(count($possibilities) > 0): ?>
     <tr>
-        <td rowspan="<?=count($companies) + 1 ?>"><?=$access->getRole($roleIdentifier)->get('name')?></td>
+        <td rowspan="<?=count($possibilities) + 1 ?>"><?=$access->getRole($roleIdentifier)->get('name')?></td>
         <th>Компании</th>
         <th>Опции</th>
     </tr>
-    <?php foreach($companies as $company): ?>
+    <?php foreach($possibilities as $possibility): ?>
     <tr>
         <td>
-            <?=$companyColl->load($company)->getData('name')?>
+            <?=$companyColl->load($possibility->getData('company'))->getData('name')?>
         </td>
         <td>
-        <?php
-            $possibilityColl->clear();
-            $possibilityColl->resetFilters()
-                ->addEqualFilter('urc', array(
-                    'user'      => $manager->getData('id'),
-                    'role'      => $access->getRole($roleIdentifier)->getId(),
-                    'company'   => $company
-                )
-            );
-        ?>
         <?php if($roleIdentifier != 'ADM_COMPANY'): ?>
-            <a data-action="editPossibilityObjects/<?=current($possibilityColl->getCollection()->getIdsIterator())?>">ресурсы</a> |
+            <a data-action="editPossibilityObjects/<?=$possibility->getData('id')?>">ресурсы</a> |
         <?php endif; ?>
-            <a data-action="removePossibility/<?=current($possibilityColl->getCollection()->getIdsIterator())?>">удалить</a>
+            <a data-action="removePossibility/<?=$possibility->getData('id')?>">удалить</a>
         </td>
     </tr>
     <?php endforeach; ?>
+    <?php endif; ?>
     <?php endforeach; ?>
     </tbody>
 </table>

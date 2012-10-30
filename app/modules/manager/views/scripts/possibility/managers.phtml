@@ -1,37 +1,35 @@
 <?php
-$rolesArray = array();
-$userColl = new HM_Model_Account_User_Collection();
-$companyColl = new HM_Model_Billing_Company_Collection();
-$possibilities = $this->possibilities;
-
-// Справочник ролей
+// Справочник ролей для JS
+$roles = array();
 foreach(HM_Model_Account_Access::getInstance()->getRoles() as $role) {
-    $rolesArray[] = $role->toArray();
+    $roles[] = $role->toArray();
 }
+$rolesJson = Zend_Json::encode($roles);
 
-
-// Список менеджеров
+// Загрузить в коллекцию список разрешенных на редактирование прав менеджеров
+$possibilities = $this->possibilities;
+$userColl = new HM_Model_Account_User_Collection();
 foreach($possibilities as $possibility) {
-    $userColl->load($possibility['user']);
+    $userColl->load($possibility->getData('user'));
 }
 
-$rolesJson = Zend_Json::encode($rolesArray);
-
-$referenceRC = Zend_Json::encode($this->referenceRC);
-
-
-$hierarchyRoleAndCompanies = array();
-foreach($this->hierarchyRoleAndCompanies as $roleIdentifier => $companies) {
-    $hierarchyRoleAndCompanies[] = array(
+// Справочник для JS
+$rolesWithInheritance = $companiesIndex= array();
+foreach($this->rolesWithInheritance as $roleIdentifier => $companies) {
+    $rolesWithInheritance[] = array(
         'code'      => $roleIdentifier,
         'companies' => $companies
     );
-    foreach($companies as $company) {
-        $companyColl->load($company);
-    }
+    $companiesIndex = array_merge($companiesIndex, $companies);
+}
+$rolesWithInheritanceJson = Zend_Json::encode($rolesWithInheritance);
+
+// Справочник для JS
+$companyColl = new HM_Model_Billing_Company_Collection();
+foreach(array_values(array_unique($companiesIndex)) as $company) {
+    $companyColl->load($company);
 }
 $companiesJson = Zend_Json::encode($companyColl->toArray());
-$hierarchyRoleAndCompaniesJson = Zend_Json::encode($hierarchyRoleAndCompanies);
 
 ?>
 <?php
@@ -67,7 +65,7 @@ require([
         var storeCompanies = new storeMemory({data: $companiesJson});
 
         // Связка связи Роль-Компания
-        var storeHierarchyRoleAndCompanies = new storeMemory({data: $hierarchyRoleAndCompaniesJson});
+        var storeHierarchyRoleAndCompanies = new storeMemory({data: $rolesWithInheritanceJson});
 
         var DialogBox = new dijitDialog();
 

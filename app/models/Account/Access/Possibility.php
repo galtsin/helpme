@@ -96,6 +96,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
                 return $row['o_id_possibility'];
             }
         }
+
         return parent::_remove();
     }
 
