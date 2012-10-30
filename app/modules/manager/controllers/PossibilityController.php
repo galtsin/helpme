@@ -246,20 +246,6 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         // Good
         // Получить ресурсы принадлежащие текущему Администратору
         $accessColl = new HM_Model_Account_Access_Collection();
-/*        if(is_string($objectType)) {
-            foreach(array_keys($userColl->load($account['user'])->getRoles()) as $roleIdentifier) {
-                if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
-                    $accessColl->resetFilters();
-                    $accessColl->setType($objectType);
-                    $accessColl->setAccessFilter(
-                        $userColl->load($account['user']),
-                        $access->getRole($pageRole),
-                        $possibilityColl->load($request->getParam('possibility'))->getData('company')
-                    );
-                }
-            }
-        }*/
-
         $accessColl->setType($objectType);
         foreach($userColl->load($account['user'])->getPossibilityCollection()->getObjectsIterator() as $possibilityObject) {
             if($access->getAcl()->inheritsRole($possibilityObject->getData('role')->get('code'), $pageRole) || $possibilityObject->getData('role')->get('code') == $pageRole) {
@@ -271,6 +257,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
         if($request->isPost()){
             if($request->getParam('objects')) {
+                // Исключить нежелательные добавления извне
                 $intersect = array_intersect($request->getParam('objects'), $accessColl->getCollection()->getIdsIterator());
                 // Сохранить пересечения
             } else {

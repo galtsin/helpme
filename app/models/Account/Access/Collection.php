@@ -27,6 +27,9 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      */
     private $_possibilities = array();
 
+
+    private $_inheritanceFromRole = null;
+
     /**
      * Инициализация
      */
@@ -92,6 +95,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     /**
      * Фильтр ограничения объектов досутпных пользователю
      * params: array('user', 'role', 'company', 'object_type')
+     * @deprecated
      * @return array
      */
     protected function _doAccessibleEqualFilterCollection()
@@ -115,6 +119,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
     /**
      * Получить объекты Привелегий
+     * @deprecated
      * @return array
      */
     public function getPossibilities()
@@ -122,10 +127,20 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
         return $this->_possibilities;
     }
 
-    public function setInheritRole(){}
+    /**
+     * Установить отсечение ролей ниже указанной
+     * @param $roleIdentifier
+     */
+    public function setInheritanceFromRole($roleIdentifier)
+    {
+        $access = HM_Model_Account_Access::getInstance();
+        if($access->getRole($roleIdentifier) instanceof App_Core_Model_Data_Store) {
+            $this->_inheritanceFromRole = $roleIdentifier;
+        }
+    }
 
     /**
-     * TODO: Самая правильная схема реализации
+     * TODO: Актуальная схема реализации
      * Фильтр по Possibility
      * @return array
      */
@@ -147,6 +162,19 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
                 foreach($possibilityCollection->getObjectsIterator() as $_possibility) {
                     // Общая проверка доступности роли и ресурса без привязки к привилегиям
+
+                    // TODO:
+                    // Start
+                    if(null !== $this->_inheritanceFromRole) {
+                        if($access->getAcl()->inheritsRole($_possibility->getData()->getRole()->get('code'), $access->getRole($this->_inheritanceFromRole)->get('code'))
+                            || $_possibility->getData()->getRole()->get('code') == $access->getRole($this->_inheritanceFromRole)->get('code')
+                        ) {
+
+                        }
+                    }
+
+                    // End
+
                     if(    $access->getAcl()->isAllowed($_possibility->getData()->getRole()->get('code'), $this->_objectType, 'W')
                         || $access->getAcl()->isAllowed($_possibility->getData()->getRole()->get('code'), $this->_objectType, 'R')
                     ) {
