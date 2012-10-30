@@ -137,6 +137,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
                         }
                         $this->_objects[$access->getType($typeIdentifier)->get('code')] = $objects;
                     }
+                    $objects = $this->_objects[$access->getType($typeIdentifier)->get('code')];
                 }
             }
             return $objects;
@@ -150,16 +151,14 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
      */
     public function addObject(App_Core_Model_Data_Store $object)
     {
-        $addFlag = false;
-        foreach($this->getObjects($object->get('type')) as $_object) {
-            if($object->getId() === $_object->getId()) {
-                $addFlag = true;
-            }
-            $object->markDirty();
-            $this->_objects[$object->get('type')->get('code')][$object->getId()] = $object;
+        if(!$this->has($object)) {
+            $this->_objects[$object->get('type')->get('code')][] = $object;
         }
     }
 
+    /**
+     * Сохранить объекты
+     */
     public function saveObjects()
     {
         foreach($this->getObjects() as $object) {
@@ -171,28 +170,70 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         }
     }
 
-    private function _insertObject($object)
+    /**
+     * Вставить объект в БД
+     * @param App_Core_Model_Data_Store $object
+     * @return int
+     */
+    private function _insertObject(App_Core_Model_Data_Store $object)
     {
+        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            ->execute('possibility_add_object', array(
+                'id_possibility'    => $this->getData('id'),
+                'id_object_type'    => $object->get('type')->getId(),
+                'id_object'         => $object->getId(),
+                'rw'                => $object->isWritable() ? self::WRITE : self::READ
 
+            )
+        );
+
+        $row = $result->fetchRow();
+        if($row['o_id_possibility_object'] > 0) {
+            $object->set('id', (int)$row['o_id_possibility_object']);
+            return $row['o_id_possibility_object'];
+        }
+
+        return parent::_insert();
     }
 
-    private function _removeObject($object)
+    /**
+     * Удалить объект из БД
+     * @param $object
+     * @return int
+     */
+    private function _removeObject(App_Core_Model_Data_Store $object)
     {
+        if($this->isIdentity()) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('possibility_del_object', array(
+                    'id_possibility'    => $this->getData('id'),
+                    'id_object_type'    => $object->get('type')->getId(),
+                    'id_object'         => $object->getId(),
+                )
+            );
 
+            $row = $result->fetchRow();
+            if((int)$row['o_id_possibility_object'] == $object->getId()) {
+                $object->clear();
+                unset($object);
+                return $row['o_id_possibility_object'];
+            }
+        }
+
+        return parent::_remove();
     }
 
-    private function _getObject()
-    {
-
-    }
-
-      /**
-     * @param App_Core_Model_Data_Store $type
-     * @param int $id
+    /**
+     * @param App_Core_Model_Data_Store $object
      * @return bool
      */
-    public function has(App_Core_Model_Data_Store $type, $id)
+    public function has(App_Core_Model_Data_Store $object)
     {
-        return in_array($id, $this->getObjects($type));
+        foreach($this->getObjects($object->get('type')->get('code')) as $_object) {
+            if($_object->getId() === $object->getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

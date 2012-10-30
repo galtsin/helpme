@@ -84,7 +84,7 @@ class HM_Model_Account_User extends App_Core_Model_Data_Entity
     public function getPossibilityCollection()
     {
         if($this->isIdentity()) {
-            if(null === $this->_roles) {
+            if(null === $this->_possibilityCollection) {
                 $collection = new HM_Model_Account_Access_Possibility_Collection();
                 foreach($this->getRoles() as $roleIdentifier => $companies) {
                     foreach($companies as $company) {

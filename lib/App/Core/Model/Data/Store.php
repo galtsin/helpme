@@ -35,6 +35,7 @@ final class App_Core_Model_Data_Store
     private $_dirty = false;
 
     /**
+     * TODO: Может по умолчанию false?
      * Разрешение на запись объекта
      * @var bool
      */
@@ -55,7 +56,12 @@ final class App_Core_Model_Data_Store
         if(is_array($options)){
             if(count($options) > 0) {
                 foreach($options as $key => $value) {
-                    $this->set($key, $value);
+                    if(method_exists($this, 'set' . ucfirst($key))) {
+                        $method = 'set' . ucfirst($key);
+                        $this->{$method}($value);
+                    } else {
+                        $this->set($key, $value);
+                    }
                 }
                 // Считаем, что инициализация объекта - это не изменение объекта, а его наполнение
                 $this->unmarkDirty();
@@ -71,7 +77,7 @@ final class App_Core_Model_Data_Store
     */
     public function __get($key)
     {
-        return $this->get($key);
+        return $this->get(lcfirst($key));
     }
 
     /**
@@ -83,7 +89,26 @@ final class App_Core_Model_Data_Store
      */
     public function __set($key, $value)
     {
-        return $this->set($key, $value);
+        return $this->set(lcfirst($key), $value);
+    }
+
+    /**
+     * @param $method
+     * @param $arg
+     * @return App_Core_Model_Data_Store|array|int
+     * @throws Exception
+     */
+    public function __call($method, $arg)
+    {
+        $_sg = substr($method, 0, 3);
+
+        if($_sg === 'get') {
+            return $this->get(lcfirst(substr($method, 3)));
+        } elseif ($_sg == 'set') {
+            return $this->set(lcfirst(substr($method, 3)), array_shift($arg));
+        }
+
+        throw new Exception('Метод ' . $method . ' не найден');
     }
 
     /**
@@ -256,7 +281,6 @@ final class App_Core_Model_Data_Store
     {
         if(is_bool($flag)) {
             $this->_writable = $flag;
-            $this->markDirty();
         }
 
         return $this;
@@ -280,7 +304,6 @@ final class App_Core_Model_Data_Store
     {
         if(is_bool($flag)) {
             $this->_removed = $flag;
-            $this->markDirty();
         }
 
         return $this;

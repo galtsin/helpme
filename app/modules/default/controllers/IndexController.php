@@ -112,21 +112,7 @@ class Default_IndexController extends App_Zend_Controller_Action
        // Zend_Debug::dump($user->getRoles());
         //Zend_Debug::dump($this->_getRelationRoleAndCompany($user));
 
-        $a = new App_Core_Model_Data_Store(array(
-            'name'  => 'igor',
-            'id'    => 5,
-            'middle'=> 'sdf'
-        ));
-        Zend_Debug::dump($a);
 
-        $a = $b = array();
-        $a[9] = 'igor';
-        $a[4] = 'name';
-
-        $b[2] = 'g';
-        $b[5] = 'b';
-
-        Zend_Debug::dump(array_merge($a, $b));
 
 /*        $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE');
@@ -134,6 +120,17 @@ class Default_IndexController extends App_Zend_Controller_Action
             ->getCollection();
         Zend_Debug::dump($accessColl->getIdsIterator());*/
 
+        //Zend_Debug::dump($user->getPossibilityCollection());
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $accessColl->setType('LINE')
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
+        $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())->getCollection();
+        //Zend_Debug::dump($accessColl->getDataIterator());
+
+        $a = new App_Core_Model_Data_Store();
+        $a->setRole(array('igor'));
+        Zend_Debug::dump($a->getRole());
 
     }
 
