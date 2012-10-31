@@ -147,6 +147,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
+     * TODO: В Идеале передавать объекты!!!!
      * Добавить объект к набору
      * @param App_Core_Model_Data_Store $object
      */
@@ -164,11 +165,18 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     {
         foreach($this->getObjects() as $object) {
             if($object->isRemoved()) {
-                $this->_removeObject($object);
+                $result = $this->_removeObject($object);
             } elseif ($object->isDirty()) {
-                $this->_insertObject($object);
+                $result = $this->_insertObject($object);
+            }
+            if(!empty($result)) {
+                if($result > 0) {
+                    return true;
+                }
+                return false;
             }
         }
+        return true;
     }
 
     /**
@@ -190,7 +198,6 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
 
         $row = $result->fetchRow();
         if($row['o_id_possibility_object'] > 0) {
-            $object->set('id', (int)$row['o_id_possibility_object']);
             return $row['o_id_possibility_object'];
         }
 

@@ -244,6 +244,7 @@ final class App_Core_Model_Data_Store
     }
 
     /**
+     * @deprecated
      * Пометить объект как измененый
      * @return App_Core_Model_Data_Store
      */
@@ -254,12 +255,27 @@ final class App_Core_Model_Data_Store
     }
 
     /**
+     * @deprecated
      * Снять отметку изменености объекта
      * @return App_Core_Model_Data_Store
      */
     public function unmarkDirty()
     {
         $this->_dirty = false;
+        return $this;
+    }
+
+    /**
+     * ПОметка объекта на изменение
+     * @param bool $flag
+     * @return App_Core_Model_Data_Store
+     */
+    public function setDirty($flag)
+    {
+        if(is_bool($flag)) {
+            $this->_dirty = $flag;
+        }
+
         return $this;
     }
 

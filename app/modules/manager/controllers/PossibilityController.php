@@ -257,11 +257,37 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
         if($request->isPost()){
             if($request->getParam('objects')) {
-                // Исключить нежелательные добавления извне
-                $intersect = array_intersect($request->getParam('objects'), $accessColl->getCollection()->getIdsIterator());
-                // Сохранить пересечения
+                // Эти данные остаются + вставляются
+                $safeIds = array_intersect((array)$request->getParam('objects'), $accessColl->getCollection()->getIdsIterator());
             } else {
-                // Отключить все объекты
+                $safeIds = array();
+            }
+
+            // Сохранить пересечения
+            $possibility = $possibilityColl->load($request->getParam('possibility'));
+            if($possibility instanceof HM_Model_Account_Access_Possibility) {
+                // Определить удаляемые
+                foreach($possibility->getObjects($objectType) as $object) {
+                    $key = array_search($object->getId(), $safeIds);
+                    if(is_bool($key)) {
+                        $object->setRemoved(true);
+                    } else {
+                        unset($safeIds[$key]);
+                    }
+                }
+                foreach($safeIds as $id) {
+                    $objectAdded = new App_Core_Model_Data_Store(array(
+                            'id'        => $id,
+                            'type'      => $access->getType($objectType),
+                            'writable'  => true
+                        )
+                    );
+                    $objectAdded->setDirty(true);
+                    $possibility->addObject($objectAdded);
+                }
+
+                // Фиксируем изменения
+                $possibility->saveObjects();
             }
         } else {
             $this->view->assign('adminResourcesColl', $accessColl->getCollection());

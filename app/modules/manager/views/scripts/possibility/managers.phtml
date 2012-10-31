@@ -45,9 +45,11 @@ require([
     "dojo/store/Memory",
     "core/Layout",
     "core/helper/Validation",
+    "core/helper/Form",
     "dijit/Dialog"
-], function(dom, domAttr, domForm, on, lang, query, router, storeMemory, coreLayout, coreValidation, dijitDialog){
+], function(dom, domAttr, domForm, on, lang, query, router, storeMemory, coreLayout, coreValidation, coreHelperForm, dijitDialog){
     dojo.ready(function(){
+
 
         var Layout = new coreLayout({
             messenger: {
@@ -137,16 +139,52 @@ require([
                 DialogBox.set('title', "Редактирование ресурсов");
                 DialogBox.show();
             }).then(function(){
+                var form = dom.byId('edit-possibility-objects');
+
+                on(form['add'], 'click', function(){
+                    moveSelectedOptions(form['available'], form['selected']);
+                });
+                on(form['remove'], 'click', function(){
+                    moveSelectedOptions(form['selected'], form['available']);
+                });
+
+                function getSelectedOptions(selectbox){
+                    var result = [];
+                    var option = null;
+                    for(var i = 0, len = selectbox.options.length; i < len; i ++) {
+                        option = selectbox.options[i];
+                        if(option.selected) {
+                            result.push(option);
+                        }
+                    }
+                    return result;
+                }
+
+                function moveSelectedOptions(selectboxSource, selectboxRecipient){
+                    var options = getSelectedOptions(selectboxSource);
+                    for(var i = 0, len = options.length; i < len; i ++ ) {
+                        selectboxRecipient.appendChild(selectboxSource.removeChild(options[i]));
+                    }
+                }
+
+
+
                 on(dom.byId('_d_'), 'click', function(event){
+                    var selected = [];
+                    for(var i = 0, len = form['selected'].options.length; i < len; i ++) {
+                        selected.push(form['selected'].options[i].value);
+                    }
+                    var args = domForm.toObject(event.target.form);
+                    args['objects[]'] = selected;
                     Layout.send({
                         url:    appConfig.baseUrl + '/manager/possibility/edit-possibility-objects',
-                        args:   domForm.toObject(event.target.form)
+                        args:   args
                     }).then(function(response){
                         if(response.result && response.result != -1) {
                             DialogBox.hide();
                         }
                     });
-                })
+                });
             })
         });
 

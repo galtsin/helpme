@@ -173,6 +173,10 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
                         }
                     }
 
+/*                    if(null !== $this->_company) {
+
+                    }*/
+
                     // End
 
                     if(    $access->getAcl()->isAllowed($_possibility->getData()->getRole()->get('code'), $this->_objectType, 'W')
