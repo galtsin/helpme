@@ -170,7 +170,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
                 $result = $this->_insertObject($object);
             }
             if(!empty($result)) {
-                if($result > 0) {
+                if(is_int($result) && $result > 0) {
                     return true;
                 }
                 return false;
@@ -197,8 +197,8 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         );
 
         $row = $result->fetchRow();
-        if($row['o_id_possibility_object'] > 0) {
-            return $row['o_id_possibility_object'];
+        if($row['o_id_possibility_object'] != -1 && (int)$row['o_id_possibility_object'] > 0) {
+            return (int)$row['o_id_possibility_object'];
         }
 
         return parent::_insert();
@@ -224,7 +224,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
             if((int)$row['o_id_possibility_object'] == $object->getId()) {
                 $object->clear();
                 unset($object);
-                return $row['o_id_possibility_object'];
+                return (int)$row['o_id_possibility_object'];
             }
         }
 

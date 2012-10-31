@@ -50,7 +50,6 @@ require([
 ], function(dom, domAttr, domForm, on, lang, query, router, storeMemory, coreLayout, coreValidation, coreHelperForm, dijitDialog){
     dojo.ready(function(){
 
-
         var Layout = new coreLayout({
             messenger: {
                 node: dom.byId('messenger')
@@ -142,32 +141,11 @@ require([
                 var form = dom.byId('edit-possibility-objects');
 
                 on(form['add'], 'click', function(){
-                    moveSelectedOptions(form['available'], form['selected']);
+                    coreHelperForm.moveSelectedOptions(form['available'], form['selected']);
                 });
                 on(form['remove'], 'click', function(){
-                    moveSelectedOptions(form['selected'], form['available']);
+                    coreHelperForm.moveSelectedOptions(form['selected'], form['available']);
                 });
-
-                function getSelectedOptions(selectbox){
-                    var result = [];
-                    var option = null;
-                    for(var i = 0, len = selectbox.options.length; i < len; i ++) {
-                        option = selectbox.options[i];
-                        if(option.selected) {
-                            result.push(option);
-                        }
-                    }
-                    return result;
-                }
-
-                function moveSelectedOptions(selectboxSource, selectboxRecipient){
-                    var options = getSelectedOptions(selectboxSource);
-                    for(var i = 0, len = options.length; i < len; i ++ ) {
-                        selectboxRecipient.appendChild(selectboxSource.removeChild(options[i]));
-                    }
-                }
-
-
 
                 on(dom.byId('_d_'), 'click', function(event){
                     var selected = [];

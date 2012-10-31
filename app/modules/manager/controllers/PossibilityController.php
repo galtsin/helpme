@@ -79,6 +79,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     }
 
     /**
+     * Good
      * Получить возможности по текущему менеджеру с привязкой к Администратору
      * Определение идет по текущему пользователю сессии
      * Условия: admin(company) = manager(company); admin(role) > manager(role)
@@ -116,6 +117,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
 
     /**
+     * Good
      * Получить список ролей пользователя с построением карты наследования
      * @return array
      */
@@ -209,6 +211,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     }
 
     /**
+     * Good
      * 1. Получить русурсы принадлежащие компании
      * 2. Получить ресурсы принадлежащие текущему Менеджеру
      * 3. Получить пересечение ресурсов. Это пересечение - доступные текущему Менеджеру ресурсы
@@ -287,7 +290,10 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                 }
 
                 // Фиксируем изменения
-                $possibility->saveObjects();
+                if($possibility->saveObjects()) {
+                    $this->setAjaxStatus('ok');
+                    $this->setAjaxResult($possibility->getData('id'));
+                }
             }
         } else {
             $this->view->assign('adminResourcesColl', $accessColl->getCollection());
@@ -297,6 +303,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
     }
 
+    /**
+     * Good
+     */
     public function addPossibilityAction()
     {
         $request = $this->getRequest();
@@ -387,57 +396,5 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         }
 
         return $roles;
-    }
-
-    /**
-     * TODO: rename
-     */
-    private function _getManagerPossibilityObjects($objectType)
-    {
-        switch ($objectType) {
-
-        }
-    }
-
-    public function getManagerAllowedRolesAction()
-    {
-        $companyColl = new HM_Model_Billing_Company_Collection();
-        $allowedRoles = $this->getManagerAllowedRoles2();
-        foreach($allowedRoles as $companies){
-            foreach($companies as $company) {
-                $companyColl->load($company);
-            }
-        }
-    }
-
-    /**
-     * Получить доступные менеджеру роли
-     */
-    public function getManagerAllowedRoles2()
-    {
-        $access = HM_Model_Account_Access::getInstance();
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
-
-        $allowedRoles = array();
-        $index = array();
-        foreach($user->getRoles() as $roleIdentifier => $companies) {
-            foreach($access->getRoles() as $role){
-                if($access->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
-/*                    if(!array_key_exists($role->get('id'), $allowedRoles)) {
-                        $allowedRoles[$role->get('id')] = $companies;
-                    }*/
-                    if(!in_array($role->get('id'), $index)) {
-                        $allowedRoles[] = array(
-                            'roleIdentifier'    => $role->get('id'),
-                            'companies'         => $companies
-                        );
-                        $index[] = $role->get('id');
-                    }
-                }
-            }
-        }
-        return $allowedRoles;
     }
 }
