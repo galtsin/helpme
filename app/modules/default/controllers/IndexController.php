@@ -53,15 +53,16 @@ class Default_IndexController extends App_Zend_Controller_Action
             $possibility->setPrivileges($line);
         }*/
 
-        $access = HM_Model_Account_Access::getInstance();
-        $accessColl = new HM_Model_Account_Access_Collection();
+
+        // TODO: алгоритм получения доступных данных
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
 
+        $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
-
-        //$accessColl->setRestrictionByCompany(16);
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
+            ->setRestrictionByCompany(12)
+            ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
 
         $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())->getCollection();
         Zend_Debug::dump($accessColl->getCollection()->getDataIterator());

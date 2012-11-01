@@ -68,35 +68,36 @@ require([
         // Связка связи Роль-Компания
         var storeHierarchyRoleAndCompanies = new storeMemory({data: $rolesWithInheritanceJson});
 
+        // Экземпляр диалогового окна
         var DialogBox = new dijitDialog();
 
-        // #Страница с менеджерами
-        router.register('main', function(){
-            // Получение менеджера
-            query('[data-action^="getManagerBoard/"]').on('click', function(event){
-                event.preventDefault();
-                router.go(event.target.getAttribute("data-action"));
-            });
-
-            query('[data-action^="addPossibility"]').on('click', function(event){
-                event.preventDefault();
-                dojo.publish('addPossibility');
-            });
-        });
-
-        // #Страница с настройками одного менеджера
-        router.register('getManagerBoard/:manager', function(event){
-            dojo.publish('getManagerBoard', event.params);
-        });
-
-        // Startup must be called in order to "activate" the router
-        router.startup();
-        router.go('main');
-
+        // Загрузить список доступных Менеджеров
         dojo.subscribe('getManagers', function(){
-
+            Layout.load({
+                url:    '../../../manager/possibility/get-managers',
+                format: 'html'
+            }).then(function(response){
+                Layout.place(dom.byId('contentManagers'), response);
+            }).then(function(){
+                // Событие на получение менеджера
+                query('[data-action^="getManagerBoard/"]').on('click', function(event){
+                    event.preventDefault();
+                    router.go(event.target.getAttribute("data-action"));
+                });
+                // Событие на добавление нового менеджера
+                query('[data-action^="addPossibility"]').on('click', function(event){
+                    event.preventDefault();
+                    dojo.publish('addPossibility');
+                });
+                // Событие на удаление менеджера
+                query('[data-action^="removeManagers"]').on('click', function(event){
+                    event.preventDefault();
+                    dojo.publish('removeManagers', domForm.toObject(event.target.form));
+                });
+            });
         });
 
+        // Загрузить Панель Управления Менеджера
         dojo.subscribe('getManagerBoard', function(args){
             Layout.load({
                 url:    '../../../manager/possibility/get-manager-board',
@@ -127,7 +128,18 @@ require([
             })
         });
 
-        // Действие на редактирование объектов
+        dojo.subscribe('removeManagers', function(args){
+            Layout.send({
+                url:    '../../../manager/possibility/remove-managers',
+                args:   args
+            }).then(function(response){
+                if(response.result && response.result != -1) {
+                    dojo.publish('getManagers');
+                }
+            });
+        });
+
+        // Редактирование объектов прав
         dojo.subscribe('editPossibilityObjects', function(args){
             Layout.load({
                 url:    appConfig.baseUrl + '/manager/possibility/edit-possibility-objects',
@@ -139,14 +151,15 @@ require([
                 DialogBox.show();
             }).then(function(){
                 var form = dom.byId('edit-possibility-objects');
-
+                // Событие на добавление объекта
                 on(form['add'], 'click', function(){
                     coreHelperForm.moveSelectedOptions(form['available'], form['selected']);
                 });
+                // Событие на удаление объекта
                 on(form['remove'], 'click', function(){
                     coreHelperForm.moveSelectedOptions(form['selected'], form['available']);
                 });
-
+                // Событие на сохранение изменений
                 on(dom.byId('_d_'), 'click', function(event){
                     var selected = [];
                     for(var i = 0, len = form['selected'].options.length; i < len; i ++) {
@@ -166,6 +179,7 @@ require([
             })
         });
 
+        // Удалить права у Менеджера
         dojo.subscribe('removePossibility', function(args){
             Layout.send({
                 url:    appConfig.baseUrl + '/manager/possibility/remove-possibility',
@@ -177,7 +191,7 @@ require([
             })
         });
 
-        // Действие на добавление нового Possibility
+        // Добавление новых прав
         dojo.subscribe('addPossibility', function(args){
             Layout.load({
                 url:    appConfig.baseUrl + '/manager/possibility/add-possibility',
@@ -209,7 +223,11 @@ require([
                                  if(response.result && response.result != -1) {
                                     DialogBox.hide();
                                     setTimeout(function(){
-                                        dojo.publish('getManagerBoard', {manager: domForm.fieldToObject(form['possibility[user]'])});
+                                        if(form['possibility[user]']) {
+                                            dojo.publish('getManagerBoard', {manager: domForm.fieldToObject(form['possibility[user]'])});
+                                        } else {
+                                            dojo.publish('getManagers');
+                                        }
                                     }, Layout._delay);
                                 } else {
                                     Validation.clear();
@@ -230,6 +248,20 @@ require([
             });
         });
 
+        // #Страница с менеджерами
+        router.register('main', function(){
+            dojo.publish('getManagers');
+        });
+
+        // #Страница с настройками одного менеджера
+        router.register('getManagerBoard/:manager', function(event){
+            dojo.publish('getManagerBoard', event.params);
+        });
+
+        // Активируем роутер
+        router.startup();
+        router.go('main');
+
     });
 });
 
@@ -237,32 +269,4 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 <div id="contentManagers">
-    <table class="table table-bordered">
-        <colgroup>
-            <col width="50">
-            <col>
-        </colgroup>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Пользователь</th>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <td colspan="2">
-                    <button type="button" data-action="addPossibility" name="add">Добавить</button>
-                    <button type="button" data-action="removeManager" name="remove" id="testme">Удалить</button>
-                </td>
-            </tr>
-        </tfoot>
-        <tbody>
-            <?php foreach($userColl->getDataIterator() as $manager): ?>
-            <tr>
-                <td><input type="checkbox"/></td>
-                <td><a data-action="getManagerBoard/<?=$manager->get('id')?>"><?=$manager->get('email')?></a></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
 </div>

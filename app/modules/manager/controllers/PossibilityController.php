@@ -29,7 +29,33 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
     public function getManagersAction()
     {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $userColl = new HM_Model_Account_User_Collection();
+        if($userColl->load($account['user']) instanceof HM_Model_Account_User) {
+            // Определить роли текущего Менеджера, где он является Администратором Компании или выше
+            // и получить список компаний, в которых он может назначать права другим Менеджерам
+            $this->view->assign('possibilities', $this->_getManagersPossibility());
+        }
+    }
 
+
+    public function removeManagersAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost() && $request->getPost('managers')){
+            $userColl = new HM_Model_Account_User_Collection();
+            foreach($request->getPost('managers') as $manager){
+                if($userColl->load($manager) instanceof HM_Model_Account_User){
+                    foreach($userColl->load($manager)->getPossibilityCollection()->getObjectsIterator() as $possibility) {
+                        $possibility->getData()->setRemoved(true);
+                        if($possibility->save()) {
+                            $this->setAjaxResult(3);
+                            $this->setAjaxStatus('ok');
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -373,7 +399,11 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     }
 
 
-
+    /**
+     * @deprecated
+     * @param HM_Model_Account_User $user
+     * @return array
+     */
     private function _getHierarchyRoles(HM_Model_Account_User $user)
     {
         $access = HM_Model_Account_Access::getInstance();

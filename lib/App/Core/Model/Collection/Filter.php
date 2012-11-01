@@ -164,7 +164,6 @@ class App_Core_Model_Collection_Filter extends App_Core_Model_CollectionAbstract
     }
 
     /**
-     * TODO: Сделать метод статическим!
     * Определение пересечения массивов.
     * Внимание: Пустой массив исключается из пересечения
     * @param array $val_1

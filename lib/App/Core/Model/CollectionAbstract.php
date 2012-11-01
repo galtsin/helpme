@@ -216,12 +216,14 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * ru: Назначить фабрику
+     * Назначить фабрику
      * @param App_Core_Model_FactoryAbstract $factory
+     * @return App_Core_Model_CollectionAbstract
      */
     public function setFactory(App_Core_Model_FactoryAbstract $factory)
     {
         $this->_factory = $factory;
+        return $this;
     }
 
     /**

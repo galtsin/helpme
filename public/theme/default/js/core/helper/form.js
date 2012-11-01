@@ -19,6 +19,17 @@ define([], function(){
             for(var i = 0, len = options.length; i < len; i ++ ) {
                 selectboxRecipient.appendChild(selectboxSource.removeChild(options[i]));
             }
+        },
+        checkboxValue: function(checkbox){
+            var value = false;
+            if(checkbox.type == "checkbox") {
+                if(checkbox.checked) {
+                    value = true;
+                }
+            } else {
+                throw new Error('Неверный тип');
+            }
+            return value;
         }
     };
 });
