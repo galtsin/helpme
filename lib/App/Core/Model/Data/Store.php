@@ -93,6 +93,8 @@ final class App_Core_Model_Data_Store
     }
 
     /**
+     * Позволяет полкчить доступ к данным модели через соответствующие методы
+     * Пример: self::_data['name'] = 'andrey'; соответственно self::getName() и self::setName('alex');
      * @param $method
      * @param $arg
      * @return App_Core_Model_Data_Store|array|int
@@ -163,51 +165,6 @@ final class App_Core_Model_Data_Store
         }
 
         return $this;
-    }
-
-    /**
-     * TODO: А нужен ли?
-     * @deprecated
-     * @param mixed $key
-     * @param mixed $value
-     * @param bool $recursive
-     * @return App_Core_Model_Data_Store
-     */
-    public function add($key, $value, $recursive = false)
-    {
-        if($this->isWritable()) {
-            switch(strtolower($key)){
-                case 'data':
-                    $this->_data = $this->merge($this->_data, (array)$value, $recursive);
-                    break;
-                default:
-                    if(!array_key_exists($key, $this->_data)) {
-                        $this->_data[$key] = $value;
-                    } else {
-                        $this->_data[$key] = $this->merge((array)$this->_data[$key], (array)$value, $recursive);
-                    }
-            }
-
-            // Пометить объект как измененый
-            $this->markDirty();
-        }
-
-        return $this;
-    }
-
-    /**
-     * Слияние
-     * @param array $array
-     * @param array $value
-     * @param bool $recursive
-     * @return array
-     */
-    public function merge(array $array, array $value, $recursive = false)
-    {
-        if(true === $recursive) {
-            return array_merge_recursive($array, $value);
-        }
-        return array_merge($array, $value);
     }
 
     /**

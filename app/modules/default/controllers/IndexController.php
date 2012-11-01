@@ -28,55 +28,6 @@ class Default_IndexController extends App_Zend_Controller_Action
     ));*/
 
 
-
-        $k = new App_Zend_Controller_Action_Helper_Validate('tariff');
-        //$input = new Zend_Filter_Input(array(), $k->getValidators());
-
-        //$input->setData(array('name' => 'sdf s'));
-        //Zend_Debug::dump($input->getEscaped('name'));
-
-
-        $var1 = array('name' => array(array('Alnum', array()),'default' => 'dsf',));
-        $var2 = $k->getValidators();
-
-        //Zend_Debug::dump($var1);
-        //Zend_Debug::dump($var2);
-
-        $input = new Zend_Filter_Input(array(), $var1);
-        $input->setData(array('igor' => '123'));
-        //Zend_Debug::dump($input->isValid());
-        //Zend_Debug::dump($input->getEscaped('igor'));
-
-
-        // Получить текущего пользователя
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $access = HM_Model_Account_Access::getInstance();
-
-        // Узнать по какой роли стоит осуществлять поиск
-        // Мы знаем URL-адрес
-        $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
-
-
-        $accessColl = new HM_Model_Account_Access_Collection();
-        $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
-        $accessColl->setAccessFilter($user, $pageRole, 15)->getCollection();
-        $lines = $accessColl->getDataIterator();
-
-        $possibility = current($accessColl->getPossibilities());
-
-        // TODO: если объект находится в possibility, то доступ к нему разрешен!!!
-
-        foreach($lines as $line) {
-            $possibility->assignPrivileges(HM_Model_Account_Access::getInstance()->getType('LINE'), $line);
-        }
-
-        $a = new App_Core_Model_Data_Store();
-        $a->set('test2', 'test2');
-        $b = array();
-        $b[] = $a->toArray();
-
         //Zend_Debug::dump(Zend_Json::encode(array('data' => array('count' => 10, 'items' => $b))));
 
 
@@ -102,35 +53,18 @@ class Default_IndexController extends App_Zend_Controller_Action
             $possibility->setPrivileges($line);
         }*/
 
-
-
         $access = HM_Model_Account_Access::getInstance();
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
-
-       // Zend_Debug::dump($user->getRoles());
-        //Zend_Debug::dump($this->_getRelationRoleAndCompany($user));
-
-
-
-/*        $accessColl = new HM_Model_Account_Access_Collection();
-        $accessColl->setType('LINE');
-        $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())
-            ->getCollection();
-        Zend_Debug::dump($accessColl->getIdsIterator());*/
-
-        //Zend_Debug::dump($user->getPossibilityCollection());
-
         $accessColl = new HM_Model_Account_Access_Collection();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+
         $accessColl->setType('LINE')
             ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
-        $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())->getCollection();
-        //Zend_Debug::dump($accessColl->getDataIterator());
 
-        $a = new App_Core_Model_Data_Store();
-        $a->setRole(array('igor'));
-        Zend_Debug::dump($a->getRole());
+        //$accessColl->setRestrictionByCompany(16);
+
+        $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())->getCollection();
+        Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
     }
 
