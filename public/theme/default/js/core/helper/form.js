@@ -1,4 +1,7 @@
 define([], function(){
+    /**
+     * Помошник формы
+     */
     return {
         getSelectedOptions: function(selectbox){
             var result = [];

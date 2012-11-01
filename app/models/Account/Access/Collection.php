@@ -30,6 +30,10 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
     private $_inheritanceFromRole = null;
 
+    private $_restrictionByCompany = null;
+
+    private $_restrictionByInheritanceFromRole = null;
+
     /**
      * Инициализация
      */
@@ -131,11 +135,11 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      * Установить отсечение ролей ниже указанной
      * @param $roleIdentifier
      */
-    public function setInheritanceFromRole($roleIdentifier)
+    public function setRestrictionByInheritanceFromRole($roleIdentifier)
     {
         $access = HM_Model_Account_Access::getInstance();
         if($access->getRole($roleIdentifier) instanceof App_Core_Model_Data_Store) {
-            $this->_inheritanceFromRole = $roleIdentifier;
+            $this->_restrictionByInheritanceFromRole = $roleIdentifier;
         }
     }
 
@@ -148,7 +152,6 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     {
         $ids = array();
 
-        $access = HM_Model_Account_Access::getInstance();
         if(count($this->getEqualFilterValues('possibility')) > 0) {
             foreach($this->getEqualFilterValues('possibility') as $possibility){
                 if(!$possibility instanceof HM_Model_Account_Access_Possibility_Collection) {
@@ -161,27 +164,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
                 }
 
                 foreach($possibilityCollection->getObjectsIterator() as $_possibility) {
-                    // Общая проверка доступности роли и ресурса без привязки к привилегиям
-
-                    // TODO:
-                    // Start
-                    if(null !== $this->_inheritanceFromRole) {
-                        if($access->getAcl()->inheritsRole($_possibility->getData()->getRole()->get('code'), $access->getRole($this->_inheritanceFromRole)->get('code'))
-                            || $_possibility->getData()->getRole()->get('code') == $access->getRole($this->_inheritanceFromRole)->get('code')
-                        ) {
-
-                        }
-                    }
-
-/*                    if(null !== $this->_company) {
-
-                    }*/
-
-                    // End
-
-                    if(    $access->getAcl()->isAllowed($_possibility->getData()->getRole()->get('code'), $this->_objectType, 'W')
-                        || $access->getAcl()->isAllowed($_possibility->getData()->getRole()->get('code'), $this->_objectType, 'R')
-                    ) {
+                    if($this->_checkRestrictions($_possibility)) {
                         $_objects = $_possibility->getObjects($this->_objectType);
                         foreach($_objects as $_object) {
                             $ids[] = $_object->getId();
@@ -192,6 +175,69 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
         }
 
         return array_unique($ids);
+    }
+
+    /**
+     * Проверка ограничений
+     * @param HM_Model_Account_Access_Possibility $possibility
+     * @return bool
+     */
+    private function _checkRestrictions(HM_Model_Account_Access_Possibility $possibility)
+    {
+        if($this->_checkRestrictionByAclAllowed($possibility)
+            && $this->_checkRestrictionByCompany($possibility)
+            && $this->_checkRestrictionByInheritanceFromRole($possibility)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Проверить на разрешение
+     * @param HM_Model_Account_Access_Possibility $possibility
+     * @return bool
+     */
+    private function _checkRestrictionByAclAllowed(HM_Model_Account_Access_Possibility $possibility) {
+        $access = HM_Model_Account_Access::getInstance();
+        if($access->getAcl()->isAllowed($possibility->getData('role')->get('code'), $this->_objectType, $possibility::WRITE)
+            || $access->getAcl()->isAllowed($possibility->getData('role')->get('code'), $this->_objectType, $possibility::READ)) {
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Проверить наследование от роли
+     * @param HM_Model_Account_Access_Possibility $possibility
+     * @return bool
+     */
+    private function _checkRestrictionByInheritanceFromRole(HM_Model_Account_Access_Possibility $possibility)
+    {
+        if(null !== $this->_inheritanceFromRole) {
+            $access = HM_Model_Account_Access::getInstance();
+            if($access->getAcl()->inheritsRole($possibility->getData('role')->get('code'), $access->getRole($this->_restrictionByInheritanceFromRole)->get('code'))
+                || $possibility->getData('role')->get('code') == $access->getRole($this->_restrictionByInheritanceFromRole)->get('code')) {
+                    return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Проверить наличие ограничения на компанию
+     * @param HM_Model_Account_Access_Possibility $possibility
+     * @return bool
+     */
+    private function _checkRestrictionByCompany(HM_Model_Account_Access_Possibility $possibility)
+    {
+        if(null !== $this->_restrictionByCompany) {
+            if($this->_restrictionByCompany == $possibility->getData('company')) {
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
