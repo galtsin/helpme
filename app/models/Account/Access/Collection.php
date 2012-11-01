@@ -18,6 +18,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     const OBJECT_TYPE = 'EMPTY';
 
     /**
+     * TODO: Переделать в HM_Model_Account_Access::getType()
      * @var string
      */
     private $_objectType = null;
@@ -72,7 +73,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
         }
 
 /*        try {
-            $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getRole($roleIdentifier));
+            $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getType($roleIdentifier));
         } catch(Exception $ex) {
             $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getRole(HM_Model_Account_Access::EMPTY_ROLE));
         }*/

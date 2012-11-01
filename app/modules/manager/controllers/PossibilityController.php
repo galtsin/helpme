@@ -1,9 +1,10 @@
 <?php
 /**
- *
+ * Product: HELPME
+ * @author: GaltsinAK
  */
 /**
- * В классе расматриваются 2 вида прав и пользователь.
+ * В классе расматриваются 2 вида прав и пользователей.
  * Первый: Администратор. Это тот кто редактирует права других.
  * Все ресурсы подчиненных менеджеров назначаются - наследниками ролей текущего администратора
  * Второй: Менеджер. Тот кому происходит назначение прав
@@ -26,6 +27,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         }
     }
 
+    /**
+     * Получить список пользователей
+     */
     public function getManagersAction()
     {
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
@@ -37,7 +41,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         }
     }
 
-
+    /**
+     * Удалить менеджеров
+     */
     public function removeManagersAction()
     {
         $request = $this->getRequest();
@@ -372,7 +378,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
 
                     // Если у Менеджера Роль - Администратор компании, то скопировать ему все доступные объекты
 /*                    if($possibility->getData('role')->get('code') == 'ADM_COMPANY') {
-                        foreach($user->getPossibilities()->getObjectsIterator() as $_possibility) {
+                        foreach($user->getPossibilities() as $_possibility) {
                             if($_possibility->getObjects(''))
                         }
                     }*/

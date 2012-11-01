@@ -99,6 +99,7 @@ class HM_Model_Account_User extends App_Core_Model_Data_Entity
                             )
                         );
                         // TODO: совпадение 1:1. Но на всякий случай ...
+                        // Экономим на экземплярах объектов User и Company
                         foreach($possibilityCollection->getCollection()->getIdsIterator() as $id) {
                             $possibility = new HM_Model_Account_Access_Possibility();
                             $possibility->setUser($this)

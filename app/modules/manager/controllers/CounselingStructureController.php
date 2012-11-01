@@ -13,7 +13,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
      * Загрузить список доступных ЛК с привязкой по компаниям
      * HTML Context
      */
-    public function linesAction()
+    public function _linesAction()
     {
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
@@ -41,6 +41,28 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
         }
         $this->view->assign('data', $data);
+    }
+
+
+    public function linesAction()
+    {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $accessColl->setType('LINE')
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
+            ->setRestrictionByCompany(12)
+            ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
+
+        $accessColl->addEqualFilter('possibility', $user->getPossibilities())
+            ->getCollection();
+
+        $data = array();
+        foreach($accessColl->getDataIterator() as $line) {
+            $companies[$line->getData('company_owner')][] = $line;
+        }
     }
 
     public function groupsAction()

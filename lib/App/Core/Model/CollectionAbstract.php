@@ -163,7 +163,7 @@ abstract class App_Core_Model_CollectionAbstract
         } elseif ($entry instanceof App_Core_Model_Data_Entity) {
             if(!array_key_exists($entry->getData()->getId(), $this->getObjectsIterator()) && !in_array($entry->getData()->getId(), $this->getIdsIterator())) {
                 $this->_idsCollection[] = $entry->getData()->getId();
-                $this->_objectsCollectionp[$entry->getData()->getId()] = $entry;
+                $this->_objectsCollection[$entry->getData()->getId()] = $entry;
             }
         }
     }
