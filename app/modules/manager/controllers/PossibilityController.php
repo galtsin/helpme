@@ -22,7 +22,6 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         if($userColl->load($account['user']) instanceof HM_Model_Account_User) {
             // Определить роли текущего Менеджера, где он является Администратором Компании или выше
             // и получить список компаний, в которых он может назначать права другим Менеджерам
-            $this->view->assign('possibilities', $this->_getManagersPossibility());
             $this->view->assign('rolesWithInheritance', $this->_getUserRolesWithInheritance());
         }
     }
@@ -46,7 +45,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
             $userColl = new HM_Model_Account_User_Collection();
             foreach($request->getPost('managers') as $manager){
                 if($userColl->load($manager) instanceof HM_Model_Account_User){
-                    foreach($userColl->load($manager)->getPossibilityCollection()->getObjectsIterator() as $possibility) {
+                    foreach($userColl->load($manager)->getPossibilities() as $possibility) {
                         $possibility->getData()->setRemoved(true);
                         if($possibility->save()) {
                             $this->setAjaxResult(3);
@@ -127,9 +126,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         if($userColl->load($account['user']) instanceof HM_Model_Account_User) {
             foreach($userColl->load($account['user'])->getRoles() as $userRoleIdentifier => $userCompanies) {
                 if($access->getAcl()->inheritsRole($userRoleIdentifier, $pageRole) || $userRoleIdentifier == $pageRole) {
-                    foreach($manager->getPossibilityCollection()->getObjectsIterator() as $possibility) {
+                    foreach($manager->getPossibilities() as $possibility) {
                         if($access->getAcl()->inheritsRole($userRoleIdentifier, $possibility->getData()->getRole()->get('code')) || $userRoleIdentifier == $possibility->getData()->getRole()->get('code')) {
-                            if(in_array($possibility->getData('company'), $userCompanies)) {
+                            if(in_array($possibility->getData('company')->getData('id'), $userCompanies)) {
                                 $managerPossibility[] = $possibility;
                             }
                         }
@@ -276,9 +275,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         // Получить ресурсы принадлежащие текущему Администратору
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType($objectType);
-        foreach($userColl->load($account['user'])->getPossibilityCollection()->getObjectsIterator() as $possibilityObject) {
+        foreach($userColl->load($account['user'])->getPossibilities() as $possibilityObject) {
             if($access->getAcl()->inheritsRole($possibilityObject->getData('role')->get('code'), $pageRole) || $possibilityObject->getData('role')->get('code') == $pageRole) {
-                if($possibilityObject->getData('company') == $possibilityColl->load($request->getParam('possibility'))->getData('company')) {
+                if($possibilityObject->getData('company')->getData('id') == $possibilityColl->load($request->getParam('possibility'))->getData('company')->getData('id')) {
                     $accessColl->addEqualFilter('possibility', $possibilityObject);
                 }
             }
@@ -370,6 +369,15 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                         $this->setAjaxResult($possibility->getData('id'));
                         $this->setAjaxStatus('ok');
                     }
+
+                    // Если у Менеджера Роль - Администратор компании, то скопировать ему все доступные объекты
+/*                    if($possibility->getData('role')->get('code') == 'ADM_COMPANY') {
+                        foreach($user->getPossibilities()->getObjectsIterator() as $_possibility) {
+                            if($_possibility->getObjects(''))
+                        }
+                    }*/
+
+
                 }
             } else {
                 $this->view->assign('hierarchyRoles', $this->_getHierarchyRoles($user));

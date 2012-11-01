@@ -39,7 +39,7 @@ $manager = $this->manager;
     <?php foreach($possibilities as $possibility): ?>
     <tr>
         <td>
-            <?=$companyColl->load($possibility->getData('company'))->getData('name')?>
+            <?=$possibility->getData('company')->getData('name')?>
         </td>
         <td>
         <?php if($roleIdentifier != 'ADM_COMPANY'): ?>

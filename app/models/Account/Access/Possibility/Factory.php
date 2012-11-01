@@ -33,12 +33,12 @@ class HM_Model_Account_Access_Possibility_Factory extends App_Core_Model_Factory
         if($result->rowCount() > 0) {
             $row = $result->fetchRow();
             $possibility = new HM_Model_Account_Access_Possibility();
+            $possibility->setUser((int)$row['o_id_user'])
+                ->setRole((int)$row['o_id_role'])
+                ->setCompany((int)$row['o_id_company']);
             $possibility->getData()
                 ->set('id', $id)
-                ->set('user', (int)$row['o_id_user'])
-                ->set('company', (int)$row['o_id_company'])
-                ->set('role', HM_Model_Account_Access::getInstance()->getRole((int)$row['o_id_role']));
-            $possibility->getData()->unmarkDirty();
+                ->setDirty(false);
         }
 
         return $possibility;

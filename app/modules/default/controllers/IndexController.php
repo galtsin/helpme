@@ -54,6 +54,9 @@ class Default_IndexController extends App_Zend_Controller_Action
         }*/
 
 
+        $possColl = new HM_Model_Account_Access_Possibility_Collection();
+        Zend_Debug::dump($possColl->load(368)->getData('role')->getData());
+
         // TODO: алгоритм получения доступных данных
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
@@ -64,7 +67,7 @@ class Default_IndexController extends App_Zend_Controller_Action
             ->setRestrictionByCompany(12)
             ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
 
-        $accessColl->addEqualFilter('possibility', $user->getPossibilityCollection())->getCollection();
+        $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
     }

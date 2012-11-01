@@ -17,7 +17,7 @@ class HM_Model_Account_User_Manager extends HM_Model_Account_User
      * Получить
      * @return App_Core_Model_CollectionAbstract|null
      */
-    public function getPossibilityCollection()
+    public function getPossibilities()
     {
         if($this->isIdentity()) {
             if(null === $this->_roles) {

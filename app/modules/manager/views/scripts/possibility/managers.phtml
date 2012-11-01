@@ -6,13 +6,6 @@ foreach(HM_Model_Account_Access::getInstance()->getRoles() as $role) {
 }
 $rolesJson = Zend_Json::encode($roles);
 
-// Загрузить в коллекцию список разрешенных на редактирование прав менеджеров
-$possibilities = $this->possibilities;
-$userColl = new HM_Model_Account_User_Collection();
-foreach($possibilities as $possibility) {
-    $userColl->load($possibility->getData('user'));
-}
-
 // Справочник для JS
 $rolesWithInheritance = $companiesIndex= array();
 foreach($this->rolesWithInheritance as $roleIdentifier => $companies) {

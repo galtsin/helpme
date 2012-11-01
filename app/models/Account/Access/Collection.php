@@ -71,6 +71,12 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
             $this->_objectType = $class::OBJECT_TYPE;
         }
 
+/*        try {
+            $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getRole($roleIdentifier));
+        } catch(Exception $ex) {
+            $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getRole(HM_Model_Account_Access::EMPTY_ROLE));
+        }*/
+
         return $this;
     }
 
@@ -112,9 +118,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
             foreach($this->getEqualFilterValues('possibility') as $possibility){
                 if(!$possibility instanceof HM_Model_Account_Access_Possibility_Collection) {
                     $possibilityCollection = new HM_Model_Account_Access_Possibility_Collection();
-                    if($possibility instanceof HM_Model_Account_Access_Possibility) {
-                        $possibilityCollection->addToCollection($possibility);
-                    }
+                    $possibilityCollection->addToCollection($possibility);
                 } else {
                     $possibilityCollection = $possibility;
                 }
@@ -193,8 +197,9 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      */
     private function _checkRestrictionByCompany(HM_Model_Account_Access_Possibility $possibility)
     {
+
         if(null !== $this->_restrictionByCompany) {
-            if($this->_restrictionByCompany == $possibility->getData('company')) {
+            if($this->_restrictionByCompany == $possibility->getData('company')->getData('id')) {
                 return true;
             }
             return false;

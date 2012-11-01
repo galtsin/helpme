@@ -18,7 +18,7 @@ class HM_Model_Account_User extends App_Core_Model_Data_Entity
     /**
      * @var null|App_Core_Model_CollectionAbstract
      */
-    private $_possibilityCollection = null;
+    private $_possibilities = null;
 
     /**
      * Инициализация
@@ -81,25 +81,40 @@ class HM_Model_Account_User extends App_Core_Model_Data_Entity
      * Получить коллекцию Possibility
      * @return App_Core_Model_CollectionAbstract|null
      */
-    public function getPossibilityCollection()
+    public function getPossibilities()
     {
         if($this->isIdentity()) {
-            if(null === $this->_possibilityCollection) {
-                $collection = new HM_Model_Account_Access_Possibility_Collection();
+            if(null === $this->_possibilities) {
+                $possibilities = array();
+                $companyCollection = new HM_Model_Billing_Company_Collection();
+                $possibilityCollection = new HM_Model_Account_Access_Possibility_Collection();
                 foreach($this->getRoles() as $roleIdentifier => $companies) {
                     foreach($companies as $company) {
-                        $collection->addEqualFilter('urc', array(
+                        $possibilityCollection->resetFilters();
+                        $possibilityCollection->clear();
+                        $possibilityCollection->addEqualFilter('urc', array(
                                 'user'      => $this->getData('id'),
                                 'role'      => $roleIdentifier,
                                 'company'   => $company
                             )
                         );
+                        // TODO: совпадение 1:1. Но на всякий случай ...
+                        foreach($possibilityCollection->getCollection()->getIdsIterator() as $id) {
+                            $possibility = new HM_Model_Account_Access_Possibility();
+                            $possibility->setUser($this)
+                                ->setRole($roleIdentifier)
+                                ->setCompany($companyCollection->load($company));
+                            $possibility->getData()
+                                ->set('id', $id)
+                                ->setDirty(false);
+                            $possibilities[] = $possibility;
+                        }
                     }
                 }
-                $this->_possibilityCollection = $collection->getCollection();
+                $this->_possibilities = $possibilities;
             }
         }
 
-        return $this->_possibilityCollection;
+        return $this->_possibilities;
     }
 }

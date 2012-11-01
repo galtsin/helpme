@@ -12,6 +12,17 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     const RESOURCE_NAMESPACE = 'account_access';
 
     /**
+     * Пустая роль
+     */
+    const EMPTY_ROLE = 'EMPTY';
+
+    /**
+     * Пустой тип
+     */
+    const EMPTY_TYPE = 'EMPTY';
+
+
+    /**
      * Массив ТипоОбъектов.
      * Null используется для отложенной загрузки
      * @var null|array App_Core_Model_Data_Store

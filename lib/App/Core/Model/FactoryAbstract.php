@@ -39,6 +39,14 @@ abstract class App_Core_Model_FactoryAbstract
     abstract public function restore($id);
 
     /**
+     * TODO: Сделать универсальный ответ неудачи
+     */
+    /*    public function restore($id) {
+            return null;
+        }*/
+
+
+    /**
      * Добавить ресурс.
      * @param App_Core_Resource_Abstract $resource
      * @param string $name

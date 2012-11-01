@@ -34,6 +34,54 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
+     * Назначить Пользователя
+     * @param $user
+     * @return HM_Model_Account_Access_Possibility
+     */
+    public function setUser($user)
+    {
+        if($user instanceof HM_Model_Account_User) {
+            $this->getData()->set('user', $user);
+        } elseif (null !== $user && is_int($user)) {
+            self::setUser(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+                ->restore($user));
+        }
+        return $this;
+    }
+
+    /**
+     * Назначить Компанию
+     * @param $company
+     * @return HM_Model_Account_Access_Possibility
+     */
+    public function setCompany($company)
+    {
+        if($company instanceof HM_Model_Billing_Company) {
+            $this->getData()->set('company', $company);
+        } elseif (null !== $company && is_int($company)) {
+            self::setCompany(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
+                ->restore($company));
+        }
+        return $this;
+    }
+
+    /**
+     * Назначить Роль
+     * @param $roleIdentifier
+     * @return HM_Model_Account_Access_Possibility
+     */
+    public function setRole($roleIdentifier)
+    {
+        try {
+            $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getRole($roleIdentifier));
+        } catch(Exception $ex) {
+            $this->getData()->set('role', HM_Model_Account_Access::getInstance()->getRole(HM_Model_Account_Access::EMPTY_ROLE));
+        }
+
+        return $this;
+    }
+
+    /**
      * Добавить
      * @return int
      */
