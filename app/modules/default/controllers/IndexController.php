@@ -67,9 +67,10 @@ class Default_IndexController extends App_Zend_Controller_Action
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
-        $f = array();
-        $f['test'] = null;
-        Zend_Debug::dump(array_key_exists('test', $f));
+        $test = new Test();
+        $test->setUser(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore(4));
+
+        Zend_Debug::dump($test);
 
     }
 
@@ -137,4 +138,12 @@ class Default_IndexController extends App_Zend_Controller_Action
         return false;
     }
 
+}
+
+class Test extends App_Core_Model_Data_Entity
+{
+    public function t2()
+    {
+        return $this;
+    }
 }

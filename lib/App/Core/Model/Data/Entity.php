@@ -24,42 +24,56 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      */
     private $_dataInstances = array();
 
-
-    public function setDataInstance($key, $value)
-    {
-        if(is_string($key)) {
-            $this->_dataInstances[$key] = $value;
-        }
-        return $this;
-    }
-
-
-    public function getDataInstance($key)
-    {
-        return $this->_dataInstances[$key];
-    }
-
+    /**
+     * @param $key
+     * @return bool
+     */
     public function hasDataInstance($key)
     {
         return array_key_exists($key, $this->_dataInstances);
     }
 
-    // TODO: В Разработке
-    public function getEntityInstance($key)
-    {
-        if($this->getData($key)) {
-            if($this->getDataInstance($key) instanceof App_Core_Model_Data_Entity) {
-                return $this->getDataInstance($key);
+    /**
+     * Извлечь экземпляр из Хранилища
+     * @param $key
+     * @return null
+     */
+    protected function _getDataInstance($key){
+        if(is_string($key)) {
+            if(self::hasDataInstance($key)) {
+                return $this->_dataInstances[$key];
             } else {
-                // Защита от бесконечной рекурсии
-                if(!$this->hasDataInstance($key)) {
-                    $this->{'set' . ucfirst($key)}($this->getData($key));
-                    return $this->{'get' . ucfirst($key)}();
+                // Замена нотации, например: user_owner = setUserOwner();
+                $method = 'set';
+                foreach(explode('_', $key) as $part) {
+                    $method .= ucfirst($part);
+                }
+                if(method_exists($this, $method) && $this->getData($key)) {
+                    // Заглушка от бесконечного зацикливания. Не пройдет из за self::hasDataInstance
+                    $this->_dataInstances[$key] = null;
+                    $this->{$method}($this->getData($key));
+                    return self::_getDataInstance($key);
                 }
             }
         }
 
         return null;
+    }
+
+    /**
+     * Установить экземпляр в Хранилище
+     * @param $key
+     * @param App_Core_Model_Data_Entity $value
+     * @return self
+     */
+    protected function _setDataInstance($key, App_Core_Model_Data_Entity $value)
+    {
+        if(is_string($key) && $value instanceof App_Core_Model_Data_Entity) {
+            $this->getData()->set($key, $value->getData()->getId());
+            $this->_dataInstances[$key] = $value;
+        }
+
+        return $this;
     }
 
 

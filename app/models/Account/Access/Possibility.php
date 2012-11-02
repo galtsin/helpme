@@ -82,28 +82,37 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         return $this;
     }
 
+
     /**
-     * TODO: В разработке
+     * TODO: в доработке
+     * Установить пользователя
+     * @param $user
+     * @return HM_Model_Account_Access_Possibility
      */
-    public function getUser()
+    public function _setUser($user)
     {
-        // создание пользователя
-        $key = 'user';
-        if($this->getData($key)) {
-            if($this->getDataInstance($key) instanceof HM_Model_Account_User) {
-                return $this->getDataInstance($key);
-            } else {
-                // Защита от бесконечной рекурсии
-                if(!$this->hasDataInstance($key)) {
-                    $this->setUser($this->getData($key));
-                    return self::getUser();
-                }
-            }
+        if(is_int($user)) {
+            $entity = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+                ->restore($user);
+        } else {
+            $entity = $user;
+        }
+        if ($entity instanceof HM_Model_Account_User) {
+            $this->_setDataInstance('user', $entity);
         }
 
-        return null;
+        return $this;
     }
 
+    /**
+     * TODO: в доработке
+     * Получить экземпляр пользователя
+     * @return HM_Model_Account_User|null
+     */
+    public function _getUser()
+    {
+        return $this->_getDataInstance('user');
+    }
 
 
     /**
