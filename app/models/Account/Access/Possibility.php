@@ -24,6 +24,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
      */
     private $_objects = array();
 
+
     /**
      * Инициализация
      */
@@ -80,6 +81,30 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
 
         return $this;
     }
+
+    /**
+     * TODO: В разработке
+     */
+    public function getUser()
+    {
+        // создание пользователя
+        $key = 'user';
+        if($this->getData($key)) {
+            if($this->getDataInstance($key) instanceof HM_Model_Account_User) {
+                return $this->getDataInstance($key);
+            } else {
+                // Защита от бесконечной рекурсии
+                if(!$this->hasDataInstance($key)) {
+                    $this->setUser($this->getData($key));
+                    return self::getUser();
+                }
+            }
+        }
+
+        return null;
+    }
+
+
 
     /**
      * Добавить

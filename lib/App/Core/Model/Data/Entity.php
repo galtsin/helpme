@@ -13,9 +13,55 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
 
     /**
      * Данные сущности - объект-значение
+     * Здесь хранятся только данные простых типов: int, string, bool, array
      * @var null|App_Core_Model_Data_Store
      */
     private $_data = null;
+
+    /**
+     * Данные сущности в виде Объектов
+     * @var array
+     */
+    private $_dataInstances = array();
+
+
+    public function setDataInstance($key, $value)
+    {
+        if(is_string($key)) {
+            $this->_dataInstances[$key] = $value;
+        }
+        return $this;
+    }
+
+
+    public function getDataInstance($key)
+    {
+        return $this->_dataInstances[$key];
+    }
+
+    public function hasDataInstance($key)
+    {
+        return array_key_exists($key, $this->_dataInstances);
+    }
+
+    // TODO: В Разработке
+    public function getEntityInstance($key)
+    {
+        if($this->getData($key)) {
+            if($this->getDataInstance($key) instanceof App_Core_Model_Data_Entity) {
+                return $this->getDataInstance($key);
+            } else {
+                // Защита от бесконечной рекурсии
+                if(!$this->hasDataInstance($key)) {
+                    $this->{'set' . ucfirst($key)}($this->getData($key));
+                    return $this->{'get' . ucfirst($key)}();
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Получить идентификационные данные сущности

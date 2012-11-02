@@ -67,6 +67,10 @@ class Default_IndexController extends App_Zend_Controller_Action
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
+        $f = array();
+        $f['test'] = null;
+        Zend_Debug::dump(array_key_exists('test', $f));
+
     }
 
     private function _getHierarchyRoleAndCompany(HM_Model_Account_User $user)
