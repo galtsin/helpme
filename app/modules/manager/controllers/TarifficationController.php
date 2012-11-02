@@ -39,7 +39,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     /**
      * Список тарифов на ЛК
      */
-    public function linesAction()
+    public function _linesAction()
     {
         $data = array();
 
@@ -52,6 +52,37 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
             $data[] = array('line' => $line->getData(), 'tariffs' => $tariffColl->getCollection()->getDataIterator());
         }
         $this->view->assign('data', $data);
+    }
+
+    public function linesAction()
+    {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $pageRole = 'ADM_LINE';
+        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $tariffColl = new HM_Model_Billing_Tariff_Collection();
+        $accessColl->setType('LINE')
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
+            ->setRestrictionByInheritanceFromRole($pageRole);
+
+        $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
+            ->getCollection();
+
+        $lines = array();
+        foreach($accessColl->getObjectsIterator() as $line) {
+            if(!array_key_exists($line->getData('id'), $lines)) {
+                $lines[$line->getData('id')] = array(
+                    'line'      => $line,
+                    'tariffs'   => array()
+                );
+            }
+            $tariffColl->resetFilters();
+            $tariffColl->clear();
+            $lines[$line->getData('id')]['tariffs'] = $tariffColl->addEqualFilter('line', $line->getData('id'))->getCollection()->getObjectsIterator();
+        }
+        $this->view->assign('chainLineWithTariffs', $lines);
     }
 
     /**

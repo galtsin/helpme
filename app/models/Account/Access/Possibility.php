@@ -89,9 +89,9 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     {
         $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
             ->execute('possibility_add', array(
-                'id_user'       => (int)$this->getData('user'),
-                'id_role'       => (int)$this->getData('role'),
-                'id_company'    => (int)$this->getData('company')
+                'id_user'       => $this->getData('user')->getData('id'),
+                'id_role'       => $this->getData('role')->getId(),
+                'id_company'    => $this->getData('company')->getData('id')
             )
         );
         if($result->rowCount() > 0) {
@@ -109,11 +109,11 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     {
         if($this->getData()->isDirty()) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                ->execute('group_update_identity', array(
+                ->execute('possibility_update_identity', array(
                     'id_possibility'    => (int)$this->getData('id'),
-                    'id_user'           => (int)$this->getData('user'),
-                    'id_role'           => (int)$this->getData('role'),
-                    'id_company'        => (int)$this->getData('company')
+                    'id_user'           => $this->getData('user')->getData('id'),
+                    'id_role'           => $this->getData('role')->getId(),
+                    'id_company'        => $this->getData('company')->getData('id')
                 )
             );
             $row = $result->fetchRow();
@@ -195,7 +195,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * TODO: В Идеале передавать объекты!!!!
+     * TODO: В Идеале передавать объекты App_Core_Model_Data_Entity
      * Добавить объект к набору
      * @param App_Core_Model_Data_Store $object
      */
@@ -214,14 +214,13 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         foreach($this->getObjects() as $object) {
             if($object->isRemoved()) {
                 $result = $this->_removeObject($object);
-            } elseif ($object->isDirty()) {
+            } elseif ($object->isDirty()) { // TODO: необходимо ли?
                 $result = $this->_insertObject($object);
             }
             if(!empty($result)) {
-                if(is_int($result) && $result > 0) {
-                    return true;
+                if(is_int($result) && $result == -1) {
+                    return false;
                 }
-                return false;
             }
         }
         return true;

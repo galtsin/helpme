@@ -242,7 +242,7 @@ require([
         });
 
         // #Страница с менеджерами
-        router.register('main', function(){
+        router.register('getManagers', function(){
             dojo.publish('getManagers');
         });
 
@@ -253,7 +253,7 @@ require([
 
         // Активируем роутер
         router.startup();
-        router.go('main');
+        router.go('getManagers');
 
     });
 });

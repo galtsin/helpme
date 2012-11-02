@@ -1,4 +1,7 @@
 <?php
+$chainCompanyWithGroups = $this->chainCompanyWithGroups;
+?>
+<?php
 $jScript = <<<JS
 require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level", "core/Sandbox", "core/sandbox/helpers/Validate", "core/sandbox/helpers/Form"]);
 dojo.ready(function(){
@@ -169,27 +172,21 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         </tr>
         </thead>
         <tbody>
-        <?php
-        foreach($data as $entry):
-            $companyData = $companyColl->load($entry['company'])->getData();
-            ?>
+        <?php foreach($chainCompanyWithGroups as $entry): ?>
         <tr>
-            <td rowspan="<?=count($entry['groups']) + 1?>"><?=$companyData->get('name')?></td>
+            <td rowspan="<?=count($entry['groups']) + 1?>"><?=$entry['company']->getData('name')?></td>
             <th>#ID</th>
             <th>Группа</th>
             <th>ЛК</th>
         </tr>
-            <?php
-            foreach($entry['groups'] as $group):
-                $groupData = $groupColl->load($group)->getData();
-                ?>
+            <?php foreach($entry['groups'] as $group): ?>
             <tr>
-                <td><?=$groupData->get('id')?></td>
-                <td><a class="engineAjax" data-action="#!/getGroupBoard/<?=$groupData->get('id')?>" href="#!/getGroupBoard/<?=$groupData->get('id')?>" title="<?=$groupData->get('name')?>"><?=$groupData->get('name')?></a></td>
+                <td><?=$group->getData('id')?></td>
+                <td><a class="engineAjax" data-action="#!/getGroupBoard/<?=$group->getData('id')?>" href="#!/getGroupBoard/<?=$group->getData('id')?>" title="<?=$group->getData('name')?>"><?=$group->getData('name')?></a></td>
                 <td>
                     <?php
                     $line = $lineColl->load(
-                        $levelColl->load($groupData->get('level'))->getData('line')
+                        $levelColl->load($group->getData('level'))->getData('line')
                     );
                     ?>
                     <?=$line->getData('name')?>

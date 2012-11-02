@@ -272,7 +272,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                 $objectType = 'GROUP';
                 break;
             default:
-                $objectType = null;
+                $objectType = HM_Model_Account_Access::EMPTY_TYPE;
         }
 
         //$objectType = 'LINE';
@@ -342,13 +342,13 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         $request = $this->getRequest();
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $userColl = new HM_Model_Account_User_Collection();
-        $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
 
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+
+        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
             ->restore($account['user']);
 
         // TODO: Проверить перед созданием
-        if($user instanceof HM_Model_Account_User) {
+        if($admin instanceof HM_Model_Account_User) {
             if($request->isPost()) {
                 $possibilityParams = $request->getPost('possibility');
                 if(empty($possibilityParams['user'])) {
@@ -364,29 +364,45 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                 }
 
                 if($manager instanceof HM_Model_Account_User){
-                    $possibility = new HM_Model_Account_Access_Possibility();
-                    $possibility->setData(array(
-                            'user'      => $manager->getData('id'),
-                            'role'      => HM_Model_Account_Access::getInstance()->getRole((int)$possibilityParams['role'])->getId(),
-                            'company'   => $possibilityParams['company']
-                        )
-                    );
-                    if($possibility->save()) {
-                        $this->setAjaxResult($possibility->getData('id'));
-                        $this->setAjaxStatus('ok');
-                    }
+                    $managerPossibility = new HM_Model_Account_Access_Possibility();
+                    $managerPossibility->setUser($manager)
+                        ->setRole((int)$possibilityParams['role'])
+                        ->setCompany((int)$possibilityParams['company']);
 
-                    // Если у Менеджера Роль - Администратор компании, то скопировать ему все доступные объекты
-/*                    if($possibility->getData('role')->get('code') == 'ADM_COMPANY') {
-                        foreach($user->getPossibilities() as $_possibility) {
-                            if($_possibility->getObjects(''))
+                    if($managerPossibility->save()) {
+                        // Если у Менеджера Роль - Администратор компании, то скопировать ему все доступные объекты
+                        if($managerPossibility->getData('role')->get('code') == 'ADM_COMPANY') {
+                            $possibilityColl = new HM_Model_Account_Access_Possibility_Collection();
+                            $possibilityColl->addEqualFilter('urc', array(
+                                    'user'      => $admin->getData('id'),
+                                    'role'      => 'ADM_COMPANY',
+                                    'company'   => $managerPossibility ->getData('company')->getData('id')
+                                )
+                            );
+                            $possibilityColl->getCollection();
+                            if(count($possibilityColl->getIdsIterator()) > 0) {
+                                foreach($possibilityColl->getObjectsIterator() as $adminPossibility) {
+                                    // Перебираем все типы данных
+                                    foreach(HM_Model_Account_Access::getInstance()->getTypes() as $type) {
+                                        foreach($adminPossibility->getObjects($type) as $object) {
+                                            $object->setDirty(true);
+                                            $managerPossibility->addObject($object);
+                                        }
+                                    }
+                                }
+                                if($managerPossibility->saveObjects()) {
+                                    $this->setAjaxResult($managerPossibility ->getData('id'));
+                                    $this->setAjaxStatus('ok');
+                                }
+                            }
+                        } else {
+                            $this->setAjaxResult($managerPossibility ->getData('id'));
+                            $this->setAjaxStatus('ok');
                         }
-                    }*/
-
-
+                    }
                 }
             } else {
-                $this->view->assign('hierarchyRoles', $this->_getHierarchyRoles($user));
+                $this->view->assign('hierarchyRoles', $this->_getHierarchyRoles($admin));
                 $this->view->assign('manager', $request->getQuery('manager'));
             }
         }

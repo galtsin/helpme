@@ -47,31 +47,69 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function linesAction()
     {
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+        $pageRole = 'ADM_LINE';
+        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
             ->restore($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
+        $companyColl = new HM_Model_Billing_Company_Collection();
         $accessColl->setType('LINE')
             ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
-            ->setRestrictionByCompany(12)
-            ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
+            ->setRestrictionByInheritanceFromRole($pageRole);
 
-        $accessColl->addEqualFilter('possibility', $user->getPossibilities())
+        $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
             ->getCollection();
 
-        $data = array();
-        foreach($accessColl->getDataIterator() as $line) {
-            $companies[$line->getData('company_owner')][] = $line;
+        $companies = array();
+        foreach($accessColl->getObjectsIterator() as $line) {
+            if(!array_key_exists($line->getData('company_owner'), $companies)) {
+                $companies[$line->getData('company_owner')] = array(
+                    'company'   =>$companyColl->load($line->getData('company_owner')),
+                    'lines'     => array()
+                );
+            }
+            $companies[$line->getData('company_owner')]['lines'][] = $line;
         }
+        $this->view->assign('chainCompanyWithLines', $companies);
+
     }
 
-    public function groupsAction()
+    public function _groupsAction()
     {
         $groupColl = new HM_Model_Counseling_Structure_Group_Collection();
         $groups = $groupColl->addEqualFilter('company', 12)->getCollection()->getIdsIterator();
         $data = array();
         $data[] = array('company' => 12, 'groups' => $groups);
         $this->view->assign('data', $data);
+    }
+
+    public function groupsAction()
+    {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $pageRole = 'ADM_GROUP';
+        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        $accessColl->setType('GROUP')
+            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory'))
+            ->setRestrictionByInheritanceFromRole($pageRole);
+
+        $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
+            ->getCollection();
+
+        $companies = array();
+        foreach($accessColl->getObjectsIterator() as $group) {
+            if(!array_key_exists($group->getData('company_owner'), $companies)) {
+                $companies[$group->getData('company_owner')] = array(
+                    'company'   =>$companyColl->load($group->getData('company_owner')),
+                    'groups'     => array()
+                );
+            }
+            $companies[$group->getData('company_owner')]['groups'][] = $group;
+        }
+        $this->view->assign('chainCompanyWithGroups', $companies);
     }
 
     /**

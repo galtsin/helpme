@@ -1,4 +1,6 @@
-
+<?php
+$chainCompanyWithLines = $this->chainCompanyWithLines;
+?>
 <?php
 $jScript = <<<JS
 require(["dojo/behavior", "dojo/hash", "app/model/Line", "app/model/Level", "core/Sandbox", "core/sandbox/helpers/Validate"]);
@@ -306,12 +308,6 @@ dojo.ready(function(){
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript');
 ?>
-
-<?php
-$data = $this->data;
-$companyColl = new HM_Model_Billing_Company_Collection();
-$lineColl = new HM_Model_Counseling_Structure_Line_Collection();
-?>
 <div id="contentLines">
 <table class="table table-bordered">
     <colgroup>
@@ -327,22 +323,20 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
     </thead>
     <tbody>
         <?php
-            foreach($data as $entry):
-                $companyData = $companyColl->load($entry['company'])->getData();
+            foreach($chainCompanyWithLines as $entry):
         ?>
         <tr>
-            <td rowspan="<?=count($entry['lines']) + 1?>"><?=$companyData->get('name')?></td>
+            <td rowspan="<?=count($entry['lines']) + 1?>"><?=$entry['company']->getData('name')?></td>
             <th>#ID</th>
             <th>Линия Консультации</th>
             <th>Опции</th>
         </tr>
         <?php
             foreach($entry['lines'] as $line):
-                $lineData = $lineColl->load($line)->getData();
         ?>
         <tr>
-            <td><?=$lineData->get('id')?></td>
-            <td><a class="engineAjax" data-action="#!/getLineBoard/<?=$lineData->get('id')?>" href="#!/getLineBoard/<?=$lineData->get('id')?>" title="<?=$lineData->get('name')?>"><?=$lineData->get('name')?></a></td>
+            <td><?=$line->getData('id')?></td>
+            <td><a class="engineAjax" data-action="#!/getLineBoard/<?=$line->getData('id')?>" href="#!/getLineBoard/<?=$line->getData('id')?>" title="<?=$line->getData('name')?>"><?=$line->getData('name')?></a></td>
             <td><em>просмотр/редактирование</em></td>
         </tr>
         <?php endforeach; ?>

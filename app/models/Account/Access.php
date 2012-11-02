@@ -14,7 +14,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Пустая роль
      */
-    const EMPTY_ROLE = 'EMPTY';
+    const EMPTY_ROLE = 'GUEST';
 
     /**
      * Пустой тип
