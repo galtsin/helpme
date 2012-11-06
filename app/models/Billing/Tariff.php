@@ -102,4 +102,6 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
         }
         return parent::_remove();
     }
+
+    public function getLine(){}
 }

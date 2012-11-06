@@ -88,22 +88,33 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
         return $this;
     }
 
-
     /**
-     * TODO: в разработке
-     * @param $key
-     * @param $values
+     * Good
+     * @param string $key
+     * @param App_Core_Model_Data_Entity|App_Core_Model_Data_Entity[] $entry
+     * @return App_Core_Model_Data_Entity
      */
-    protected function _setSeveralDataObject($key, array $values)
+    protected function _setDataObject($key, $entry)
     {
-        if(is_array($values)) {
+        if(is_array($entry)) {
+            // Первоначальная настройка
             $this->_dataObjects[$key] = array();
             $this->getData()->set($key, array());
-
-            foreach($values as $value) {
+            foreach($entry as $value) {
                 if($value instanceof App_Core_Model_Data_Entity) {
-                    $this->_setDataObject($key, $value);
+                    self::_setDataObject($key, $value);
                 }
+            }
+        } elseif($entry instanceof App_Core_Model_Data_Entity && $entry->isIdentity()) {
+            if(is_array($this->_dataObjects[$key])) {
+                $this->getData()->set(
+                    $key,
+                    array_merge($this->getData()->get($key), array($entry->getData('id')))
+                );
+                $this->_dataObjects[$key][] = $entry;
+            } else {
+                $this->getData()->set($key, $entry->getData('id'));
+                $this->_dataObjects[$key] = $entry;
             }
         }
 
@@ -111,28 +122,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Установка одиночного объекта
-     * @param $key
-     * @param App_Core_Model_Data_Entity $entity
-     * @return App_Core_Model_Data_Entity
-     */
-    protected function _setSingleDataObject($key, App_Core_Model_Data_Entity $entity)
-    {
-        if(is_array($this->_dataObjects[$key])) {
-            $this->getData()->set(
-                $key,
-                array_merge($this->getData()->get($key), array($entity->getData('id')))
-            );
-            $this->_dataObjects[$key][] = $entity;
-        } else {
-            $this->getData()->set($key, $entity->getData('id'));
-            $this->_dataObjects[$key] = $entity;
-        }
-
-        return $this;
-    }
-
-    /**
+     * Good
      * @param string $key
      * @return mixed
      */
@@ -147,7 +137,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
                 $method .= ucfirst($part);
             }
 
-            if(method_exists($this, $method) && $this->getData($key)) {
+            if(method_exists($this, $method) && $this->getData()->has($key)) {
                 $this->{$method}($this->getData($key));
             }
         }

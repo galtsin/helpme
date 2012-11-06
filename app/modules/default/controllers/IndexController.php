@@ -54,6 +54,10 @@ class Default_IndexController extends App_Zend_Controller_Action
         }*/
 
 
+        $test = new Test();
+        $test->setUser(new HM_Model_Account_User());
+        Zend_Debug::dump($test);
+
         // TODO: алгоритм получения доступных данных
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
@@ -139,8 +143,14 @@ class Default_IndexController extends App_Zend_Controller_Action
 
 class Test extends App_Core_Model_Data_Entity
 {
-    public function t2()
+    public function getUser()
     {
+        return $this->_getDataObject('user');
+    }
+
+    public function setUser($user)
+    {
+        $this->_setDataObject('user', $user);
         return $this;
     }
 }

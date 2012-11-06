@@ -290,9 +290,24 @@ final class App_Core_Model_Data_Store
     {
         $this->_id = null;
         $this->_data = array();
-        $this->unmarkDirty();
+        $this->setDirty(false);
 
         return $this;
+    }
+
+
+    /**
+     * Проверить наличие ключа в индексе данных data
+     * @param $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        if(null !== $this->_data[$key]) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
