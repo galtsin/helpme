@@ -1,0 +1,43 @@
+<?php
+$agreements = $this->agreements;
+?>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#ID</th>
+            <th>ЛК</th>
+            <th>Тариф</th>
+            <th>Дата заключения</th>
+            <th>Дата окончания</th>
+            <th>Истекает (дней)</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="6">
+                <button type="button">Добавить договор</button>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        <?php foreach($agreements as $agreement): ?>
+        <tr>
+            <td><?=$agreement->getData('id')?></td>
+            <td><?=$agreement->getData('tariff')?></td>
+            <td><?=$agreement->getData('tariff')?></td>
+            <td><?=date("d.m.Y", $agreement->getData('date_begin'))?></td>
+            <td><?=date("d.m.Y", $agreement->getData('date_end'))?></td>
+            <td>
+                <?php
+                    $days = ceil(($agreement->getData('date_end') - date('U')) / 86400);
+                ?>
+                <?php if($days > 0): ?>
+                    <?=$days?>
+                <?php else: ?>
+                    <em>Истек <?=abs($days)?> дней назад</em>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

@@ -1,0 +1,136 @@
+<?php
+$companies = $this->companies;
+?>
+<?php
+$jScript = <<<JS
+require([
+    "dojo/dom",
+    "dojo/dom-attr",
+    "dojo/dom-form",
+    "dojo/on",
+    "dojo/_base/lang",
+    "dojo/query",
+    "dojo/router",
+    "dojo/store/Memory",
+    "core/Layout",
+    "core/helper/Validation",
+    "core/helper/form",
+    "core/helper/common",
+    "dijit/Dialog"
+], function(dom, domAttr, domForm, on, lang, query, router, storeMemory, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog){
+    dojo.ready(function(){
+
+        var Layout = new coreLayout({
+            messenger: {
+                node: dom.byId('messenger')
+                },
+            processing: {
+                node: dom.byId('loader')
+                }
+        });
+
+        // Экземпляр диалогового окна
+        var DialogBox = new dijitDialog();
+
+        dojo.subscribe('addAgreement', function(args){
+           Layout.load({
+                url:    appConfig.baseUrl + '/manager/billing/add-agreement',
+                format: 'html'
+           }).then(function(response){
+                DialogBox.set('title', 'Добавление договора');
+                DialogBox.set('content', response);
+                DialogBox.show();
+           })
+        });
+
+        dojo.subscribe('getCompanyClientAgreements', function(args){
+            console.log(args);
+           Layout.load({
+                url:    appConfig.baseUrl + '/manager/billing/get-company-client-agreements',
+                format: 'html',
+                args: args
+           }).then(function(response){
+                Layout.place(dom.byId('contentCompanies'), response);
+           })
+        });
+
+        // Событие на добавление Договора
+        query('[data-action^="addAgreement"]').on('click', function(event){
+            event.preventDefault();
+            dojo.publish('addAgreement', {});
+        });
+
+        // Событие на получение договоров компании
+        query('[data-action^="getCompanyClientAgreements"]').on('click', function(event){
+            event.preventDefault();
+            dojo.publish('getCompanyClientAgreements', (function(){
+                var dataActionParams = domAttr.get(event.target, "data-action").split('/');
+                return coreHelperCommon.arrayInObject(
+                    [dataActionParams[1], dataActionParams[2]],
+                    ['company_owner', 'company_client']
+                );
+            })());
+        });
+
+        // #Страница со всеми компаниями и договорами
+        router.register('getCompanies', function(event){
+            dojo.publish('getCompanies');
+        });
+
+        // #Страница договорами одной компании
+        router.register('getCompanyClientAgreements/:company', function(event){
+            dojo.publish('getCompanyClientAgreements', event.params);
+        });
+
+        // Активируем роутер
+        router.startup();
+        router.go('getManagers');
+
+    });
+});
+
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript')
+?>
+<div id="contentCompanies">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="350"/>
+            <col width="350"/>
+            <col/>
+        </colgroup>
+        <thead>
+            <tr>
+                <th colspan="3">Компания (владелец ЛК)</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach($companies as $company): ?>
+            <?php
+                $companyColl = new HM_Model_Billing_Company_Collection();
+                foreach($company->getAgreements() as $agreements) {
+                    $companyColl->load($agreements->getData('company_client'));
+                }
+            ?>
+            <tr>
+                <td rowspan="<?=count($company->getAgreements()) + 2?>"><?=$company->getData('name')?></td>
+                <th>Контрагент</th>
+                <th>Опции</th>
+            </tr>
+            <?php foreach($companyColl->getObjectsIterator() as $companyClient): ?>
+            <tr>
+                <td><?=$companyClient->getData('name')?></td>
+                <td>
+                    <a data-action="getCompanyClientAgreements/<?=$company->getData('id')?>/<?=$companyClient->getData('id')?>">договора</a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            <tr>
+                <td colspan="2">
+                    <button>Добавить контрагента</button>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

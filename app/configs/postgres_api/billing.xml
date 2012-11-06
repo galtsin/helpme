@@ -52,7 +52,7 @@
         <id_company type="integer"/>
     </agreements_by_company_client>
     <agreement_get_identity>
-        <id type="integer"/>
+        <id_agreement type="integer"/>
     </agreement_get_identity>
     <agreement_get_subscribers>
         <id_agreement type="integer"/>

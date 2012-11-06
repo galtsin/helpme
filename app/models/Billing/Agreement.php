@@ -27,6 +27,13 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
 
     public function getInvitedGuestFromSubscription(){}
 
+    public function getCompanyOwner(){}
+
+    public function getCompanyClient()
+    {
+
+    }
+
     protected function _insert(){}
 
     protected function _update(){}

@@ -8,5 +8,58 @@
  */
 class Manager_BillingController extends App_Zend_Controller_Action
 {
+    public function agreementsAction()
+    {
+        // Получить текущего пользователя
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+        $pageRole = 'ADM_COMPANY';
+        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
 
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        foreach($admin->getRoles() as $roleIdentifier => $companies) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
+                foreach($companies as $company) {
+                    $companyColl->load($company);
+                }
+            }
+        }
+
+        $this->view->assign('companies', $companyColl->getObjectsIterator());
+    }
+
+    /**
+     * Добавить новый договор
+     */
+    public function addAgreementAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost()) {
+
+        } else {
+
+        }
+    }
+
+    /**
+     * Получить список договоров контрагента
+     */
+    public function getCompanyClientAgreementsAction()
+    {
+        $request = $this->getRequest();
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        $companyClient = $companyColl->load($request->getParam('company_client'));
+        //$companyOwner = $companyColl->load($request->getParam('company_owner'));
+        $agreements = array();
+        if($companyClient instanceof HM_Model_Billing_Company) {
+            // Отобразить договора, которые заключены только между компанией Owner и Client
+            foreach($companyClient->getClientAgreements() as $agreement) {
+                if($agreement->getData('company_owner') == $request->getParam('company_owner')) {
+                    $agreements[] = $agreement;
+                }
+            }
+        }
+        $this->view->assign('agreements', $agreements);
+    }
 }

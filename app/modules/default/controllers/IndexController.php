@@ -67,10 +67,7 @@ class Default_IndexController extends App_Zend_Controller_Action
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
-        $test = new Test();
-        $test->setUser(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore(4));
 
-        Zend_Debug::dump($test);
 
     }
 

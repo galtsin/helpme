@@ -105,7 +105,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * @return array
+     * @return App_Core_Model_Data_Entity[]
      */
     public function getObjectsIterator()
     {
@@ -118,7 +118,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * @return array
+     * @return App_Core_Model_Data_Store[]
      */
     public function getDataIterator()
     {

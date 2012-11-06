@@ -19,10 +19,18 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     private $_data = null;
 
     /**
+     * TODO:
      * Данные сущности в виде Объектов
+     * @deprecated use self::_dataObjects
      * @var array
      */
     private $_dataInstances = array();
+
+    /**
+     * Сопутствующие ссылки на другие объекты
+     * @var array
+     */
+    private $_dataObjects = array();
 
     /**
      * @param $key
@@ -34,7 +42,9 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * TODO:  В разработке
      * Извлечь экземпляр из Хранилища
+     * @deprecated
      * @param $key
      * @return null
      */
@@ -61,7 +71,9 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * TODO: В разработке
      * Установить экземпляр в Хранилище
+     * @deprecated
      * @param $key
      * @param App_Core_Model_Data_Entity $value
      * @return self
@@ -76,6 +88,72 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
         return $this;
     }
 
+
+    /**
+     * TODO: в разработке
+     * @param $key
+     * @param $values
+     */
+    protected function _setSeveralDataObject($key, array $values)
+    {
+        if(is_array($values)) {
+            $this->_dataObjects[$key] = array();
+            $this->getData()->set($key, array());
+
+            foreach($values as $value) {
+                if($value instanceof App_Core_Model_Data_Entity) {
+                    $this->_setDataObject($key, $value);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Установка одиночного объекта
+     * @param $key
+     * @param App_Core_Model_Data_Entity $entity
+     * @return App_Core_Model_Data_Entity
+     */
+    protected function _setSingleDataObject($key, App_Core_Model_Data_Entity $entity)
+    {
+        if(is_array($this->_dataObjects[$key])) {
+            $this->getData()->set(
+                $key,
+                array_merge($this->getData()->get($key), array($entity->getData('id')))
+            );
+            $this->_dataObjects[$key][] = $entity;
+        } else {
+            $this->getData()->set($key, $entity->getData('id'));
+            $this->_dataObjects[$key] = $entity;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    protected function _getDataObject($key)
+    {
+        if(null === $this->_dataObjects[$key]) {
+            // Пробуем получить данные путем создания объектов через данные self::getData()
+            // Используется возможность отложенной загрузки Lazy Load
+            // Замена нотации ключа в массиве на нотацию функции, например: user_owner = setUserOwner();
+            $method = 'set';
+            foreach(explode('_', $key) as $part) {
+                $method .= ucfirst($part);
+            }
+
+            if(method_exists($this, $method) && $this->getData($key)) {
+                $this->{$method}($this->getData($key));
+            }
+        }
+
+        return $this->_dataObjects[$key];
+    }
 
     /**
      * Получить идентификационные данные сущности
