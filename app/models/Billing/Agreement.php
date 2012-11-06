@@ -34,6 +34,24 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
 
     }
 
+    public function getTariff()
+    {
+        return $this->_getDataObject('tariff');
+    }
+
+    public function setTariff($tariff)
+    {
+        if($tariff instanceof HM_Model_Billing_Tariff) {
+            $this->_setDataObject('tariff', $tariff);
+        } elseif (is_int($tariff)) {
+            self::setTariff(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Tariff_Factory')
+                ->restore($tariff));
+        }
+
+        return $this;
+    }
+
+
     protected function _insert(){}
 
     protected function _update(){}

@@ -24,7 +24,7 @@ $agreements = $this->agreements;
         <tr>
             <td><?=$agreement->getData('id')?></td>
             <td><?=$agreement->getData('tariff')?></td>
-            <td><?=$agreement->getData('tariff')?></td>
+            <td><?=$agreement->getTariff()->getData('name')?></td>
             <td><?=date("d.m.Y", $agreement->getData('date_begin'))?></td>
             <td><?=date("d.m.Y", $agreement->getData('date_end'))?></td>
             <td>

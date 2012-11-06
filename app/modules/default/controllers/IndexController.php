@@ -69,9 +69,9 @@ class Default_IndexController extends App_Zend_Controller_Action
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         //Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
-        $test = new Test();
-        $test->setUser($user);
-        Zend_Debug::dump($test->getUser()->getData());
+        $agrColl = new HM_Model_Billing_Agreement_Collection();
+        $agr = $agrColl->load(57);
+        Zend_Debug::dump($agr->getTariff());
 
     }
 

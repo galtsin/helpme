@@ -72,6 +72,7 @@ class App
     }
 
     /**
+     * App::getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
      * @param string $class
      * @return mixed
      * @throws Exception
@@ -79,6 +80,5 @@ class App
     public static function getResource($class)
     {
         return self::_getInstance('resource', $class);
-
     }
 }

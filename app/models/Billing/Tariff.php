@@ -104,4 +104,5 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
     }
 
     public function getLine(){}
+    public function setLine(){}
 }

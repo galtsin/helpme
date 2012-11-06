@@ -4,7 +4,7 @@
  * @author: GaltsinAK
  */
 /**
- * TODO: Дабавить валидацию данных Zend_Validate
+ * TODO: Дабавить валидацию данных Zend_Validate?
  * ru: Абстрактный класс-контейнер для сущностей
  */
 class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
@@ -137,6 +137,11 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      */
     protected function _getDataObject($key)
     {
+        // TODO: Проработать
+        if(array_key_exists($key, $this->_dataObjects)) {
+
+        }
+
         if(null === $this->_dataObjects[$key]) {
             // Пробуем получить данные путем создания объектов через данные self::getData()
             // Используется возможность отложенной загрузки Lazy Load
