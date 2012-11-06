@@ -54,9 +54,7 @@ class Default_IndexController extends App_Zend_Controller_Action
         }*/
 
 
-        $test = new Test();
-        $test->setUser(new HM_Model_Account_User());
-        Zend_Debug::dump($test);
+
 
         // TODO: алгоритм получения доступных данных
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
@@ -69,9 +67,11 @@ class Default_IndexController extends App_Zend_Controller_Action
             ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
 
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
-        Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
+        //Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
-
+        $test = new Test();
+        $test->setUser($user);
+        Zend_Debug::dump($test->getUser()->getData());
 
     }
 

@@ -93,20 +93,28 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      * @param string $key
      * @param App_Core_Model_Data_Entity|App_Core_Model_Data_Entity[] $entry
      * @return App_Core_Model_Data_Entity
+     * @throws Exception
      */
     protected function _setDataObject($key, $entry)
     {
+        if(!is_string($key)) {
+            throw new Exception('Неверный тип данных ключа. Разрешен только строковый тип');
+        }
+
         if(is_array($entry)) {
             // Первоначальная настройка
             $this->_dataObjects[$key] = array();
             $this->getData()->set($key, array());
+
             foreach($entry as $value) {
+                // Предотвращение возможных зацикливанией рекурсии
                 if($value instanceof App_Core_Model_Data_Entity) {
                     self::_setDataObject($key, $value);
                 }
             }
+
         } elseif($entry instanceof App_Core_Model_Data_Entity && $entry->isIdentity()) {
-            if(is_array($this->_dataObjects[$key])) {
+            if(array_key_exists($key, $this->_dataObjects) && is_array($this->_dataObjects[$key])) {
                 $this->getData()->set(
                     $key,
                     array_merge($this->getData()->get($key), array($entry->getData('id')))
@@ -123,6 +131,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
 
     /**
      * Good
+     * Получить экземпляр связанной сущности из Хранилища объектов
      * @param string $key
      * @return mixed
      */
