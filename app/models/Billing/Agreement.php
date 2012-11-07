@@ -51,8 +51,27 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
         return $this;
     }
 
+    /**
+     * Создать договор
+     * @return int
+     */
+    protected function _insert()
+    {
+        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            ->execute('agreement_add', array(
+                'id_tariff'     => (int)$this->getData('tariff'),
+                'id_invoice'    => (int)$this->getData('invoice'),
+                'date_end'      => $this->getData('date_end')
+            )
+        );
 
-    protected function _insert(){}
+        if($result->rowCount() > 0) {
+            $row = $result->fetchRow();
+            return (int)$row['o_id_agreement'];
+        }
+
+        return parent::_insert();
+    }
 
     protected function _update(){}
 }

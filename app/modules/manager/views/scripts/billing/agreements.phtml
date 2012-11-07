@@ -35,56 +35,66 @@ require([
         dojo.subscribe('addAgreement', function(args){
            Layout.load({
                 url:    appConfig.baseUrl + '/manager/billing/add-agreement',
-                format: 'html'
+                format: 'html',
+                args: args
            }).then(function(response){
                 DialogBox.set('title', 'Добавление договора');
                 DialogBox.set('content', response);
                 DialogBox.show();
-           })
+           }).then(function(){
+                var form = dom.byId('add-agreement');
+                on(form['send'], 'click', function(event){
+                    event.preventDefault();
+                    Layout.send({
+                        url: appConfig.baseUrl + '/manager/billing/add-agreement',
+                        args: domForm.toObject(form)
+                    });
+                });
+           });
         });
 
         dojo.subscribe('getCompanyClientAgreements', function(args){
-            console.log(args);
            Layout.load({
                 url:    appConfig.baseUrl + '/manager/billing/get-company-client-agreements',
                 format: 'html',
                 args: args
            }).then(function(response){
                 Layout.place(dom.byId('contentCompanies'), response);
-           })
+           }).then(function(){
+               // Событие на добавление Договора
+                query('[data-action^="addAgreement"]').on('click', function(event){
+                    event.preventDefault();
+                    dojo.publish('addAgreement', args);
+                });
+           });
         });
 
         // Событие на добавление Договора
         query('[data-action^="addAgreement"]').on('click', function(event){
             event.preventDefault();
-            dojo.publish('addAgreement', {});
+            dojo.publish('addAgreement', {company_owner: event.target.getAttribute('data-action').split('/')[1]});
         });
 
         // Событие на получение договоров компании
         query('[data-action^="getCompanyClientAgreements"]').on('click', function(event){
             event.preventDefault();
-            dojo.publish('getCompanyClientAgreements', (function(){
+            router.go(event.target.getAttribute("data-action"));
+/*            dojo.publish('getCompanyClientAgreements', (function(){
                 var dataActionParams = domAttr.get(event.target, "data-action").split('/');
                 return coreHelperCommon.arrayInObject(
                     [dataActionParams[1], dataActionParams[2]],
                     ['company_owner', 'company_client']
                 );
-            })());
-        });
-
-        // #Страница со всеми компаниями и договорами
-        router.register('getCompanies', function(event){
-            dojo.publish('getCompanies');
+            })());*/
         });
 
         // #Страница договорами одной компании
-        router.register('getCompanyClientAgreements/:company', function(event){
+        router.register('getCompanyClientAgreements/:company_owner/:company_client', function(event){
             dojo.publish('getCompanyClientAgreements', event.params);
         });
 
         // Активируем роутер
         router.startup();
-        router.go('getManagers');
 
     });
 });
@@ -105,15 +115,15 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </tr>
         </thead>
         <tbody>
-        <?php foreach($companies as $company): ?>
+        <?php foreach($companies as $companyOwner): ?>
             <?php
                 $companyColl = new HM_Model_Billing_Company_Collection();
-                foreach($company->getAgreements() as $agreements) {
+                foreach($companyOwner->getOwnerAgreements() as $agreements) {
                     $companyColl->load($agreements->getData('company_client'));
                 }
             ?>
             <tr>
-                <td rowspan="<?=count($company->getAgreements()) + 2?>"><?=$company->getData('name')?></td>
+                <td rowspan="<?=count($companyOwner->getOwnerAgreements()) + 2?>"><?=$companyOwner->getData('name')?></td>
                 <th>Контрагент</th>
                 <th>Опции</th>
             </tr>
@@ -121,13 +131,13 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             <tr>
                 <td><?=$companyClient->getData('name')?></td>
                 <td>
-                    <a data-action="getCompanyClientAgreements/<?=$company->getData('id')?>/<?=$companyClient->getData('id')?>">договора</a>
+                    <a data-action="getCompanyClientAgreements/<?=$companyOwner->getData('id')?>/<?=$companyClient->getData('id')?>">договора</a>
                 </td>
             </tr>
             <?php endforeach; ?>
             <tr>
                 <td colspan="2">
-                    <button>Добавить контрагента</button>
+                    <button type="button" data-action="addAgreement/<?=$companyOwner->getData('id')?>">Новый договор</button>
                 </td>
             </tr>
             <?php endforeach; ?>

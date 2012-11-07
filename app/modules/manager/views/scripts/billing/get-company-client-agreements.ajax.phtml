@@ -1,21 +1,30 @@
 <?php
 $agreements = $this->agreements;
+$lineColl = new HM_Model_Counseling_Structure_Line_Collection();
 ?>
 <table class="table table-bordered">
+    <colgroup>
+        <col width="50"/>
+        <col width="350"/>
+        <col width="350"/>
+        <col width="100"/>
+        <col width="100">
+        <col/>
+    </colgroup>
     <thead>
         <tr>
             <th>#ID</th>
             <th>ЛК</th>
             <th>Тариф</th>
-            <th>Дата заключения</th>
-            <th>Дата окончания</th>
-            <th>Истекает (дней)</th>
+            <th>Начало</th>
+            <th>Окончание</th>
+            <th>Истекает (дн.)</th>
         </tr>
     </thead>
     <tfoot>
         <tr>
             <td colspan="6">
-                <button type="button">Добавить договор</button>
+                <button type="button" data-action="addAgreement/12/26">Новый договор</button>
             </td>
         </tr>
     </tfoot>
@@ -23,7 +32,7 @@ $agreements = $this->agreements;
         <?php foreach($agreements as $agreement): ?>
         <tr>
             <td><?=$agreement->getData('id')?></td>
-            <td><?=$agreement->getData('tariff')?></td>
+            <td><?=$agreement->getTariff()->getLine()->getData('name')?></td>
             <td><?=$agreement->getTariff()->getData('name')?></td>
             <td><?=date("d.m.Y", $agreement->getData('date_begin'))?></td>
             <td><?=date("d.m.Y", $agreement->getData('date_end'))?></td>
@@ -34,7 +43,7 @@ $agreements = $this->agreements;
                 <?php if($days > 0): ?>
                     <?=$days?>
                 <?php else: ?>
-                    <em>Истек <?=abs($days)?> дней назад</em>
+                    <span style="color: #cc0000"><?=abs($days)?> (просрочен)</span>
                 <?php endif; ?>
             </td>
         </tr>

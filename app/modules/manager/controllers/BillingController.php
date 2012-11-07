@@ -36,9 +36,38 @@ class Manager_BillingController extends App_Zend_Controller_Action
     {
         $request = $this->getRequest();
         if($request->isPost()) {
+            $agreementParams = $request->getPost('agreement');
+            $agreement = new HM_Model_Billing_Agreement();
+            $agreement->getData()
+                ->set('tariff', $agreementParams['tariff'])
+                ->set('date_end', $agreementParams['date_end']['day'] . '.' . $agreementParams['date_end']['month'] . '.' . $agreementParams['date_end']['year']);
+            if(empty($agreementParams['invoice'])) {
+                $companyClient = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
+                    ->restore($request->getParam('company_client'));
+                $invoice = $companyClient->addInvoice();
+                if($invoice > 0) {
+                    $agreement->getData()
+                        ->set('invoice', $invoice);
+                }
+            } else {
+                $agreement->getData()
+                    ->set('invoice', $agreementParams['invoice']);
+            }
+
+            if($agreement->save()) {
+                $this->setAjaxResult($agreement->getData()->getId());
+                $this->setAjaxStatus('ok');
+            }
 
         } else {
 
+
+            $companyClient = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
+                ->restore($request->getParam('company_client'));
+            $companyOwner = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
+                ->restore($request->getParam('company_owner'));
+            $this->view->assign('companyClient', $companyClient);
+            $this->view->assign('companyOwner', $companyOwner);
         }
     }
 

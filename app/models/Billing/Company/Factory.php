@@ -39,23 +39,26 @@ class HM_Model_Billing_Company_Factory extends App_Core_Model_FactoryAbstract
     {
         $company = null;
 
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-            ->execute('company_get_identity', array(
-                'id' => (int)$id
-            )
-        );
+        if(!empty($id)) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('company_get_identity', array(
+                    'id' => (int)$id
+                )
+            );
 
-        if($result->rowCount() > 0) {
-            $row = $result->fetchRow();
-            $company = new HM_Model_Billing_Company();
-            $company->getData()
-                ->set('id', $id)
-                ->set('name', $row['o_name'])
-                ->set('inn', $row['o_inn'])
-                ->set('kpp', $row['o_kpp'])
-                ->set('user_creator', $row['o_id_creator']);
-            $company->getData()->unmarkDirty();
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $company = new HM_Model_Billing_Company();
+                $company->getData()
+                    ->set('id', $id)
+                    ->set('name', $row['o_name'])
+                    ->set('inn', $row['o_inn'])
+                    ->set('kpp', $row['o_kpp'])
+                    ->set('user_creator', $row['o_id_creator']);
+                $company->getData()->unmarkDirty();
+            }
         }
+
 
         return $company;
     }

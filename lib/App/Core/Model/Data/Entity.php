@@ -89,44 +89,12 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Good
-     * @param string $key
-     * @param App_Core_Model_Data_Entity|App_Core_Model_Data_Entity[] $entry
-     * @return App_Core_Model_Data_Entity
-     * @throws Exception
+     * @param $key
+     * @param $entry
      */
     protected function _setDataObject($key, $entry)
     {
-        if(!is_string($key)) {
-            throw new Exception('Неверный тип данных ключа. Разрешен только строковый тип');
-        }
-
-        if(is_array($entry)) {
-            // Первоначальная настройка
-            $this->_dataObjects[$key] = array();
-            $this->getData()->set($key, array());
-
-            foreach($entry as $value) {
-                // Предотвращение возможных зацикливанией рекурсии
-                if($value instanceof App_Core_Model_Data_Entity) {
-                    self::_setDataObject($key, $value);
-                }
-            }
-
-        } elseif($entry instanceof App_Core_Model_Data_Entity && $entry->isIdentity()) {
-            if(array_key_exists($key, $this->_dataObjects) && is_array($this->_dataObjects[$key])) {
-                $this->getData()->set(
-                    $key,
-                    array_merge($this->getData()->get($key), array($entry->getData('id')))
-                );
-                $this->_dataObjects[$key][] = $entry;
-            } else {
-                $this->getData()->set($key, $entry->getData('id'));
-                $this->_dataObjects[$key] = $entry;
-            }
-        }
-
-        return $this;
+        $this->_dataObjects[$key] = $entry;
     }
 
     /**
@@ -137,12 +105,8 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      */
     protected function _getDataObject($key)
     {
-        // TODO: Проработать
-        if(array_key_exists($key, $this->_dataObjects)) {
-
-        }
-
-        if(null === $this->_dataObjects[$key]) {
+        if(!array_key_exists($key, $this->_dataObjects)) {
+            $this->_dataObjects[$key] = null;
             // Пробуем получить данные путем создания объектов через данные self::getData()
             // Используется возможность отложенной загрузки Lazy Load
             // Замена нотации ключа в массиве на нотацию функции, например: user_owner = setUserOwner();

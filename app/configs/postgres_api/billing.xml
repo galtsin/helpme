@@ -2,7 +2,7 @@
 <functions>
     <agreement_add>
         <id_invoice type="integer"/>
-        <id_tarif type="integer"/>
+        <id_tariff type="integer"/>
         <date_end type="string"/>
     </agreement_add>
     <tarif_get_identity>
@@ -42,9 +42,9 @@
     <tarif_del>
         <id_tarif type="integer"/>
     </tarif_del>
-    <billing_add_invoice>
+    <company_add_invoice>
         <id_company_owner type="integer"/>
-    </billing_add_invoice>
+    </company_add_invoice>
     <agreements_by_company_owner_line>
         <id_company type="integer"/>
     </agreements_by_company_owner_line>
@@ -114,4 +114,7 @@
     <agreement_get_invited_users>
         <id_agreement type="integer"/>
     </agreement_get_invited_users>
+    <company_get_invoices>
+        <id_company type="integer"/>
+    </company_get_invoices>
 </functions>

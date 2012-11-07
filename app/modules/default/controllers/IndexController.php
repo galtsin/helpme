@@ -71,7 +71,8 @@ class Default_IndexController extends App_Zend_Controller_Action
 
         $agrColl = new HM_Model_Billing_Agreement_Collection();
         $agr = $agrColl->load(57);
-        Zend_Debug::dump($agr->getTariff());
+        $agr->getTariff();
+        Zend_Debug::dump($agr);
 
     }
 

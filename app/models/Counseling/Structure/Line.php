@@ -130,4 +130,24 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
         }
         return $processing;
     }
+
+    /**
+     * TODO: Пример
+     * Получить список Тарифов на ЛК
+     * @return HM_Model_Billing_Tariff[]|null
+     */
+    public function getTariffs()
+    {
+        $key = 'tariffs';
+        if(null === $this->_getDataObject($key)) {
+            if($this->isIdentity()) {
+                $tariffColl = new HM_Model_Billing_Tariff_Collection();
+                $tariffColl->addEqualFilter('line', $this->getData()->getId())
+                    ->getCollection();
+                $this->_setDataObject($key, $tariffColl->getObjectsIterator());
+                $this->getData()->set($key, $tariffColl->getIdsIterator());
+            }
+        }
+        return $this->_getDataObject($key);
+    }
 }

@@ -103,6 +103,26 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
         return parent::_remove();
     }
 
-    public function getLine(){}
-    public function setLine(){}
+    /**
+     * Получить ЛК
+     * @return HM_Model_Counseling_Structure_Line|null
+     */
+    public function getLine()
+    {
+        return $this->_getDataObject('line');
+    }
+
+    /**
+     * Установить ЛК для тарифа
+     * @param $line
+     */
+    public function setLine($line)
+    {
+        if($line instanceof HM_Model_Counseling_Structure_Line) {
+            $this->_setDataObject('line', $line);
+        } elseif (is_int($line)) {
+            self::setLine(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
+                ->restore($line));
+        }
+    }
 }

@@ -21,22 +21,25 @@ class HM_Model_Counseling_Structure_Level_Factory extends App_Core_Model_Factory
     {
         $level = null;
 
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-            ->execute('level_get_identity', array(
-                'id_level' => (int)$id
-            )
-        );
+        if(!empty($id)) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('level_get_identity', array(
+                    'id_level' => (int)$id
+                )
+            );
 
-        if($result->rowCount() > 0) {
-            $row = $result->fetchRow();
-            $level = new HM_Model_Counseling_Structure_Level();
-            $level->getData()
-                ->set('id', $id)
-                ->set('name', $row['o_name'])
-                ->set('line', $row['o_id_line'])
-                ->set('priority', $row['o_priority']);
-            $level->getData()->unmarkDirty();
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $level = new HM_Model_Counseling_Structure_Level();
+                $level->getData()
+                    ->set('id', $id)
+                    ->set('name', $row['o_name'])
+                    ->set('line', $row['o_id_line'])
+                    ->set('priority', $row['o_priority']);
+                $level->getData()->unmarkDirty();
+            }
         }
+
 
         return $level;
     }
