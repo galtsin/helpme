@@ -29,6 +29,41 @@ class Manager_BillingController extends App_Zend_Controller_Action
         $this->view->assign('companies', $companyColl->getObjectsIterator());
     }
 
+
+    /**
+     * Получить соглашения
+     */
+    public function getCompanyOwnerAgreementsAction()
+    {
+        // Получить текущего пользователя
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+        $pageRole = 'ADM_COMPANY';
+        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
+            ->restore($account['user']);
+
+        $companyOwnerColl = new HM_Model_Billing_Company_Collection();
+        foreach($admin->getRoles() as $roleIdentifier => $companies) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
+                foreach($companies as $company) {
+                    $companyOwnerColl->load($company);
+                }
+            }
+        }
+
+        $store = array();
+        foreach($companyOwnerColl->getObjectsIterator() as $companyOwner) {
+            $companyClientColl = new HM_Model_Billing_Company_Collection();
+            foreach($companyOwner->getOwnerAgreements() as $agreements) {
+                $companyClientColl->load($agreements->getData('company_client'));
+            }
+            $store[] = array_merge($companyOwner->getData()->toArray(), array(
+                'company_clients' => $companyClientColl->toArray()
+            ));
+        }
+        $this->setAjaxData($store);
+    }
+
     /**
      * Добавить новый договор
      */
@@ -82,7 +117,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
         //$companyOwner = $companyColl->load($request->getParam('company_owner'));
         $agreements = array();
         if($companyClient instanceof HM_Model_Billing_Company) {
-            // Отобразить договора, которые заключены только между компанией Owner и Client
+            // Отобразить договора, которые заключены только между компанией Owner(Партнером) и Client(Контрагентом)
             foreach($companyClient->getClientAgreements() as $agreement) {
                 if($agreement->getData('company_owner') == $request->getParam('company_owner')) {
                     $agreements[] = $agreement;
@@ -90,5 +125,13 @@ class Manager_BillingController extends App_Zend_Controller_Action
             }
         }
         $this->view->assign('agreements', $agreements);
+    }
+
+    /**
+     * Поиск организации
+     */
+    public function searchCompanyAction()
+    {
+
     }
 }

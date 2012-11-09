@@ -22,20 +22,22 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
     }
 
     /**
-     * Получить список договоров, где компания является владельцем ЛК
-     * @return App_Core_Model_Data_Entity[]|null
+     * Получить список договоров, где компания является владельцем ЛК (Партнером)
+     * @return HM_Model_Billing_Agreement[]|null
      */
     public function getOwnerAgreements()
     {
-        if($this->isIdentity()) {
-            if(null === $this->_agreements) {
+        $key = 'company_owner_agreements';
+        if(null === $this->_getDataObject($key)) {
+            if($this->isIdentity()) {
                 $agreementsColl = new HM_Model_Billing_Agreement_Collection();
-                $agreementsColl->addEqualFilter('companyOwner', $this->getData('id'));
-                $this->_agreements = $agreementsColl->getCollection()->getObjectsIterator();
+                $agreementsColl->addEqualFilter('companyOwner', $this->getData()->getId())
+                    ->getCollection();
+                $this->_setDataObject($key, $agreementsColl->getObjectsIterator());
+                $this->getData()->set($key, $agreementsColl->getIdsIterator());
             }
         }
-
-        return $this->_agreements;
+        return $this->_getDataObject($key);
     }
 
     /**

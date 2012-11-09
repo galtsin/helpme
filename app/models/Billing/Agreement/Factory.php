@@ -22,7 +22,7 @@ class HM_Model_Billing_Agreement_Factory extends App_Core_Model_FactoryAbstract
     {
         $agreement = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('agreement_get_identity', array(
                     'id_agreement' => (int)$id

@@ -21,7 +21,7 @@ class HM_Model_Counseling_Structure_Level_Factory extends App_Core_Model_Factory
     {
         $level = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('level_get_identity', array(
                     'id_level' => (int)$id

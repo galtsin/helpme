@@ -187,6 +187,15 @@ require([
             while(node.firstChild) {
                 node.removeChild(node.firstChild);
             }
+        },
+        /**
+         * Получить URL адрес
+         * @param url
+         */
+        baseUrl: function(/* String */url) {
+/*            if(window.appConfig){
+
+            }*/
         }
     });
 });

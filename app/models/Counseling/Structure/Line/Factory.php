@@ -21,7 +21,7 @@ class HM_Model_Counseling_Structure_Line_Factory extends App_Core_Model_FactoryA
     {
         $line = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('line_get_identity', array(
                     'id_line' => (int)$id

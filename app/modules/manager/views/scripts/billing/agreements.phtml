@@ -1,12 +1,31 @@
 <?php
+// TODO: Может заносить данные в StoreMemory?
+?>
+<?php
 $companies = $this->companies;
+$store = array();
+foreach($companies as $companyOwner) {
+    $companyColl = new HM_Model_Billing_Company_Collection();
+    foreach($companyOwner->getOwnerAgreements() as $agreements) {
+        $companyColl->load($agreements->getData('company_client'));
+    }
+    $store[] =         array_merge($companyOwner->getData()->toArray(), array(
+        'company_clients' => $companyColl->toArray()
+    ));
+}
+
+$storeJson = Zend_Json::encode($store);
+
 ?>
 <?php
 $jScript = <<<JS
 require([
     "dojo/dom",
+    "dojo/html",
+    "dojo/dom-construct",
     "dojo/dom-attr",
     "dojo/dom-form",
+    "dojo/_base/array",
     "dojo/on",
     "dojo/_base/lang",
     "dojo/query",
@@ -17,7 +36,7 @@ require([
     "core/helper/form",
     "core/helper/common",
     "dijit/Dialog"
-], function(dom, domAttr, domForm, on, lang, query, router, storeMemory, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog){
+], function(dom, domHtml, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog){
     dojo.ready(function(){
 
         var Layout = new coreLayout({
@@ -29,25 +48,185 @@ require([
                 }
         });
 
+        var storeCompanies = $storeJson;
+
         // Экземпляр диалогового окна
         var DialogBox = new dijitDialog();
 
+        var Agr = {
+            addCompanyClientEvents: function(node){
+                query('[data-action^="addAgreement"]', node).on('click', function(event){
+                    route(event.target, ['company_owner', 'company_client']);
+                });
+                query('[data-action^="getCompanyClientAgreements"]', node).on('click', function(event){
+                    event.preventDefault();
+                    router.go(domAttr.get(event.target, 'data-action'));
+                });
+            }
+        };
+
+        // Используем набор вспомогательных виджетов, которые можно использовать по всей системе
+        // Поиск компании
+        dojo.declare('SearchCompanyDialog', null, {
+            constructor: function(LayoutInstance){
+                this.Layout = LayoutInstance;
+                this.DialogBox = new dijitDialog();
+                var that = this;
+                // Загрузка содержимого
+                that.Layout.load({
+                    url:    appConfig.baseUrl + '/manager/billing/search-company',
+                    format: 'html'
+                }).then(function(response){
+                    that.DialogBox.set('title', 'Поиск компании');
+                    that.DialogBox.set('content', response);
+                    that.DialogBox.show();
+                }).then(function(){
+                    var formNode = dom.byId('search-company');
+                    on(formNode['send'], 'click', function(){
+                        that._searchRequest(formNode);
+                    });
+                });
+            },
+            _searchRequest: function(formNode){
+                var that = this;
+                that.Layout.load({
+                    url: appConfig.baseUrl + '/service/query/company',
+                    format: 'json',
+                    args: {'filters[equal][inn][]': formNode['company[inn]'].value, 'filters[equal][kpp][]': formNode['company[kpp]'].value}
+                }).then(function(response){
+                    that._showRequestResults(new storeMemory({data: response.data}));
+                });
+            },
+
+            _showRequestResults: function(storeResults){
+                var that = this;
+                if(storeResults.data.length > 0) {
+                    var tbody = query('tbody', dom.byId('search-results'))[0];
+                    domHtml.set(tbody, Handlebars.compile(dojo.byId("search-results-items").innerHTML)({items: storeResults.data}));
+                    query('a', tbody).on('click', function(event){
+                        event.preventDefault();
+                        that.DialogBox.hide();
+                        var selectCompany = event.target.getAttribute('data-action').split('/')[1];
+                        that.onSelect(storeResults.get(selectCompany));
+                    });
+                }
+            },
+            onSelect: function(data){
+                // callback
+            }
+        });
+
+        // Создание нового договора
+        dojo.declare('CreateAgreementDialog', null, {
+            constructor: function(companyOwner, companyClient){
+                Layout.load({
+                    url:    appConfig.baseUrl + '/manager/billing/add-agreement',
+                    format: 'html',
+                    args: args
+                }).then(function(response){
+                    DialogBox.set('title', 'Заключение нового договора');
+                    DialogBox.set('content', response);
+                    DialogBox.show();
+                }).then(function(){
+                    // Контрагент известен
+                    var form = dom.byId('add-agreement');
+                    on(form['send'], 'click', function(event){
+                        event.preventDefault();
+                        Layout.send({
+                            url: appConfig.baseUrl + '/manager/billing/add-agreement',
+                            args: domForm.toObject(form)
+                        });
+                    });
+               })
+            },
+            _sendRequest: function(formNode){
+                Layout.send({
+                    url: appConfig.baseUrl + '/manager/billing/add-agreement',
+                    args: domForm.toObject(formNode)
+                }).then(function(response){
+                    if(response.results != -1) {
+                        DialogBox.hide();
+                    }
+                })
+            },
+            onCreated: function(){
+                // callback
+            }
+        });
+
+        // args summary:
+        // company_owner:
+        //      Компания, владелец ЛК (Партнер)
+        // company_client:
+        //      Компания-Контрагент
         dojo.subscribe('addAgreement', function(args){
-           Layout.load({
+            Layout.load({
                 url:    appConfig.baseUrl + '/manager/billing/add-agreement',
                 format: 'html',
                 args: args
-           }).then(function(response){
+            }).then(function(response){
                 DialogBox.set('title', 'Добавление договора');
                 DialogBox.set('content', response);
                 DialogBox.show();
-           }).then(function(){
+            }).then(function(){
+
+                // Контрагент известен
                 var form = dom.byId('add-agreement');
                 on(form['send'], 'click', function(event){
                     event.preventDefault();
                     Layout.send({
                         url: appConfig.baseUrl + '/manager/billing/add-agreement',
                         args: domForm.toObject(form)
+                    });
+                });
+           })
+        });
+
+        // Добавить Контрагента
+        dojo.subscribe('addCompanyClient', function(args){
+            // args:
+            // company_owner
+            Layout.load({
+                url:    appConfig.baseUrl + '/manager/billing/search-company',
+                format: 'html'
+            }).then(function(response){
+                DialogBox.set('title', 'Поиск компании');
+                DialogBox.set('content', response);
+                DialogBox.show();
+            }).then(function(){
+                var form = dom.byId('search-company');
+                // Поиск Компании
+                on(form['send'], 'click', function(){
+                    Layout.load({
+                        url: appConfig.baseUrl + '/service/query/company',
+                        format: 'json',
+                        args: {'filters[equal][inn][]': form['company[inn]'].value, 'filters[equal][kpp][]': form['company[kpp]'].value}
+                    }).then(function(response){
+                        var tbody = dom.byId('search-results').getElementsByTagName('tbody')[0];
+                        if(response.data.length > 0) {
+                            // Сохранить результаты выборки в памяти
+                            var storeSearchCompanyResults = new storeMemory({data: response.data});
+                            // Заполнить шаблон с результатами поиска
+                            var template = Handlebars.compile(dojo.byId("search-results-items").innerHTML);
+                            tbody.innerHTML = template({items: response.data});
+
+                            query('[data-action^="selectCompany"]').on('click', function(event){
+                                event.preventDefault();
+                                DialogBox.hide();
+
+                                var selectCompany = event.target.getAttribute('data-action').split('/')[1];
+                                var html = Handlebars.compile(dom.byId("new-company-client-item").innerHTML)(storeSearchCompanyResults.get(selectCompany)['parent'] = args['company_owner']);
+                                var tr = dom.byId('company-owner-item-' + args['company_owner']);
+                                var td = query('td', tr)[0];
+                                domConstruct.place(html, tr, 'after');
+                                td.setAttribute('rowspan', Number(td.getAttribute('rowspan')) + 1);
+
+                                // Навесить обработчики на вставленный объект
+                                Agr.addCompanyClientEvents(dom.byId('company-client-item-' + selectCompany));
+                            });
+                        } else {
+                            tbody.innerHTML = '';
+                        }
                     });
                 });
            });
@@ -70,27 +249,99 @@ require([
         });
 
         // Событие на добавление Договора
-        query('[data-action^="addAgreement"]').on('click', function(event){
+        query('[data-action^="addCompanyClient"]').on('click', function(event){
             event.preventDefault();
-            dojo.publish('addAgreement', {company_owner: event.target.getAttribute('data-action').split('/')[1]});
+            dojo.publish('addCompanyClient', {company_owner: event.target.getAttribute('data-action').split('/')[1]});
         });
 
-        // Событие на получение договоров компании
-        query('[data-action^="getCompanyClientAgreements"]').on('click', function(event){
+        // Событие на добавление Договора
+        query('[data-action^="addAgreement"]').on('click', function(event){
             event.preventDefault();
-            router.go(event.target.getAttribute("data-action"));
-/*            dojo.publish('getCompanyClientAgreements', (function(){
-                var dataActionParams = domAttr.get(event.target, "data-action").split('/');
-                return coreHelperCommon.arrayInObject(
-                    [dataActionParams[1], dataActionParams[2]],
-                    ['company_owner', 'company_client']
-                );
-            })());*/
+            dojo.publish('addAgreement', {});
         });
+
+
+        (function(){
+            setTimeout(function(){
+                //dojo.publish('getCompanyOwnerAgreements');
+                router.go('getCompanyOwnerAgreements')
+            }, 500);
+        })();
+
+        function route(node, keysArray){
+            if(node.getAttribute('data-action')) {
+                keysArray.unshift('method');
+                var params = coreHelperCommon.arrayInObject(node.getAttribute('data-action').split('/'), keysArray);
+                var method = params['method'];
+                delete params['method'];
+                dojo.publish(method , params);
+            }
+        }
+
+        // == Настройка роутера
 
         // #Страница договорами одной компании
         router.register('getCompanyClientAgreements/:company_owner/:company_client', function(event){
             dojo.publish('getCompanyClientAgreements', event.params);
+        });
+
+        // # Страница с договорами Партнера
+        router.register('getCompanyOwnerAgreements', function(){
+            Layout.load({
+                url:    appConfig.baseUrl + '/manager/billing/get-company-owner-agreements',
+                format: 'json'
+            }).then(function(response){
+                // Загрузить список компаний
+                var storeCompanies = new storeMemory({data: response.data});
+
+                // Формируем HTML-контент
+                var tbody = query('tbody', dom.byId('company-owner-agreements'))[0];
+                storeCompanies.query(function(owner){
+                    domConstruct.place(Handlebars.compile(dojo.byId("company-owner-item").innerHTML)(owner), tbody, 'last');
+                    var html = '';
+                    array.forEach(owner['company_clients'], function(client){
+                        client['parent'] = owner.id;
+                        html += Handlebars.compile(dom.byId("company-client-item").innerHTML)(client);
+                    });
+                    var tr = dom.byId('company-owner-item-' + owner.id);
+                    var td = query('td', tr)[0];
+                    domConstruct.place(html, tr, 'after');
+                    td.setAttribute('rowspan', Number(td.getAttribute('rowspan')) + owner['company_clients'].length);
+                });
+
+                // Событие на просмотр договоров Контрагента
+                query('[data-action^="getCompanyClientAgreements"]').on('click', function(event){
+                    event.preventDefault();
+                    router.go(domAttr.get(event.target, 'data-action'));
+                });
+
+                query('[data-action^="addCompanyClient"]').on('click', function(event){
+                    event.preventDefault();
+                    //route(event.target, ['company_owner'])
+                    var search = new SearchCompanyDialog(Layout);
+                    search.onSelect = function(data){
+                        var companyOwner = event.target.getAttribute('data-action').split('/')[1];
+                        storeCompanies.get(companyOwner)['company_clients'].push(data);
+                        // TODO: Перед добавлением в память - проверить наличие в этой памяти!!!
+                        console.log(storeCompanies);
+                        var html = Handlebars.compile(dom.byId("new-company-client-item").innerHTML)({company: data, parent: companyOwner});
+                        var tr = dom.byId('company-owner-item-' + companyOwner);
+                        var td = query('td', tr)[0];
+                        domConstruct.place(html, tr, 'after');
+                        td.setAttribute('rowspan', Number(td.getAttribute('rowspan')) + 1);
+                        query('[data-action^="addAgreement"]', dom.byId('new-company-client-item-' + data.id)).on('click', function(event){
+                            event.preventDefault();
+                            route(event.target, ['company_owner', 'company_client']);
+                        });
+                    }
+                });
+
+                query('[data-action^="addAgreement"]').on('click', function(event){
+                    event.preventDefault();
+                    route(event.target, ['company_owner', 'company_client']);
+                });
+
+            });
         });
 
         // Активируем роутер
@@ -103,44 +354,55 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 <div id="contentCompanies">
-    <table class="table table-bordered">
+    <table class="table table-bordered" id="company-owner-agreements">
         <colgroup>
             <col width="350"/>
             <col width="350"/>
             <col/>
         </colgroup>
         <thead>
-            <tr>
-                <th colspan="3">Компания (владелец ЛК)</th>
-            </tr>
+        <tr>
+            <th colspan="3">Компания (владелец ЛК)</th>
+        </tr>
         </thead>
-        <tbody>
-        <?php foreach($companies as $companyOwner): ?>
-            <?php
-                $companyColl = new HM_Model_Billing_Company_Collection();
-                foreach($companyOwner->getOwnerAgreements() as $agreements) {
-                    $companyColl->load($agreements->getData('company_client'));
-                }
-            ?>
-            <tr>
-                <td rowspan="<?=count($companyOwner->getOwnerAgreements()) + 2?>"><?=$companyOwner->getData('name')?></td>
-                <th>Контрагент</th>
-                <th>Опции</th>
-            </tr>
-            <?php foreach($companyColl->getObjectsIterator() as $companyClient): ?>
-            <tr>
-                <td><?=$companyClient->getData('name')?></td>
-                <td>
-                    <a data-action="getCompanyClientAgreements/<?=$companyOwner->getData('id')?>/<?=$companyClient->getData('id')?>">договора</a>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-            <tr>
-                <td colspan="2">
-                    <button type="button" data-action="addAgreement/<?=$companyOwner->getData('id')?>">Новый договор</button>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
+        <tbody></tbody>
     </table>
 </div>
+
+<script id="_t_-items" type="text/x-handlebars-template">
+    <tr>
+        <td>{{data.name}} <span class="error-anchor label label-important"><span>новый</span></span></td>
+        <td>+ новый</td>
+    </tr>
+</script>
+
+<script id="company-owner-item" type="text/x-handlebars-template">
+    <tr id="company-owner-item-{{id}}">
+        <td rowspan="2">{{data.name}}</td>
+        <th>Контрагент</th>
+        <th>Опции</th>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <button type="button" data-action="addCompanyClient/{{id}}">Добавить контрагента</button>
+        </td>
+    </tr>
+</script>
+
+<script id="company-client-item" type="text/x-handlebars-template">
+    <tr id="company-client-item-{{id}}">
+        <td>{{data.name}} ({{data.inn}} / {{data.kpp}})</td>
+        <td>
+            <a data-action="addAgreement/{{parent}}/{{id}}">+ новый</a>
+            <span style="padding: 0 4px">|</span>
+            <a data-action="getCompanyClientAgreements/{{parent}}/{{id}}">договора</a>
+        </td>
+    </tr>
+</script>
+
+<script id="new-company-client-item" type="text/x-handlebars-template">
+    <tr id="new-company-client-item-{{company.id}}">
+        <td>{{company.data.name}} ({{company.data.inn}} / {{company.data.kpp}}) <span class="error-anchor label label-important"><span>новый</span></span></td>
+        <td><a data-action="addAgreement/{{parent}}/{{company.id}}">+ новый</a></td>
+    </tr>
+</script>

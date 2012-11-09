@@ -39,7 +39,7 @@ class HM_Model_Billing_Company_Factory extends App_Core_Model_FactoryAbstract
     {
         $company = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('company_get_identity', array(
                     'id' => (int)$id

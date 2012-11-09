@@ -21,7 +21,7 @@ class HM_Model_Billing_Tariff_Factory extends App_Core_Model_FactoryAbstract
     {
         $tariff = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('tarif_get_identity', array(
                     'id_tariff' => (int)$id

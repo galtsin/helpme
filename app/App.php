@@ -13,6 +13,8 @@ class App
      */
     private static $_instances = array();
 
+    private $_resources = array();
+
     /**
      * ru: Получить экземпляр класса
      * @static
@@ -80,5 +82,15 @@ class App
     public static function getResource($class)
     {
         return self::_getInstance('resource', $class);
+    }
+
+    public static function _getResource($namespace)
+    {
+
+    }
+
+    public function resisterResource($instance, $namespace)
+    {
+        $this->_resources[$namespace] = $instance;
     }
 }

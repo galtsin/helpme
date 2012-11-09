@@ -22,7 +22,7 @@ class HM_Model_Account_User_Factory extends App_Core_Model_FactoryAbstract
     {
         $user = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('user_identity', array(
                     'id' => (int)$id

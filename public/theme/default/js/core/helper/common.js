@@ -10,6 +10,13 @@ define([], function(){
                 obj[keysArray[i]] = sourceArray[i];
             }
             return obj;
+        },
+        parseDataActionParams: function(node, keysArray){
+            if(node.getAttribute('data-action')) {
+                keysArray.unshift('method');
+                return this.arrayInObject(node.getAttribute('data-action').split('/'), keysArray);
+            }
+            return null;
         }
     };
 });

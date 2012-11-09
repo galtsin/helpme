@@ -24,7 +24,7 @@ class HM_Model_Account_Access_Possibility_Factory extends App_Core_Model_Factory
     {
         $possibility = null;
 
-        if(!empty($id)) {
+        if(isset($id)) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                 ->execute('possibility_get_identity', array(
                     'id_possibility' => (int)$id

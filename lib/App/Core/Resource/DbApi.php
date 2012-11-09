@@ -82,6 +82,7 @@ class App_Core_Resource_DbApi extends App_Core_Resource_Abstract
             }
 
             $stmt->execute();
+            // $stmt->close(); Освобождаем дескриптор подготовленного запроса
             return new App_Core_Resource_DbApi_Result($stmt);
 
         } catch(Exception $ex) {
