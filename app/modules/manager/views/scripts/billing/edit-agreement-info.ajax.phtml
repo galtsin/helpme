@@ -1,0 +1,51 @@
+<?php
+$agreement = $this->agreement;
+?>
+<form id="edit-agreement-info">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="200">
+            <col/>
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Информация по Договору <?=$agreement->getData('id')?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Номер счета:</th>
+                <td>#<?=$agreement->getData('invoice')?></td>
+            </tr>
+            <tr>
+                <th>Срок действия:</th>
+                <td>
+                    <?=date('m.d.Y', $agreement->getData('date_begin'))?>
+                    —
+                    <?=date('m.d.Y', $agreement->getData('date_end'))?>
+                </td>
+            </tr>
+            <tr>
+                <th>ЛК/Тариф:</th>
+                <td>
+                    <?=$agreement->getTariff()->getLine()->getData('name')?> / <?=$agreement->getTariff()->getData('name')?>
+                </td>
+            </tr>
+            <tr>
+                <th>Компания Партнер:</th>
+                <td>
+                    <?php
+                        $company =
+                        App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
+                            ->restore(
+                                $agreement->getTariff()
+                                    ->getLine()
+                                    ->getData('company_owner')
+                            );
+                    ?>
+                    <?=$company->getData('name')?> (<?=$company->getData('inn')?> / <?=$company->getData('kpp')?>)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>

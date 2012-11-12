@@ -134,4 +134,43 @@ class Manager_BillingController extends App_Zend_Controller_Action
     {
 
     }
+
+    /**
+     * Загрузить панель Управление договором
+     */
+    public function getAgreementBoardAction()
+    {
+        $request = $this->getRequest();
+        $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
+            ->restore($request->getParam('agreement'));
+        if($agreement instanceof HM_Model_Billing_Agreement) {
+            $this->view->assign('agreement', $agreement);
+        }
+    }
+
+    /**
+     * Загрузить подписчиков на Договор
+     */
+    public function getSubscribersAction()
+    {
+        $request = $this->getRequest();
+        $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
+            ->restore($request->getParam('agreement'));
+        if($agreement instanceof HM_Model_Billing_Agreement) {
+            $this->view->assign('agreement', $agreement);
+        }
+    }
+
+    /**
+     * Загрузить информацию по Договору
+     */
+    public function editAgreementInfoAction()
+    {
+        $request = $this->getRequest();
+        $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
+            ->restore($request->getParam('agreement'));
+        if($agreement instanceof HM_Model_Billing_Agreement) {
+            $this->view->assign('agreement', $agreement);
+        }
+    }
 }

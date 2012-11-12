@@ -1,0 +1,76 @@
+<?php
+$agreement = $this->agreement;
+?>
+<form id="edit-agreement-subscribers">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="50"/>
+            <col width="50"/>
+            <col width="300"/>
+            <col/>
+        </colgroup>
+        <thead>
+            <tr>
+                <th colspan="5">Активные подписчики</th>
+            </tr>
+            <tr>
+                <th>#ID</th>
+                <th>#</th>
+                <th>Логин</th>
+                <th>Email</th>
+                <th>Ф.И.О</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <button type="button" name="add">Добавить</button>
+                    <button type="button" name="remove">Удалить</button>
+                </td>
+            </tr>
+        </tfoot>
+        <tbody>
+            <?php foreach($agreement->getSubscriptionUsers() as $user): ?>
+            <tr>
+                <td><?=$user->getData('id')?></td>
+                <td></td>
+                <td><?=$user->getData('login')?></td>
+                <td><?=$user->getData('email')?></td>
+                <td><?=$user->getData('last_name')?> <?=$user->getData('first_name')?> <?=$user->getData('middle_name')?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</form>
+
+<form id="edit-agreement-invited-subscribers">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="50"/>
+            <col width="50"/>
+            <col width="300"/>
+            <col/>
+        </colgroup>
+        <thead>
+        <tr>
+            <th colspan="4">Приглашенные подписчики</th>
+        </tr>
+        <tr>
+            <th>#ID</th>
+            <th>#</th>
+            <th>Email</th>
+            <th>Ф.И.О</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="5">
+                <button type="button" name="add">Добавить</button>
+                <button type="button" name="remove">Удалить</button>
+            </td>
+        </tr>
+        </tfoot>
+        <tbody>
+        </tbody>
+    </table>
+</form>

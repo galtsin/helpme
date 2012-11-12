@@ -1,41 +1,66 @@
-dojo.provide("core.widgets.SearchCompanyDialog");
-require([
+define([
+    "require",
+    "dojo/_base/declare", // declare
+    "dojo/dom",
+    "dojo/html",
+    "dojo/dom-construct",
+    "dojo/dom-attr",
+    "dojo/dom-form",
+    "dojo/_base/array",
+    "dojo/on",
     "dojo/_base/lang",
-    "dojo/_base/fx"
-], function(lang, fx){
-    core.widgets.SearchCompanyDialog = function(){};
-    dojo.declare("core.widgets.SearchCompanyDialog", null, {
-        constructor: function(LayoutInstance, HandlebarsInstance){
+    "dojo/query",
+    "dojo/store/Memory"
+], function(require, declare, dom, domHtml, domConstruct, domAttr, domForm, array, on, lang, query, storeMemory){
+    return declare(null, {
+        /**
+         * Инициализация Виджета
+         * @param LayoutInstance
+         * @param DialogInstance
+         * @param HandlebarsInstance
+         */
+        constructor: function(LayoutInstance, DialogInstance, HandlebarsInstance){
             this.Layout = LayoutInstance;
-            this.DialogBox = new dijitDialog();
             this.Handlebars = HandlebarsInstance;
+            this.DialogBox = DialogInstance;
+        },
+        load: function(){
             var that = this;
             // Загрузка содержимого
             that.Layout.load({
-                url:    appConfig.baseUrl + '/manager/billing/search-company',
+                url:    that.Layout.baseUrl('manager/billing/search-company'),
                 format: 'html'
             }).then(function(response){
                     that.DialogBox.set('title', 'Поиск компании');
                     that.DialogBox.set('content', response);
                     that.DialogBox.show();
-                }).then(function(){
-                    var formNode = dom.byId('search-company');
-                    on(formNode['send'], 'click', function(){
-                        that._searchRequest(formNode);
-                    });
+            }).then(function(){
+                var formNode = dom.byId('search-company');
+                on(formNode['send'], 'click', function(){
+                    that._searchRequest(formNode);
                 });
+            });
         },
+        /**
+         * Поиск результатов
+         * @param formNode
+         * @private
+         */
         _searchRequest: function(formNode){
             var that = this;
             that.Layout.load({
-                url: appConfig.baseUrl + '/service/query/company',
+                url: that.Layout.baseUrl('service/query/company'),
                 format: 'json',
                 args: {'filters[equal][inn][]': formNode['company[inn]'].value, 'filters[equal][kpp][]': formNode['company[kpp]'].value}
             }).then(function(response){
                     that._showRequestResults(new storeMemory({data: response.data}));
                 });
         },
-
+        /**
+         * Отобразить результаты поиска
+         * @param storeResults
+         * @private
+         */
         _showRequestResults: function(storeResults){
             var that = this;
             if(storeResults.data.length > 0) {

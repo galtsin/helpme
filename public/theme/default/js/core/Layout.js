@@ -56,6 +56,7 @@ require([
         // TODO: заменить на dojo.lang::mixin
         /**
          * Передать свойства источника, свойству приемника при условии совпадения свойств
+         * @deprecated
          * @param recipient
          * @param source
          * @return {*}
@@ -189,13 +190,11 @@ require([
             }
         },
         /**
-         * Получить URL адрес
+         * Получить полный URL-адрес с привязкой к протоколу и доменному имени
          * @param url
          */
         baseUrl: function(/* String */url) {
-/*            if(window.appConfig){
-
-            }*/
+            return window.location.protocol + '//' + window.location.host + '/' + url;
         }
     });
 });

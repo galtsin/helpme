@@ -9,7 +9,7 @@ foreach($companies as $companyOwner) {
     foreach($companyOwner->getOwnerAgreements() as $agreements) {
         $companyColl->load($agreements->getData('company_client'));
     }
-    $store[] =         array_merge($companyOwner->getData()->toArray(), array(
+    $store[] = array_merge($companyOwner->getData()->toArray(), array(
         'company_clients' => $companyColl->toArray()
     ));
 }
@@ -35,8 +35,10 @@ require([
     "core/helper/Validation",
     "core/helper/form",
     "core/helper/common",
-    "dijit/Dialog"
-], function(dom, domHtml, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog){
+    "dijit/Dialog",
+    "core/widgets/SearchCompanyDialog"
+], function(dom, domHtml, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, coreLayout,
+coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompanyDialog){
     dojo.ready(function(){
 
         var Layout = new coreLayout({
@@ -48,10 +50,56 @@ require([
                 }
         });
 
+        // Список действий
+        var actionStore = new storeMemory({
+            idProperty: 'action',
+            data: [
+                {
+                    action: 'getAgreementBoard',
+                    route:  'getAgreementBoard/:agreement',
+                    type:   'router' /*subscription*/
+                },
+                {
+                    action: 'getSubscribers',
+                    route:  'getSubscribers/:agreement',
+                    type:   'router'
+                },
+                {
+                    action: 'editAgreementInfo',
+                    route:  'editAgreementInfo/:agreement',
+                    type:   'router'
+                }
+            ]
+        });
+
         var storeCompanies = $storeJson;
 
         // Экземпляр диалогового окна
         var DialogBox = new dijitDialog();
+
+        // Парсер
+        function actionParser(/*String|Node*/refNode) {
+            query('[data-action]', dom.byId(refNode)).on('click', function(event){
+                event.preventDefault();
+                actionDispatcher(event.target.getAttribute('data-action'));
+            });
+        }
+
+        // Диспетчер
+        function actionDispatcher(/*String*/ request) {
+            var parts = request.split('/');
+            if(actionStore.get(parts[0])) {
+                var action = actionStore.get(parts[0]);
+                if(action.type == 'router') {
+                    router.go(request);
+                } else {
+                    var keys = action.route.split('/:');
+                    keys[0] = 'action';
+                    dojo.publish(action.action, coreHelperCommon.arrayInObject(parts, keys));
+                }
+            }
+        }
+
 
         var Agr = {
             addCompanyClientEvents: function(node){
@@ -67,54 +115,6 @@ require([
 
         // Используем набор вспомогательных виджетов, которые можно использовать по всей системе
         // Поиск компании
-        dojo.declare('SearchCompanyDialog', null, {
-            constructor: function(LayoutInstance){
-                this.Layout = LayoutInstance;
-                this.DialogBox = new dijitDialog();
-                var that = this;
-                // Загрузка содержимого
-                that.Layout.load({
-                    url:    appConfig.baseUrl + '/manager/billing/search-company',
-                    format: 'html'
-                }).then(function(response){
-                    that.DialogBox.set('title', 'Поиск компании');
-                    that.DialogBox.set('content', response);
-                    that.DialogBox.show();
-                }).then(function(){
-                    var formNode = dom.byId('search-company');
-                    on(formNode['send'], 'click', function(){
-                        that._searchRequest(formNode);
-                    });
-                });
-            },
-            _searchRequest: function(formNode){
-                var that = this;
-                that.Layout.load({
-                    url: appConfig.baseUrl + '/service/query/company',
-                    format: 'json',
-                    args: {'filters[equal][inn][]': formNode['company[inn]'].value, 'filters[equal][kpp][]': formNode['company[kpp]'].value}
-                }).then(function(response){
-                    that._showRequestResults(new storeMemory({data: response.data}));
-                });
-            },
-
-            _showRequestResults: function(storeResults){
-                var that = this;
-                if(storeResults.data.length > 0) {
-                    var tbody = query('tbody', dom.byId('search-results'))[0];
-                    domHtml.set(tbody, Handlebars.compile(dojo.byId("search-results-items").innerHTML)({items: storeResults.data}));
-                    query('a', tbody).on('click', function(event){
-                        event.preventDefault();
-                        that.DialogBox.hide();
-                        var selectCompany = event.target.getAttribute('data-action').split('/')[1];
-                        that.onSelect(storeResults.get(selectCompany));
-                    });
-                }
-            },
-            onSelect: function(data){
-                // callback
-            }
-        });
 
         // Создание нового договора
         dojo.declare('CreateAgreementDialog', null, {
@@ -169,7 +169,6 @@ require([
                 DialogBox.set('content', response);
                 DialogBox.show();
             }).then(function(){
-
                 // Контрагент известен
                 var form = dom.byId('add-agreement');
                 on(form['send'], 'click', function(event){
@@ -177,6 +176,10 @@ require([
                     Layout.send({
                         url: appConfig.baseUrl + '/manager/billing/add-agreement',
                         args: domForm.toObject(form)
+                    }).then(function(response){
+                        if(reponse.results != -1) {
+                            DialogBox.hide();
+                        }
                     });
                 });
            })
@@ -244,6 +247,11 @@ require([
                 query('[data-action^="addAgreement"]').on('click', function(event){
                     event.preventDefault();
                     dojo.publish('addAgreement', args);
+                });
+
+                query('[data-action^="getAgreementBoard"]').on('click', function(event){
+                    event.preventDefault();
+                    router.go(event.target.getAttribute('data-action'));
                 });
            });
         });
@@ -318,21 +326,30 @@ require([
                 query('[data-action^="addCompanyClient"]').on('click', function(event){
                     event.preventDefault();
                     //route(event.target, ['company_owner'])
-                    var search = new SearchCompanyDialog(Layout);
+                    var search = new coreSearchCompanyDialog(Layout, DialogBox, Handlebars);
+                    console.log(search);
+                    search.load();
                     search.onSelect = function(data){
                         var companyOwner = event.target.getAttribute('data-action').split('/')[1];
-                        storeCompanies.get(companyOwner)['company_clients'].push(data);
-                        // TODO: Перед добавлением в память - проверить наличие в этой памяти!!!
-                        console.log(storeCompanies);
-                        var html = Handlebars.compile(dom.byId("new-company-client-item").innerHTML)({company: data, parent: companyOwner});
-                        var tr = dom.byId('company-owner-item-' + companyOwner);
-                        var td = query('td', tr)[0];
-                        domConstruct.place(html, tr, 'after');
-                        td.setAttribute('rowspan', Number(td.getAttribute('rowspan')) + 1);
-                        query('[data-action^="addAgreement"]', dom.byId('new-company-client-item-' + data.id)).on('click', function(event){
-                            event.preventDefault();
-                            route(event.target, ['company_owner', 'company_client']);
+                        // Перед добавлением в память - проверить наличие в этой памяти!
+                        var insert = true;
+                        array.forEach(storeCompanies.get(companyOwner)['company_clients'], function(client){
+                            if(client.id == data.id) {
+                                insert = false;
+                            }
                         });
+                        if(insert) {
+                            storeCompanies.get(companyOwner)['company_clients'].push(data);
+                            var html = Handlebars.compile(dom.byId("new-company-client-item").innerHTML)({company: data, parent: companyOwner});
+                            var tr = dom.byId('company-owner-item-' + companyOwner);
+                            var td = query('td', tr)[0];
+                            domConstruct.place(html, tr, 'after');
+                            td.setAttribute('rowspan', Number(td.getAttribute('rowspan')) + 1);
+                            query('[data-action^="addAgreement"]', dom.byId('new-company-client-item-' + data.id)).on('click', function(event){
+                                event.preventDefault();
+                                route(event.target, ['company_owner', 'company_client']);
+                            });
+                        }
                     }
                 });
 
@@ -343,6 +360,48 @@ require([
 
             });
         });
+
+        // #Страница с Панелью управления отдельным Договором
+        router.register(actionStore.get('getAgreementBoard').route, function(event){
+            Layout.load({
+                url:    Layout.baseUrl('manager/billing/get-agreement-board'),
+                format: 'html',
+                args: event.params
+            }).then(function(response){
+                domHtml.set(dom.byId('contentCompanies'), response);
+            }).then(function(){
+                actionParser(dom.byId('contentCompanies'));
+            }).then(function(){
+                setTimeout(function(){
+                    router.go('editAgreementInfo/' + event.params['agreement']);
+                }, 500);
+            })
+        });
+
+        // #Страница с подписчиками (клиентами) на Договор
+        router.register(actionStore.get('getSubscribers').route, function(event){
+            Layout.load({
+                url:    Layout.baseUrl('manager/billing/get-subscribers'),
+                format: 'html',
+                args: event.params
+            }).then(function(response){
+                domHtml.set(dom.byId('contentAgreement'), response);
+            }).then(function(){
+
+            })
+        });
+
+        // #Страница с общей информацией по договору
+        router.register(actionStore.get('editAgreementInfo').route, function(event){
+            Layout.load({
+                url:    Layout.baseUrl('manager/billing/edit-agreement-info'),
+                format: 'html',
+                args: event.params
+            }).then(function(response){
+                domHtml.set(dom.byId('contentAgreement'), response);
+            });
+        });
+
 
         // Активируем роутер
         router.startup();

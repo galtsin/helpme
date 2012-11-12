@@ -23,9 +23,42 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
 
     public function removeInvitedGuestFromSubscription(HM_Model_Account_InvitedGuest $invitedGuest){}
 
-    public function getUsersFromSubscription(){}
+    /**
+     * TODO: Доработать
+     * Получить список подписчиков
+     */
+    public function getSubscriptionUsers()
+    {
+        $key = 'subscribers';
 
-    public function getInvitedGuestFromSubscription(){}
+        if(!$this->getData()->has($key)) {
+            if($this->isIdentity()) {
+                $userColl = new HM_Model_Account_User_Collection();
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('agreement_get_subscribers', array(
+                        'id_agreement' => $this->getData()->getId()
+                    )
+                );
+
+                if($result->rowCount() > 0) {
+                    foreach($result->fetchAll() as $row) {
+                        $userColl->load((int)$row["o_id_user"]);
+                    }
+                }
+
+                $this->getData()
+                    ->set($key, $userColl->getIdsIterator());
+
+                $this->_setDataObject($key, $userColl->getObjectsIterator());
+            }
+        }
+
+        return $this->_getDataObject($key);
+    }
+
+
+
+    public function getSubscriptionInvitedGuests(){}
 
     public function getCompanyOwner(){}
 

@@ -10,6 +10,7 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
         <col width="100"/>
         <col width="100">
         <col/>
+        <col/>
     </colgroup>
     <thead>
         <tr>
@@ -19,6 +20,7 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
             <th>Начало</th>
             <th>Окончание</th>
             <th>Истекает (дн.)</th>
+            <th>Опции</th>
         </tr>
     </thead>
     <tfoot>
@@ -46,6 +48,7 @@ $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
                     <span style="color: #cc0000"><?=abs($days)?> (просрочен)</span>
                 <?php endif; ?>
             </td>
+            <td><a data-action="getAgreementBoard/<?=$agreement->getData('id')?>">просмотр</td>
         </tr>
         <?php endforeach; ?>
     </tbody>
