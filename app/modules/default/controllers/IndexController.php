@@ -69,10 +69,13 @@ class Default_IndexController extends App_Zend_Controller_Action
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         //Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
-        $agrColl = new HM_Model_Billing_Agreement_Collection();
-        $agr = $agrColl->load(57);
-        $agr->getTariff();
-        Zend_Debug::dump($agr);
+        $inviteColl = new HM_Model_Account_Invite_Collection();
+        $inviteColl->addEqualFilter('guest', 30)->getCollection();
+        Zend_Debug::dump($inviteColl->getDataIterator());
+
+
+
+
 
     }
 

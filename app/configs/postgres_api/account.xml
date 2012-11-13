@@ -64,32 +64,30 @@
     </possibility_get_objects>
 
     <!-- TODO Верная нотация-->
-    <invite_add>
-        <id_invited_user type="integer"/>
-        <id_agreement type="integer"/>
-        <params type="string"/>
-    </invite_add>
-    <get_identity_invite>
-        <id type="integer"/>
-    </get_identity_invite>
-    <get_invite_by_agreement>
-        <id_agreement type="integer"/>
-    </get_invite_by_agreement>
-    <user_invited_add>
+    <account_add_invite>
+        <id_guest type="integer"/>
+    </account_add_invite>
+    <account_get_identity_invite>
+        <id_invite type="integer"/>
+    </account_get_identity_invite>
+    <account_get_invites_by_guest>
+        <id_guest type="integer"/>
+    </account_get_invites_by_guest>
+    <account_add_guest>
         <email type="string"/>
         <first_name type="string"/>
         <last_name type="string"/>
         <middle_name type="string"/>
-    </user_invited_add>
-    <get_identity_invited_user>
-        <id type="integer"/>
-    </get_identity_invited_user>
-    <get_invited_user_by_hashlink>
-        <hashlink type="string"/>
-    </get_invited_user_by_hashlink>
-    <get_invited_user_by_email>
+    </account_add_guest>
+    <account_get_identity_guest>
+        <id_guest type="integer"/>
+    </account_get_identity_guest>
+    <account_get_guest_by_hash_activation>
+        <hash_activation type="string"/>
+    </account_get_guest_by_hash_activation>
+    <account_get_guest_by_email>
         <email type="string"/>
-    </get_invited_user_by_email>
+    </account_get_guest_by_email>
     <possibility_get_identity>
         <id_possibility type="int"/>
     </possibility_get_identity>

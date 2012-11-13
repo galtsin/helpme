@@ -25,7 +25,7 @@ class HM_Model_Account_Guest_Factory extends App_Core_Model_FactoryAbstract
         if(isset($id)) {
 
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                ->execute('get_identity_invited_user', array(
+                ->execute('account_get_identity_guest', array(
                     'id_guest' => (int)$id
                 )
             );
@@ -35,13 +35,12 @@ class HM_Model_Account_Guest_Factory extends App_Core_Model_FactoryAbstract
                 $guest = new HM_Model_Account_Guest();
                 $guest->getData()
                     ->set('id', $id)
-                    ->set('hashlink', $row['o_hashlink'])
+                    ->set('hash_activation', $row['o_hash_activation'])
                     ->set('email', $row['o_email'])
                     ->set('first_name', $row['o_first_name'])
                     ->set('last_name', $row['o_last_name'])
                     ->set('middle_name', $row['o_middle_name'])
-                    ->set('is_activated', $row['o_activated']) // is_activated
-                    ->set('date_create', $row['o_create_date'])
+                    ->set('date_created', strtotime($row['o_date_created']))
                     ->setDirty(false);
             }
         }
