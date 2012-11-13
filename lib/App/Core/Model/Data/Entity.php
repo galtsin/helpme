@@ -19,6 +19,13 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     private $_data = null;
 
     /**
+     * Публичные свойства сущности, доступные через методы self::getProperty и self::setProperty
+     * Как правило здесь хранятся восстановленные объекты-сущности
+     * @var array
+     */
+    private $_properties = array();
+
+    /**
      * TODO:
      * Данные сущности в виде Объектов
      * @deprecated use self::_dataObjects
@@ -28,11 +35,13 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
 
     /**
      * Сопутствующие ссылки на другие объекты
+     * @deprecated
      * @var array
      */
     private $_dataObjects = array();
 
     /**
+     * @deprecated
      * @param $key
      * @return bool
      */
@@ -89,6 +98,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * @deprecated use self::setProperty
      * @param $key
      * @param $entry
      */
@@ -100,6 +110,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     /**
      * Good
      * Получить экземпляр связанной сущности из Хранилища объектов
+     * @deprecated
      * @param string $key
      * @return mixed
      */
@@ -121,6 +132,43 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
         }
 
         return $this->_dataObjects[$key];
+    }
+
+    /**
+     * TODO: Будующая реализация! В разработке
+     * Внимание! Назначенные через данный метод свойства являются публичными
+     * и доступны через метод self::getProperty
+     * @param $key
+     * @param $value
+     */
+    public function setProperty($key, $value)
+    {
+        $this->_properties[$key] = $value;
+    }
+
+    /**
+     * TODO: Будующая реализация! В разработке
+     * Получить свойство сущности
+     * @param $key
+     * @return mixed
+     */
+    public function getProperty($key)
+    {
+        if(!array_key_exists($key, $this->_properties)) {
+            $this->_properties[$key] = null;
+        }
+
+        return $this->_properties[$key];
+    }
+
+    /**
+     * Проверка существования свойства
+     * @param string $key
+     * @return bool
+     */
+    public function hasProperty($key)
+    {
+        return array_key_exists($key, $this->_properties);
     }
 
     /**

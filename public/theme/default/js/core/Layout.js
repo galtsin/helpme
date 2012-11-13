@@ -56,7 +56,7 @@ require([
         // TODO: заменить на dojo.lang::mixin
         /**
          * Передать свойства источника, свойству приемника при условии совпадения свойств
-         * @deprecated
+         * @deprecated see dojo-lang-mixin
          * @param recipient
          * @param source
          * @return {*}
@@ -174,6 +174,7 @@ require([
         },
         /**
          * Вставить контент внутрь узла
+         * @deprecated see dojo-dom-construct
          * @param node
          * @param content
          */
@@ -182,6 +183,7 @@ require([
         },
         /**
          * Очистить узел
+         * @deprecated see dojo-dom-construct
          * @param node
          */
         clear: function(node){

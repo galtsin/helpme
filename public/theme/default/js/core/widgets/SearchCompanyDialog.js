@@ -38,6 +38,7 @@ define([
                 var formNode = dom.byId('search-company');
                 on(formNode['send'], 'click', function(){
                     that._searchRequest(formNode);
+                    that._searchRequest(formNode)
                 });
             });
         },
@@ -54,7 +55,7 @@ define([
                 args: {'filters[equal][inn][]': formNode['company[inn]'].value, 'filters[equal][kpp][]': formNode['company[kpp]'].value}
             }).then(function(response){
                     that._showRequestResults(new storeMemory({data: response.data}));
-                });
+            });
         },
         /**
          * Отобразить результаты поиска

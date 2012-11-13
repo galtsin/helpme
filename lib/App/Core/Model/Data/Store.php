@@ -303,11 +303,7 @@ final class App_Core_Model_Data_Store
      */
     public function has($key)
     {
-        if(null !== $this->_data[$key]) {
-            return true;
-        }
-
-        return false;
+        return array_key_exists($key, $this->_data);
     }
 
     /**

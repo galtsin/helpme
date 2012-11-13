@@ -6,7 +6,8 @@ $agreement = $this->agreement;
         <colgroup>
             <col width="50"/>
             <col width="50"/>
-            <col width="300"/>
+            <col width="200"/>
+            <col width="200"/>
             <col/>
         </colgroup>
         <thead>
@@ -24,7 +25,8 @@ $agreement = $this->agreement;
         <tfoot>
             <tr>
                 <td colspan="5">
-                    <button type="button" name="add">Добавить</button>
+                    <input type="hidden" name="agreement" value="<?=$agreement->getData('id')?>">
+                    <button type="button" name="add" data-action="addSubscriber/<?=$agreement->getData('id')?>">Добавить</button>
                     <button type="button" name="remove">Удалить</button>
                 </td>
             </tr>
@@ -33,7 +35,9 @@ $agreement = $this->agreement;
             <?php foreach($agreement->getSubscriptionUsers() as $user): ?>
             <tr>
                 <td><?=$user->getData('id')?></td>
-                <td></td>
+                <td>
+                    <input type="checkbox" name="users[]" value="<?=$user->getData('id')?>"/>
+                </td>
                 <td><?=$user->getData('login')?></td>
                 <td><?=$user->getData('email')?></td>
                 <td><?=$user->getData('last_name')?> <?=$user->getData('first_name')?> <?=$user->getData('middle_name')?></td>
@@ -65,8 +69,10 @@ $agreement = $this->agreement;
         <tfoot>
         <tr>
             <td colspan="5">
+                <input type="hidden" name="agreement" value="<?=$agreement->getData('id')?>">
                 <button type="button" name="add">Добавить</button>
-                <button type="button" name="remove">Удалить</button>
+                <button type="button" name="remove">Удалить приглашения</button>
+                <button type="button" name="remove">Отправить приглашения повторно</button>
             </td>
         </tr>
         </tfoot>

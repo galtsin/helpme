@@ -162,6 +162,41 @@ class Manager_BillingController extends App_Zend_Controller_Action
     }
 
     /**
+     * Добавить подписчика
+     */
+    public function addSubscriberAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost()) {
+            $userParams = $request->getPost('user');
+            $userColl = new HM_Model_Account_User_Collection();
+            if(array_key_exists('id', $userParams) && isset($userParams['id'])) {
+                if($userColl->load($userParams['id']) instanceof HM_Model_Account_User) {
+
+                }
+            } else {
+                // TODO: Сделать проверку на существование пользователя
+            }
+            $this->setAjaxResult(2);
+            $this->setAjaxStatus('ok');
+        } else {
+            $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
+                ->restore($request->getParam('agreement'));
+            if($agreement instanceof HM_Model_Billing_Agreement) {
+                $this->view->assign('agreement', $agreement);
+            }
+        }
+    }
+
+    /**
+     * Удалить подписчика
+     */
+    public function removeSubscriberAction()
+    {
+
+    }
+
+    /**
      * Загрузить информацию по Договору
      */
     public function editAgreementInfoAction()

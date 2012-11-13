@@ -4,9 +4,9 @@
  * @author: GaltsinAK
  */
 /**
- * Пользователь, получивший инвайт в систему
+ * Гости системы, сохраненные в Кэше приглашений системы
  */
-class HM_Model_Account_InvitedGuest extends App_Core_Model_Data_Entity
+class HM_Model_Account_Guest extends App_Core_Model_Data_Entity
 {
     protected function _init()
     {
@@ -14,4 +14,5 @@ class HM_Model_Account_InvitedGuest extends App_Core_Model_Data_Entity
     }
 
     public function activate(){}
+    public function getInvites(){}
 }

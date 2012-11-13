@@ -2,18 +2,19 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
+ * @version: 13.11.12
  */
 /**
- * ru: Коллекция по сущностям Пользователь
+ * ru:
  */
-class HM_Model_Account_InvitedGuest_Collection extends App_Core_Model_Collection_Filter
+class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
 {
     /**
      * Инициализация
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_InvitedGuest_Factory'));
+        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Guest_Factory'));
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'email');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'hashlink');
@@ -45,9 +46,9 @@ class HM_Model_Account_InvitedGuest_Collection extends App_Core_Model_Collection
     }
 
     /**
-    * Фильтр по электронной почте
-    * @return array
-    */
+     * Фильтр по электронной почте
+     * @return array
+     */
     protected function _doEmailEqualFilterCollection()
     {
         $ids = array();

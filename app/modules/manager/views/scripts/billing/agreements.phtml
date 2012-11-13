@@ -22,6 +22,7 @@ $jScript = <<<JS
 require([
     "dojo/dom",
     "dojo/html",
+    "dojo/dom-class",
     "dojo/dom-construct",
     "dojo/dom-attr",
     "dojo/dom-form",
@@ -37,7 +38,7 @@ require([
     "core/helper/common",
     "dijit/Dialog",
     "core/widgets/SearchCompanyDialog"
-], function(dom, domHtml, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, coreLayout,
+], function(dom, domHtml, domClass, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, coreLayout,
 coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompanyDialog){
     dojo.ready(function(){
 
@@ -68,6 +69,11 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                     action: 'editAgreementInfo',
                     route:  'editAgreementInfo/:agreement',
                     type:   'router'
+                },
+                {
+                    action: 'addSubscriber',
+                    route:  'addSubscriber/:agreement',
+                    type:   'subscription'
                 }
             ]
         });
@@ -286,6 +292,74 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
             }
         }
 
+
+        dojo.subscribe('addSubscriber', function(args){
+            Layout.load({
+                url:    Layout.baseUrl('manager/billing/add-subscriber'),
+                format: 'html',
+                args: args
+            }).then(function(response){
+                DialogBox.set('title', 'Добавить подписчика');
+                DialogBox.set('content', response);
+                DialogBox.show();
+            }).then(function(){
+                var searchUserForm = dom.byId('search-user');
+                var addSubscriberForm = dom.byId('add-subscriber');
+
+                on(searchUserForm['search'], 'click', function(event){
+                    event.preventDefault();
+                    Layout.load({
+                        url: Layout.baseUrl('service/query/user'),
+                        format: 'json',
+                        args: {'filters[equal][email][]': searchUserForm['user[email]'].value}
+                    }).then(function(response){
+                        var tbody = query('tbody', dom.byId('search-results'))[0];
+                        if(response.data.length == 0) {
+                            domHtml.set(tbody, Handlebars.compile(dojo.byId("search-user-results-items").innerHTML)({}));
+                            addSubscriberForm['user[email]'].value = searchUserForm['user[email]'].value
+                        } else {
+                            domHtml.set(tbody, Handlebars.compile(dojo.byId("search-user-results-items").innerHTML)(response.data[0]));
+                            searchUserForm['send'].disabled = false;
+                        }
+                    });
+                });
+
+                on(searchUserForm['send'], 'click', function(){
+                    if(domForm.fieldToObject(searchUserForm['user[id]'])) {
+                        Layout.send({
+                            url: Layout.baseUrl('manager/billing/add-subscriber'),
+                            format: 'json',
+                            args: {user: domForm.fieldToObject(searchUserForm['user[id]'])}
+                        }).then(function(response){
+                            var tbody = query('tbody', dom.byId('search-results'))[0];
+                            if(response.result > 0) {
+                                domConstruct.empty(tbody);
+                                searchUserForm['send'].disabled = true;
+                            }
+                        })
+                    }
+
+                });
+
+                on(addSubscriberForm['send'], 'click', function(){
+                    if(domForm.fieldToObject(addSubscriberForm['user[email]'])) {
+                        Layout.send({
+                            url: Layout.baseUrl('manager/billing/add-subscriber'),
+                            format: 'json',
+                            args: domForm.toObject(addSubscriberForm)
+                        }).then(function(response){
+                            var tbody = query('tbody', dom.byId('search-results'))[0];
+                            if(response.result > 0) {
+                                addSubscriberForm.reset();
+                            }
+                        })
+                    }
+
+                });
+
+            })
+        });
+
         // == Настройка роутера
 
         // #Страница договорами одной компании
@@ -387,6 +461,17 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
             }).then(function(response){
                 domHtml.set(dom.byId('contentAgreement'), response);
             }).then(function(){
+                actionParser(dom.byId('contentAgreement'));
+            }).then(function(){
+                var editSubscribersForm = dom.byId('edit-agreement-subscribers');
+                var editInvitedSubscribersForm = dom.byId('edit-agreement-invited-subscribers');
+
+                on(editSubscribersForm['remove'], 'click', function(){
+                    Layout.send({
+                        url:    Layout.baseUrl('manager/billing/remove-subscriber'),
+                        args: domForm.toObject(editSubscribersForm)
+                    })
+                });
 
             })
         });

@@ -24,16 +24,19 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
     public function removeInvitedGuestFromSubscription(HM_Model_Account_InvitedGuest $invitedGuest){}
 
     /**
-     * TODO: Доработать
-     * Получить список подписчиков
+     * Final
+     * TODO: Пример для подражания!
+     * Получить список подписчиков на текущий договор
+     * @return HM_Model_Account_User[]|null
      */
     public function getSubscriptionUsers()
     {
-        $key = 'subscribers';
+        $property = 'subscribers';
 
-        if(!$this->getData()->has($key)) {
+        if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
                 $userColl = new HM_Model_Account_User_Collection();
+
                 $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
                     ->execute('agreement_get_subscribers', array(
                         'id_agreement' => $this->getData()->getId()
@@ -46,19 +49,47 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
                     }
                 }
 
-                $this->getData()
-                    ->set($key, $userColl->getIdsIterator());
-
-                $this->_setDataObject($key, $userColl->getObjectsIterator());
+                $this->getData()->set($property, $userColl->getIdsIterator());
+                $this->setProperty($property, $userColl->getObjectsIterator());
             }
         }
 
-        return $this->_getDataObject($key);
+        return $this->getProperty($property);
     }
 
+    /**
+     * Получить список приглашенных на текущий договор пользоваелей
+     */
+    public function getSubscriptionGuests()
+    {
+        $property = 'invited_subscribers';
 
+        if(null == $this->getProperty($property)) {
+            if($this->isIdentity()) {
 
-    public function getSubscriptionInvitedGuests(){}
+                $guestColl = new HM_Model_Account_Guest_Collection();
+
+                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    ->execute('agreement_get_invited_users', array(
+                        'id_agreement' => $this->getData()->getId()
+                    )
+                );
+
+                if($result->rowCount() > 0) {
+                    foreach($result->fetchAll() as $row) {
+                        $guestColl->load((int)$row["o_id_invited_user"]);
+                    }
+                }
+
+                $this->getData()->set($property, $guestColl->getIdsIterator());
+                $this->setProperty($property, $guestColl->getObjectsIterator());
+
+            }
+        }
+
+        return $this->getProperty($property);
+    }
+
 
     public function getCompanyOwner(){}
 
