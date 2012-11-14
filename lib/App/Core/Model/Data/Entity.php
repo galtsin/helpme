@@ -246,8 +246,12 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     /**
      * TODO: Возможно стоит использовать данный метод вместо фабрик!!!!
      * Аналог Factory::restore
+     * Использование позднего статического связывания для реализации метода наследуемыми потомками
      */
-    public function load(){}
+    public static function load($id)
+    {
+
+    }
 
     /**
      * Проверка, принадлежности сущности системе

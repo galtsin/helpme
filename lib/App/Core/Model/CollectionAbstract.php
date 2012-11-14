@@ -28,6 +28,7 @@ abstract class App_Core_Model_CollectionAbstract
     private $_idsCollection = array();
 
     /**
+     * @deprecated
      * @var App_Core_Model_FactoryAbstract|null
      */
     private $_factory = null;
@@ -37,6 +38,14 @@ abstract class App_Core_Model_CollectionAbstract
      * @var array
      */
     protected $_resources = array();
+
+
+    /**
+     * TODO:
+     * Замена self::_factory
+     * @var null
+     */
+    private $_modelRestore = null;
 
     /**
      * Constructor
@@ -202,8 +211,13 @@ abstract class App_Core_Model_CollectionAbstract
         return Zend_Json::encode($this->toArray());
     }
 
+    public function setModelRestore($model){}
+
+    public function getModelRestore(){}
+
     /**
      * Получить фабрику
+     * @deprecated
      * @return App_Core_Model_FactoryAbstract|null
      * @throws Exception
      */
@@ -216,6 +230,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
+     * @deprecated
      * Назначить фабрику
      * @param App_Core_Model_FactoryAbstract $factory
      * @return App_Core_Model_CollectionAbstract

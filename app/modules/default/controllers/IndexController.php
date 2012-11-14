@@ -72,13 +72,16 @@ class Default_IndexController extends App_Zend_Controller_Action
         $inviteColl = new HM_Model_Account_Invite_Collection();
         $guest = $inviteColl->load(205)->getGuest();
 
-        $subscription = new HM_Model_Billing_Agreement_Subscription();
-        $subscription->getData()
-            ->set('id', 1);
-        //$subscription->addGuest($guest);
-        $subscription->removeUser($user);
-        Zend_Debug::dump($subscription->getUsers());
-        //$subscription->removeGuest($guest);
+
+        $beerDrink = new Beer;
+
+        $aleDrink = new Ale;
+
+        echo "Beer is: " . $beerDrink->getName() ."\n";
+        echo "Ale is:  " . $aleDrink->getName()  ."\n";
+
+        echo "Beer is actually: " . $beerDrink->getStaticName() ."\n";
+        echo "Ale is actually:  " . $aleDrink->getStaticName()  ."\n";
 
 
 
@@ -152,16 +155,17 @@ class Default_IndexController extends App_Zend_Controller_Action
 
 }
 
-class Test extends App_Core_Model_Data_Entity
-{
-    public function getUser()
-    {
-        return $this->_getDataObject('user');
+class Beer {
+    const NAME = 'Beer!';
+    public function getName() {
+        return self::NAME;
     }
-
-    public function setUser($user)
-    {
-        $this->_setDataObject('user', $user);
-        return $this;
+    public function getStaticName() {
+        return static::NAME;
     }
 }
+
+class Ale extends Beer {
+    const NAME = 'Ale!';
+}
+
