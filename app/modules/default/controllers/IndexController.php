@@ -73,18 +73,23 @@ class Default_IndexController extends App_Zend_Controller_Action
         $guest = $inviteColl->load(205)->getGuest();
 
 
-        $beerDrink = new Beer;
+        $r = new App_Core_Resource_DbApi();
+        $result1 = $r->execute('user_identity', array(
+                'id' => 4
+            )
+        );
 
-        $aleDrink = new Ale;
+        $result2 = $r->execute('user_identity', array(
+                'id' => 581
+            )
+        );
 
-        echo "Beer is: " . $beerDrink->getName() ."\n";
-        echo "Ale is:  " . $aleDrink->getName()  ."\n";
+        Zend_Debug::dump(App::getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE));
 
-        echo "Beer is actually: " . $beerDrink->getStaticName() ."\n";
-        echo "Ale is actually:  " . $aleDrink->getStaticName()  ."\n";
+        Zend_Debug::dump($result1->fetchRow());
+        Zend_Debug::dump($result2->fetchRow());
 
-
-
+        App::getResource(App::getNamespace('FN_API'));
 
 
     }

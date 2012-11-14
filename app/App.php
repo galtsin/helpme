@@ -9,69 +9,12 @@
 class App
 {
     /**
+     * Список ресурсов
      * @var array
      */
-    private static $_instances = array();
-
-    private $_resources = array();
-
-    /**
-     * ru: Получить экземпляр класса
-     * @static
-     * @return mixed
-     */
-    public static function getInstance()
-    {
-        $calledClass = get_called_class();
-        if(false === self::hasInstance()) {
-            self::$_instances[$calledClass] = new $calledClass();
-        }
-        return self::$_instances[$calledClass];
-    }
-
-
-    public static function _getInstance($key, $class)
-    {
-        if(class_exists($class)) {
-            if(!array_key_exists($key, self::$_instances)) {
-                self::$_instances[$key] = array();
-            }
-            if(!array_key_exists($class, self::$_instances[$key])){
-                self::$_instances[$key][$class] = new $class();
-            }
-            return self::$_instances[$key][$class];
-        }
-        throw new Exception('Class "' . $class . '" is not defined');
-    }
-
-
-    /**
-     * ru: Проверка наличия экземпляра класса в Памяти
-     * @static
-     * @return bool
-     */
-    public static function hasInstance()
-    {
-        $calledClass = get_called_class();
-        if(!isset(self::$_instances[$calledClass])) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Получить фабрику
-     * @param string $class
-     * @return App_Core_Model_FactoryAbstract
-     * @throws Exception
-     */
-    public static function getFactory($class)
-    {
-        if(get_parent_class($class) == 'App_Core_Model_FactoryAbstract') {
-            return self::_getInstance('factory', $class);
-        }
-        throw new Exception('Class "' . $class . '" is not Factory instance');
-    }
+    private static $_resources = array(
+        App_Core_Resource_DbApi::RESOURCE_NAMESPACE => 'App_Core_Resource_DbApi'
+    );
 
     /**
      * App::getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
@@ -79,18 +22,46 @@ class App
      * @return mixed
      * @throws Exception
      */
-    public static function getResource($class)
+
+    /**
+     *
+     * @param $namespace
+     */
+    public static function getResource($namespace)
     {
-        return self::_getInstance('resource', $class);
+        return self::$_resources[$namespace];
     }
 
-    public static function _getResource($namespace)
+    /**
+     * @param $namespace
+     * @param $instance
+     */
+    public static function registerResource($namespace, $instance)
+    {
+        self::$_resources[$namespace] = $instance;
+    }
+
+    /**
+     * Зарегистрировать пространство имен, через которое к нему можно обращаться
+     * App::getDefaultNamespace()
+     * @param $namespace
+     */
+    public static function registerNamespace($namespace)
     {
 
     }
 
-    public function resisterResource($instance, $namespace)
+    /**
+     * Пространство имен по умолчанию
+     * @param string $namespace
+     */
+    public static function getNamespace($namespace = 'default')
     {
-        $this->_resources[$namespace] = $instance;
+        return '';
+    }
+
+    public function __call($method, $params)
+    {
+        Zend_Debug::dump($method);
     }
 }

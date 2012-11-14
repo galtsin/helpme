@@ -151,5 +151,4 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         }
         Zend_Registry::set(App_Core_Resource_DbApi::RESOURCE_NAMESPACE, $config);
     }
-
 }
