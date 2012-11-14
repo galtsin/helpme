@@ -150,6 +150,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
 
     /**
      * Загрузить подписчиков на Договор
+     * TODO: getSubscription
      */
     public function getSubscribersAction()
     {

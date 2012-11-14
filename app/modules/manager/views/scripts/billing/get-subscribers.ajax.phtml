@@ -32,7 +32,7 @@ $agreement = $this->agreement;
             </tr>
         </tfoot>
         <tbody>
-            <?php foreach($agreement->getSubscriptionUsers() as $user): ?>
+            <?php foreach($agreement->getSubscription()->getUsers() as $user): ?>
             <tr>
                 <td><?=$user->getData('id')?></td>
                 <td>
@@ -77,6 +77,16 @@ $agreement = $this->agreement;
         </tr>
         </tfoot>
         <tbody>
+        <?php foreach($agreement->getSubscription()->getGuests() as $guest): ?>
+            <tr>
+                <td><?=$guest->getData('id')?></td>
+                <td>
+                    <input type="checkbox" name="users[]" value="<?=$user->getData('id')?>"/>
+                </td>
+                <td><?=$guest->getData('email')?></td>
+                <td><?=$guest->getData('last_name')?> <?=$guest->getData('first_name')?> <?=$guest->getData('middle_name')?></td>
+            </tr>
+            <?php endforeach; ?>
         </tbody>
     </table>
 </form>
