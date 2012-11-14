@@ -57,8 +57,8 @@ class HM_Model_Billing_Tariff_Factory extends App_Core_Model_FactoryAbstract
                     ->set('active', (bool)$row['o_active'])
                     ->set('need_committer', (bool)$row['o_need_committer'])
                     ->set('used', (bool)$row['o_used'])
-                    ->set('line', (int)$row['o_id_line']);
-                $tariff->getData()->unmarkDirty();
+                    ->set('line', (int)$row['o_id_line'])
+                    ->setDirty(false);
             }
         }
 

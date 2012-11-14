@@ -49,10 +49,10 @@ class HM_Model_Account_User_Factory extends App_Core_Model_FactoryAbstract
                         ->set('first_name', $row['first_name'])
                         ->set('last_name', $row['last_name'])
                         ->set('middle_name', $row['middle_name'])
-                        ->set('logo', $row['logo']);
+                        ->set('logo', $row['logo'])
+                        ->setDirty(false);
 
                 }
-                $user->getData()->unmarkDirty();
             }
         }
 

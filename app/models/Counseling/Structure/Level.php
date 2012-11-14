@@ -138,7 +138,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
                             ->set('name_level_to', $row['o_name_level_to'])
                             ->set('duration', $row['o_duration'])
                             ->set('is_enabled', (bool)$row['o_is_enabled'])
-                            ->unmarkDirty();
+                            ->setDirty(false);
                         $rules[$rule->getId()] = $rule;
                     }
                 }
@@ -170,7 +170,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
                         if($row['o_id_rule'] === -1) {
                             $processing = false;
                         } else {
-                            $rule->unmarkDirty();
+                            $rule->setDirty(false);
                         }
                     } catch(Exception $ex) {
                         $processing = false;

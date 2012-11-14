@@ -214,7 +214,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
                                     )
                                 );
                                 $_object->setWritable(('W' === $row['o_rw']) ? true : false)
-                                    ->unmarkDirty();
+                                    ->setDirty(false);
                                 $objects[] = $_object;
                             }
                         }

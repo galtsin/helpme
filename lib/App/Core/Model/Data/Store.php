@@ -64,7 +64,7 @@ final class App_Core_Model_Data_Store
                     }
                 }
                 // Считаем, что инициализация объекта - это не изменение объекта, а его наполнение
-                $this->unmarkDirty();
+                $this->setDirty(false);
             }
         }
     }
@@ -161,7 +161,7 @@ final class App_Core_Model_Data_Store
             }
 
             // Пометить объект как измененый
-            $this->markDirty();
+            $this->setDirty(true);
         }
 
         return $this;
@@ -198,28 +198,6 @@ final class App_Core_Model_Data_Store
     public function isDirty()
     {
         return $this->_dirty;
-    }
-
-    /**
-     * @deprecated
-     * Пометить объект как измененый
-     * @return App_Core_Model_Data_Store
-     */
-    public function markDirty()
-    {
-        $this->_dirty = true;
-        return $this;
-    }
-
-    /**
-     * @deprecated
-     * Снять отметку изменености объекта
-     * @return App_Core_Model_Data_Store
-     */
-    public function unmarkDirty()
-    {
-        $this->_dirty = false;
-        return $this;
     }
 
     /**

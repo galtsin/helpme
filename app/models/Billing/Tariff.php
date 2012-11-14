@@ -75,7 +75,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
             );
             $row = $result->fetchRow();
             if($row['o_id_tarif'] !== -1) {
-                $this->getData()->unmarkDirty();
+                $this->getData()->setDirty(false);
                 return $this->getData('id');
             }
         }

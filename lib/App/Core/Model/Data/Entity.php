@@ -224,7 +224,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
                 } elseif($this->getData()->isDirty()) {
                     // Обновление записи
                     if($this->_update() > 0) {
-                        $this->getData()->unmarkDirty();
+                        $this->getData()->setDirty(false);
                         return true;
                     }
                 }
@@ -233,7 +233,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
                 $result = $this->_insert();
                 if(is_int($result) && $result > 0) {
                     $this->getData()->set('id', $result);
-                    $this->getData()->unmarkDirty();
+                    $this->getData()->setDirty(false);
                     return true;
                 }
             }
