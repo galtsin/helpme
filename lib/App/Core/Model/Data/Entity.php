@@ -245,6 +245,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
 
     /**
      * TODO: Возможно стоит использовать данный метод вместо фабрик!!!!
+     * Аналог Factory::restore
      */
     public function load(){}
 

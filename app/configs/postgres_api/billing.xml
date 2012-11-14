@@ -54,17 +54,24 @@
     <agreement_get_identity>
         <id_agreement type="integer"/>
     </agreement_get_identity>
-    <agreement_get_subscribers>
+    <subscription_get_users>
         <id_agreement type="integer"/>
-    </agreement_get_subscribers>
-    <agreement_del_subscriber>
-        <id_agreement type="integer"/>
-        <id_user type="integer"/>
-    </agreement_del_subscriber>
-    <agreement_add_subscriber>
+    </subscription_get_users>
+    <subscription_remove_user>
         <id_agreement type="integer"/>
         <id_user type="integer"/>
-    </agreement_add_subscriber>
+    </subscription_remove_user>
+    <subscription_add_user>
+        <id_agreement type="integer"/>
+        <id_user type="integer"/>
+    </subscription_add_user>
+    <subscription_add_invite>
+        <id_invite type="integer"/>
+        <id_agreement type="integer"/>
+    </subscription_add_invite>
+    <subscription_get_invites>
+        <id_agreement type="integer"/>
+    </subscription_get_invites>
     <company_add>
         <name type="string"/>
         <inn type="string"/>

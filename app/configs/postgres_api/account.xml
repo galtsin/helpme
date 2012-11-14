@@ -67,6 +67,9 @@
     <account_add_invite>
         <id_guest type="integer"/>
     </account_add_invite>
+    <account_remove_invite>
+        <id_invite type="integer"/>
+    </account_remove_invite>
     <account_get_identity_invite>
         <id_invite type="integer"/>
     </account_get_identity_invite>

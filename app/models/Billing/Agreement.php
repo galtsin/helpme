@@ -35,7 +35,28 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
         return parent::_insert();
     }
 
-    protected function _update(){}
+
+    /**
+     * Получить подписку на Договор
+     * @return HM_Model_Billing_Agreement_Subscription|null
+     */
+    public function getSubscription()
+    {
+        $property = 'subscription';
+
+        if(null == $this->getProperty($property)) {
+            if($this->isIdentity()) {
+                $subscription = new HM_Model_Billing_Agreement_Subscription();
+                $subscription->getData()
+                    ->set('id', $this->getData()->getId())
+                    ->setDirty(false);
+                $this->setProperty($property, $subscription);
+            }
+        }
+
+        return $this->getProperty($property);
+    }
+
 
     /**
      * TODO: В разработке
@@ -80,10 +101,6 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
 
     }
 
-    /**
-     * Получить подписку на Договор
-     */
-    public function getSubscription(){}
 
     public function removeSubscriptionUser(HM_Model_Account_User $user){}
 

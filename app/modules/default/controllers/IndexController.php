@@ -70,8 +70,15 @@ class Default_IndexController extends App_Zend_Controller_Action
         //Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
         $inviteColl = new HM_Model_Account_Invite_Collection();
-        $inviteColl->addEqualFilter('guest', 30)->getCollection();
-        Zend_Debug::dump($inviteColl->getDataIterator());
+        $guest = $inviteColl->load(205)->getGuest();
+
+        $subscription = new HM_Model_Billing_Agreement_Subscription();
+        $subscription->getData()
+            ->set('id', 1);
+        //$subscription->addGuest($guest);
+        $subscription->removeUser($user);
+        Zend_Debug::dump($subscription->getUsers());
+        //$subscription->removeGuest($guest);
 
 
 

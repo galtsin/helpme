@@ -54,4 +54,22 @@ class HM_Model_Account_Invite extends App_Core_Model_Data_Entity
         }
         return parent::_remove();
     }
+
+    /**
+     * Получить Гостя текущего приглашения
+     * @return HM_Model_Account_Guest|null
+     */
+    public function getGuest()
+    {
+        $property = 'guest';
+
+        if(null == $this->getProperty($property)) {
+            if($this->isIdentity()) {
+                $guestColl = new HM_Model_Account_Guest_Collection();
+                $this->setProperty($property, $guestColl->load($this->getData('guest')));
+            }
+        }
+
+        return $this->getProperty($property);
+    }
 }
