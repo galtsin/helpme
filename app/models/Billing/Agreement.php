@@ -13,15 +13,83 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
     }
 
-    public function addToSubscription(array $options){}
+    /**
+     * Создать договор
+     * @return int
+     */
+    protected function _insert()
+    {
+        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            ->execute('agreement_add', array(
+                'id_tariff'     => (int)$this->getData('tariff'),
+                'id_invoice'    => (int)$this->getData('invoice'),
+                'date_end'      => $this->getData('date_end')
+            )
+        );
 
-    public function addUserToSubscription(HM_Model_Account_User $user){}
+        if($result->rowCount() > 0) {
+            $row = $result->fetchRow();
+            return (int)$row['o_id_agreement'];
+        }
 
-    public function removeUserFromSubscription(HM_Model_Account_User $user){}
+        return parent::_insert();
+    }
 
-    public function addInvitedGuestToSubscription(HM_Model_Account_InvitedGuest $invitedGuest){}
+    protected function _update(){}
 
-    public function removeInvitedGuestFromSubscription(HM_Model_Account_InvitedGuest $invitedGuest){}
+    /**
+     * TODO: В разработке
+     * Добавить пользователя на Договор
+     * @param HM_Model_Account_User $user
+     * @return int
+     */
+    public function addSubscriptionUser(HM_Model_Account_User $user)
+    {
+        // Проверка подписчика в текущищих
+        foreach($this->getSubscriptionUsers() as $subscriptionUser) {
+            if($subscriptionUser->getData()->getId() == $user->getData()->getId()) {
+                return $subscriptionUser->getData()->getId();
+            }
+        }
+
+        if($this->isIdentity()) {
+            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                ->execute('agreement_add_subscriber', array(
+                    'id_agreement'  => $this->getData()->getId(),
+                    'id_user'       => $user->getData()->getId()
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                if((int)$row["o_id_subscribe"] > 0) {
+
+                }
+            }
+
+        }
+
+/*        $row = $result->fetchRow();
+        if((int)$row["o_id_subscribe"] > 0) {
+            $subscribers = $this->getData()->get('subscribers');
+            array_push($subscribers, $userId);
+            $this->getData()->set('subscribers', $subscribers);
+            return $userId;
+        }*/
+
+
+    }
+
+    /**
+     * Получить подписку на Договор
+     */
+    public function getSubscription(){}
+
+    public function removeSubscriptionUser(HM_Model_Account_User $user){}
+
+    public function addSubscriptionGuest(HM_Model_Account_Guest $guest){}
+
+    public function removeSubscriptionGuest(HM_Model_Account_guest $guest){}
 
     /**
      * Final
@@ -98,11 +166,20 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
 
     }
 
+    /**
+     * @deprecated
+     * @return mixed
+     */
     public function getTariff()
     {
         return $this->_getDataObject('tariff');
     }
 
+    /**
+     * @deprecated
+     * @param $tariff
+     * @return HM_Model_Billing_Agreement
+     */
     public function setTariff($tariff)
     {
         if($tariff instanceof HM_Model_Billing_Tariff) {
@@ -115,27 +192,4 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
         return $this;
     }
 
-    /**
-     * Создать договор
-     * @return int
-     */
-    protected function _insert()
-    {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-            ->execute('agreement_add', array(
-                'id_tariff'     => (int)$this->getData('tariff'),
-                'id_invoice'    => (int)$this->getData('invoice'),
-                'date_end'      => $this->getData('date_end')
-            )
-        );
-
-        if($result->rowCount() > 0) {
-            $row = $result->fetchRow();
-            return (int)$row['o_id_agreement'];
-        }
-
-        return parent::_insert();
-    }
-
-    protected function _update(){}
 }

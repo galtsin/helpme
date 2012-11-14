@@ -239,8 +239,14 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
             }
             return false;
         }
+
         throw new Exception('Отсутствуют данные для сохранения');
     }
+
+    /**
+     * TODO: Возможно стоит использовать данный метод вместо фабрик!!!!
+     */
+    public function load(){}
 
     /**
      * Проверка, принадлежности сущности системе
