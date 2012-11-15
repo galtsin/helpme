@@ -9,20 +9,6 @@
 class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
 {
     /**
-     * Массив правил переадресации на ЛК
-     * @var null|array App_Core_Model_Dat_Store
-     */
-    private $_rules = null;
-
-    /**
-     * Инициализация
-     */
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
-    /**
      * @param int $id
      * @return HM_Model_Counseling_Structure_Line|null
      */
@@ -79,6 +65,7 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
 
     /**
      * Получить массив Уровней
+     * TODO: Доработать
      * @return ArrayObject
      */
     public function getLevels()
@@ -93,92 +80,24 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
     }
 
     /**
-     * Получить список правил переадресации на ЛК
-     * @return array|null
-     */
-    public function getRules()
-    {
-        if(null === $this->_rules){
-            if($this->isIdentity()){
-                $rules = array();
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('line_get_forwarding_rules', array(
-                        'id_line' => $this->getData('id')
-                    )
-                );
-
-                if($result->rowCount() > 0) {
-                    foreach($result->fetchAll() as $row) {
-                        $rule = new App_Core_Model_Data_Store();
-                        $rule->set('id', (int)$row['o_id_rule'])
-                            ->set('level_from', $row['o_id_level_from'])
-                            ->set('name_level_from', $row['o_name_level_from'])
-                            ->set('level_to', $row['o_id_level_to'])
-                            ->set('name_level_to', $row['o_name_level_to'])
-                            ->set('duration', $row['o_duration'])
-                            ->set('is_enabled', (bool)$row['o_is_enabled'])
-                            ->setDirty(false);
-                        $rules[$rule->getId()] = $rule;
-                    }
-                }
-                $this->_rules = $rules;
-            }
-        }
-
-        return $this->_rules;
-    }
-
-    /**
-     * Обновить правила
-     * @return bool
-     */
-    public function updateRules()
-    {
-        $processing = true;
-        if(count($this->getRules()) > 0) {
-            foreach($this->getRules() as $rule) {
-                if(true === $rule->isDirty()) {
-                    try{
-                        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                            ->execute('level_update_forwarding_rule', array(
-                                'id_rule'       => $rule->get('id'),
-                                'id_duration'   => $rule->get('duration'),
-                                'is_enabled'    => (bool)$rule->get('is_enabled')
-                            )
-                        );
-                        $row = $result->fetchRow();
-                        if($row['o_id_rule'] === -1) {
-                            $processing = false;
-                        } else {
-                            $rule->setDirty(false);
-                        }
-                    } catch(Exception $ex) {
-                        $processing = false;
-                        continue;
-                    }
-                }
-            }
-        }
-        return $processing;
-    }
-
-    /**
-     * TODO: Пример
      * Получить список Тарифов на ЛК
      * @return HM_Model_Billing_Tariff[]|null
      */
     public function getTariffs()
     {
-        $key = 'tariffs';
-        if(null === $this->_getDataObject($key)) {
+        $property = 'tariffs';
+        if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
-                $tariffColl = new HM_Model_Billing_Tariff_Collection();
-                $tariffColl->addEqualFilter('line', $this->getData()->getId())
-                    ->getCollection();
-                $this->_setDataObject($key, $tariffColl->getObjectsIterator());
-                $this->getData()->set($key, $tariffColl->getIdsIterator());
+                if($this->isIdentity()) {
+                    $tariffColl = new HM_Model_Billing_Tariff_Collection();
+                    $tariffColl->addEqualFilter('line', $this->getData()->getId())
+                        ->getCollection();
+                    $this->setProperty($property, $tariffColl->getObjectsIterator());
+                    $this->getData()->set($property, $tariffColl->getIdsIterator());
+                }
             }
         }
-        return $this->_getDataObject($key);
+
+        return $this->getProperty($property);
     }
 }

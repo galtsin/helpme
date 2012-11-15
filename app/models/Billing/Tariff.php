@@ -9,14 +9,6 @@
 class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
 {
     /**
-     * Инициализация
-     */
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
-    /**
      * @param int $id
      * @return HM_Model_Billing_Tariff
      */
@@ -75,7 +67,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('tarif_add', array(
                 'id_line'   => $this->getData('line'),
                 'name'      => $this->getData('name')
@@ -98,7 +90,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
     protected function _update()
     {
         if($this->getData()->isDirty()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('tarif_update', array(
                     'id_tarif'              => $this->getData('id'),
                     'name'                  => $this->getData('name'),
@@ -142,7 +134,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
     protected function _remove()
     {
         if($this->isIdentity()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('tarif_del', array(
                     'id_tarif'              => $this->getData('id')
                 )
@@ -153,6 +145,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
                 return $row['o_id_tarif'];
             }
         }
+
         return parent::_remove();
     }
 
@@ -162,20 +155,28 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
      */
     public function getLine()
     {
-        return $this->_getDataObject('line');
+        $property = 'line';
+        if(null == $this->getProperty($property)) {
+            if($this->isIdentity()) {
+                $line = $this->getData()->get('line');
+                $this->setProperty($property, HM_Model_Counseling_Structure_Line::load($line));
+            }
+        }
+
+        return $this->getProperty($property);
     }
 
     /**
      * Установить ЛК для тарифа
+     * TODO: Странно??
      * @param $line
      */
     public function setLine($line)
     {
         if($line instanceof HM_Model_Counseling_Structure_Line) {
-            $this->_setDataObject('line', $line);
+            $this->setProperty('line', $line);
         } elseif (is_int($line)) {
-            self::setLine(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
-                ->restore($line));
+            self::setLine(HM_Model_Counseling_Structure_Line::load($line));
         }
     }
 }

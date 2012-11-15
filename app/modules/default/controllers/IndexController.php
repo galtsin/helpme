@@ -62,7 +62,7 @@ class Default_IndexController extends App_Zend_Controller_Action
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
+            ->setModelRestore('HM_Model_Counseling_Structure_Line')
             ->setRestrictionByCompany(12)
             ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
 
@@ -89,7 +89,8 @@ class Default_IndexController extends App_Zend_Controller_Action
         Zend_Debug::dump($result1->fetchRow());
         Zend_Debug::dump($result2->fetchRow());
 
-        Zend_Debug::dump(HM_Model_Billing_Agreement::load(1));
+        $uc = new HM_Model_Account_User_Collection();
+        Zend_Debug::dump($uc->load(4)->getRoles());
 
 
     }

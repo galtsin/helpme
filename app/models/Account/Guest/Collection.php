@@ -14,8 +14,6 @@ class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Guest_Factory'));
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->setModelRestore('HM_Model_Account_Guest');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'email');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'hashActivation');
@@ -31,7 +29,7 @@ class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
 
         if(count($this->getEqualFilterValues('hashActivation')) > 0) {
             foreach($this->getEqualFilterValues('hashActivation') as $hashActivation) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('account_get_guest_by_hash_activation', array(
                         'hash_activation' => $hashActivation
                     )
@@ -56,7 +54,7 @@ class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
 
         if(count($this->getEqualFilterValues('email')) > 0) {
             foreach($this->getEqualFilterValues('email') as $email) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('account_get_guest_by_email', array(
                         'email' => $email
                     )

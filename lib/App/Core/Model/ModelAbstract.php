@@ -10,6 +10,7 @@ class App_Core_Model_ModelAbstract
 {
     /**
      * ru: Список ресурсов
+     * @deprecated
      * @var array
      */
     private $_resources = array();
@@ -48,6 +49,7 @@ class App_Core_Model_ModelAbstract
 
     /**
      * ru: Добавление ресурса
+     * @deprecated
      * @tag final
      * @param mixed $resource
      * @param string $name
@@ -65,6 +67,7 @@ class App_Core_Model_ModelAbstract
 
     /**
      * ru: Получить ресурс
+     * @deprecated
      * @param string $name
      * @return App_Core_Resource_Abstract
      * @throws Exception

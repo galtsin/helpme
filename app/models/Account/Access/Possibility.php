@@ -76,8 +76,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         if($user instanceof HM_Model_Account_User) {
             $this->getData()->set('user', $user);
         } elseif (null !== $user && is_int($user)) {
-            self::setUser(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-                ->restore($user));
+            self::setUser(HM_Model_Account_User::load($user));
         }
         return $this;
     }
@@ -92,8 +91,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
         if($company instanceof HM_Model_Billing_Company) {
             $this->getData()->set('company', $company);
         } elseif (null !== $company && is_int($company)) {
-            self::setCompany(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
-                ->restore($company));
+            self::setCompany(HM_Model_Billing_Company::load($company));
         }
         return $this;
     }
@@ -124,8 +122,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     public function _setUser($user)
     {
         if(is_int($user)) {
-            $entity = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-                ->restore($user);
+            $entity = HM_Model_Account_User::load($user);
         } else {
             $entity = $user;
         }

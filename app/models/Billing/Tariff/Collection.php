@@ -13,8 +13,6 @@ class HM_Model_Billing_Tariff_Collection extends App_Core_Model_Collection_Filte
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Tariff_Factory'));
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->setModelRestore('HM_Model_Billing_Tariff');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'line');
     }
@@ -29,7 +27,7 @@ class HM_Model_Billing_Tariff_Collection extends App_Core_Model_Collection_Filte
 
         if(count($this->getEqualFilterValues('line')) > 0) {
             foreach($this->getEqualFilterValues('line') as $line) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('line_get_tarifs', array(
                         'id_line' => $line
                     )

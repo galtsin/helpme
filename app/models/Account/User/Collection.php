@@ -13,8 +13,6 @@ class HM_Model_Account_User_Collection extends App_Core_Model_Collection_Filter
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory'));
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->setModelRestore('HM_Model_Account_User');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'email');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'login');
@@ -30,7 +28,7 @@ class HM_Model_Account_User_Collection extends App_Core_Model_Collection_Filter
 
         if(count($this->getEqualFilterValues('email')) > 0) {
             foreach($this->getEqualFilterValues('email') as $email) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('user_by_email', array(
                         'email' => $email
                     )
@@ -55,7 +53,7 @@ class HM_Model_Account_User_Collection extends App_Core_Model_Collection_Filter
 
         if(count($this->getEqualFilterValues('login')) > 0) {
             foreach($this->getEqualFilterValues('login') as $login) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('user_by_login', array(
                         'login' => $login
                     )

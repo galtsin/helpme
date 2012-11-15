@@ -1,8 +1,6 @@
 <?php
 $data = $this->data;
-$companyFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory');
-$manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-    ->restore($data['manager']);
+$manager = HM_Model_Account_User::load($data['manager']);
 
 
 
@@ -10,7 +8,7 @@ $roles = array();
 $account = HM_Model_Account_Auth::getInstance()->getAccount();
 $access = HM_Model_Account_Access::getInstance();
 
-$user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+$user = HM_Model_Account_User::load($account['user']);
 foreach(array_keys($user->getRoles()) as $roleIdentifier) {
     $roles = array_merge(
         $roles,
@@ -50,7 +48,7 @@ Zend_Debug::dump($roles);
     <?php foreach($companies as $company): ?>
     <tr>
         <td>
-            <a data-action="editPossibilityObjects/"><?=$companyFactory->restore($company)->getData('name')?></a>
+            <a data-action="editPossibilityObjects/"><?=HM_Model_Billing_Company::load($company)->getData('name')?></a>
         </td>
     </tr>
     <?php endforeach; ?>

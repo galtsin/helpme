@@ -14,8 +14,6 @@ class HM_Model_Account_Invite_Collection extends App_Core_Model_Collection_Filte
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Invite_Factory'));
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->setModelRestore('HM_Model_Account_Invite');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'guest');
     }
@@ -30,7 +28,7 @@ class HM_Model_Account_Invite_Collection extends App_Core_Model_Collection_Filte
 
         if(count($this->getEqualFilterValues('guest')) > 0) {
             foreach($this->getEqualFilterValues('guest') as $guest) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('account_get_invites_by_guest', array(
                         'id_guest' => $guest
                     )

@@ -9,19 +9,6 @@
 class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
 {
     /**
-     * @var App_Core_Model_Data_Entity[]null
-     */
-    private $_agreements = null;
-
-    /**
-     * Инициализация
-     */
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
-    /**
      * @param int $id
      * @return HM_Model_Billing_Company|null
      */
@@ -36,7 +23,7 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
 
             if($result->rowCount() > 0) {
                 $row = $result->fetchRow();
-                $company = new HM_Model_Billing_Company();
+                $company = new self();
                 $company->getData()
                     ->set('id', $id)
                     ->set('name', $row['o_name'])
@@ -52,39 +39,61 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
         return null;
     }
 
+    /*    protected function _insert(App_Core_Model_DataObject $dataObject)
+    {
+        $identity = $dataObject->get('identity');
+        if(!empty($identity)) {
+            $result = $this->getResource('postgres_api')->execute('company_add', array(
+                    'name'  => $identity['name'],
+                    'inn'   => $identity['inn'],
+                    'kpp'   => $identity['kpp'],
+                    'id_user_creator'   => $identity['user_creator']
+                )
+            );
+            $row = $result->fetchRow();
+            return (int)$row['company_add'];
+        }
+        return -1;
+    }*/
+
     /**
      * Получить список договоров, где компания является владельцем ЛК (Партнером)
      * @return HM_Model_Billing_Agreement[]|null
      */
     public function getOwnerAgreements()
     {
-        $key = 'company_owner_agreements';
-        if(null === $this->_getDataObject($key)) {
+        $property = 'owner_agreements';
+        if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
                 $agreementsColl = new HM_Model_Billing_Agreement_Collection();
                 $agreementsColl->addEqualFilter('companyOwner', $this->getData()->getId())
                     ->getCollection();
-                $this->_setDataObject($key, $agreementsColl->getObjectsIterator());
-                $this->getData()->set($key, $agreementsColl->getIdsIterator());
+                $this->setProperty($property, $agreementsColl->getObjectsIterator());
+                $this->getData()->set($property, $agreementsColl->getIdsIterator());
             }
         }
-        return $this->_getDataObject($key);
+
+        return $this->getProperty($property);
     }
 
     /**
      * Получить список клиентских договоров, на которых компания является Контрагентом
+     * @return HM_Model_Billing_Agreement[]|null
      */
     public function getClientAgreements()
     {
-        if($this->isIdentity()) {
-            if(null === $this->_agreements) {
+        $property = 'client_agreements';
+        if(null == $this->getProperty($property)) {
+            if($this->isIdentity()) {
                 $agreementsColl = new HM_Model_Billing_Agreement_Collection();
-                $agreementsColl->addEqualFilter('companyClient', $this->getData('id'));
-                $this->_agreements = $agreementsColl->getCollection()->getObjectsIterator();
+                $agreementsColl->addEqualFilter('companyClient', $this->getData('id'))
+                    ->getCollection();
+                $this->setProperty($property, $agreementsColl->getObjectsIterator());
+                $this->getData()->set($property, $agreementsColl->getIdsIterator());
             }
         }
 
-        return $this->_agreements;
+        return $this->getProperty($property);
     }
 
     /**
@@ -93,12 +102,11 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
      */
     public function getInvoices()
     {
-        $key = 'invoices';
-
-        if(!$this->getData()->has($key)) {
+        $property = 'invoices';
+        if(!$this->getData()->has($property)) {
             if($this->isIdentity()) {
                 $invoices = array();
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('company_get_invoices', array(
                         'id_company' => $this->getData()->getId()
                     )
@@ -110,12 +118,11 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
                     }
                 }
 
-                $this->getData()
-                    ->set('invoices', $invoices);
+                $this->getData()->set($property, $invoices);
             }
         }
 
-        return $this->getData($key);
+        return $this->getData($property);
     }
 
     /**
@@ -125,7 +132,7 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
     public function addInvoice()
     {
         if($this->isIdentity()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('company_add_invoice', array(
                     'id_company' => $this->getData()->getId()
                 )

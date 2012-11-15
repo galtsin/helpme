@@ -14,8 +14,6 @@ class HM_Model_Billing_Company_Collection extends App_Core_Model_Collection_Filt
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory'));
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->setModelRestore('HM_Model_Billing_Company');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'inn');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'kpp');
@@ -31,7 +29,7 @@ class HM_Model_Billing_Company_Collection extends App_Core_Model_Collection_Filt
 
         if(count($this->getEqualFilterValues('inn')) > 0) {
             foreach($this->getEqualFilterValues('inn') as $inn) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('company_by_inn', array(
                         'inn' => $inn
                     )
@@ -57,7 +55,7 @@ class HM_Model_Billing_Company_Collection extends App_Core_Model_Collection_Filt
 
         if(count($this->getEqualFilterValues('kpp')) > 0) {
             foreach($this->getEqualFilterValues('kpp') as $kpp) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('company_by_kpp', array(
                         'kpp' => $kpp
                     )

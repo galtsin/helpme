@@ -49,7 +49,6 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      */
     protected function _init()
     {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'possibility');
 
         $class = get_called_class(); //  Для доступа наследуемым классам
@@ -59,7 +58,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     /**
      * Установить тип объекта по которому идет ограничение
      * @param $typeIdentifier
-     * @return HM_Model_Account_Access_Collection
+     * @return self
      */
     public function setType($typeIdentifier)
     {
@@ -84,7 +83,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     /**
      * Установить отсечение ролей ниже указанной
      * @param $roleIdentifier
-     * @return HM_Model_Account_Access_Collection
+     * @return self
      */
     public function setRestrictionByInheritanceFromRole($roleIdentifier)
     {
@@ -99,7 +98,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     /**
      * Установить ограничение на соответствие компании
      * @param int $company
-     * @return HM_Model_Account_Access_Collection
+     * @return self
      */
     public function setRestrictionByCompany($company)
     {

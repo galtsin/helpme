@@ -191,7 +191,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     public function getManagerBoardAction()
     {
         $request = $this->getRequest();
-        $manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($request->getQuery('manager'));
+        $manager = HM_Model_Account_User::load($request->getQuery('manager'));
         if($manager instanceof HM_Model_Account_User) {
             // Определить роли текущего Менеджера, где он является Администратором Компании или выше
             // и получить список компаний, в которых он может назначать права другим Менеджерам
@@ -214,11 +214,9 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         $access = HM_Model_Account_Access::getInstance();
 
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $user = HM_Model_Account_User::load($account['user']);
 
-        $manager = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($request->getParam('manager'));
+        $manager = HM_Model_Account_User::load($request->getParam('manager'));
 
         if($manager instanceof HM_Model_Account_User) {
             // Получить список компаний от имени которых пользователь может назначать права другим
@@ -344,8 +342,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         $userColl = new HM_Model_Account_User_Collection();
 
 
-        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $admin = HM_Model_Account_User::load($account['user']);
 
         // TODO: Проверить перед созданием
         if($admin instanceof HM_Model_Account_User) {
@@ -413,12 +410,10 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     {
         $request = $this->getRequest();
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $user = HM_Model_Account_User::load($account['user']);
         if($user instanceof HM_Model_Account_User) {
             if($request->isPost()) {
-                $possibility = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Access_Possibility_Factory')
-                    ->restore($request->getPost('possibility'));
+                $possibility = HM_Model_Account_Access_Possibility::load($request->getPost('possibility'));
                 $possibility->getData()->setRemoved(true);
                 if($possibility->save()) {
                     $this->setAjaxResult($request->getPost('possibility'));

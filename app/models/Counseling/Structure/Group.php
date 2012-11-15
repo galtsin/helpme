@@ -15,14 +15,6 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
     private $_experts = null;
 
     /**
-     * Инициализация
-     */
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
-    /**
      * @param int $id
      * @return HM_Model_Counseling_Structure_Group|null
      */
@@ -58,7 +50,7 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('group_add', array(
                 'id_level'          => $this->getData('level'),
                 'id_company_owner'  => $this->getData('company_owner'),
@@ -81,7 +73,7 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
     protected function _update()
     {
         if($this->getData()->isDirty()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('group_update_identity', array(
                     'id_group'  => $this->getData('id'),
                     'name'      => $this->getData('name')
@@ -105,14 +97,14 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
         if(null === $this->_experts){
             if($this->isIdentity()){
                 $experts = array();
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('group_get_users', array(
                         'id_group'  => $this->getData('id')
                     )
                 );
                 if($result->rowCount() > 0){
                     foreach($result->fetchAll() as $row){
-                        $experts[] = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($row['o_id_user']);
+                        $experts[] = HM_Model_Account_User::load($row['o_id_user']);
                     }
                 }
                 $this->_experts = $experts;
@@ -129,7 +121,7 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
     public function attachExpert(HM_Model_Account_User $user)
     {
         if($this->isIdentity()){
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('group_add_user', array(
                     'id_group'  => $this->getData('id'),
                     'id_user'   => $user->getData('id')
@@ -154,7 +146,7 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
     public function detachExpert(HM_Model_Account_User $user)
     {
         if($this->isIdentity()){
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('group_delete_user', array(
                     'id_group'  => $this->getData('id'),
                     'id_user'   => $user->getData('id')
@@ -167,6 +159,7 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
                 }
             }
         }
-        return parent::remove();
+
+        return parent::_remove();
     }
 }

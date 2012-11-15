@@ -22,7 +22,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         // Узнать по какой роли стоит осуществлять поиск
         // Мы знаем URL-адрес
         $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+        $user = HM_Model_Account_User::load($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE')
@@ -48,13 +48,12 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     {
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $pageRole = 'ADM_LINE';
-        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $admin = HM_Model_Account_User::load($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $companyColl = new HM_Model_Billing_Company_Collection();
         $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
+            ->setModelRestore('HM_Model_Counseling_Structure_Line')
             ->setRestrictionByInheritanceFromRole($pageRole);
 
         $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
@@ -87,13 +86,12 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     {
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $pageRole = 'ADM_GROUP';
-        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $admin = HM_Model_Account_User::load($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $companyColl = new HM_Model_Billing_Company_Collection();
         $accessColl->setType('GROUP')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory'))
+            ->setModelRestore('HM_Model_Counseling_Structure_Group')
             ->setRestrictionByInheritanceFromRole($pageRole);
 
         $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
@@ -124,11 +122,10 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
         // Узнать по какой роли стоит осуществлять поиск
         // Мы знаем URL-адрес
         $pageRole = $access->getRole('ADM_LINE'); // TODO: Как то нужно узнавать!
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+        $user = HM_Model_Account_User::load($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
-        $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
+        $accessColl->setType('LINE')->setModelRestore('HM_Model_Counseling_Structure_Line');
 
         $data = array();
         $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
@@ -160,8 +157,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function getLineLevelsAction()
     {
         $request = $this->getRequest();
-        $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
-            ->restore($request->getParam('line'));
+        $line = HM_Model_Counseling_Structure_Line::load($request->getParam('line'));
         if($line instanceof HM_Model_Counseling_Structure_Line) {
             $this->view->assign('data', $line->getLevels());
             $this->view->assign('is_writable', true);
@@ -174,8 +170,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function getLevelBoardAction()
     {
         $request = $this->getRequest();
-        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
-            ->restore($request->getParam('level'));
+        $level = HM_Model_Counseling_Structure_Level::load($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             $this->view->assign('data', $level->getData());
         }
@@ -188,8 +183,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function editLevelInfoAction()
     {
         $request = $this->getRequest();
-        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
-            ->restore($request->getParam('level'));
+        $level = HM_Model_Counseling_Structure_Level::load($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level){
             if($this->getRequest()->isPost()){
                 if(array_key_exists('level', $request->getPost())){
@@ -223,8 +217,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function getLevelGroupsAction()
     {
         $request = $this->getRequest();
-        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
-            ->restore($request->getParam('level'));
+        $level = HM_Model_Counseling_Structure_Level::load($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             $this->view->assign('data', $level->getGroups());
         }
@@ -237,8 +230,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function editLevelForwardingRulesAction()
     {
         $request = $this->getRequest();
-        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
-            ->restore($request->getParam('level'));
+        $level = HM_Model_Counseling_Structure_Level::load($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             if($request->isPost()){
                 if(array_key_exists('rules', $request->getPost())) {
@@ -279,8 +271,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     {
         $request = $this->getRequest();
         if($request->isPost()){
-            $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
-                ->restore($request->getParam('line'));
+            $line = HM_Model_Counseling_Structure_Line::load($request->getParam('line'));
             if($line instanceof HM_Model_Counseling_Structure_Line) {
                 $levelData = $request->getPost('level');
                 $level = $line->addLevel(array(
@@ -306,8 +297,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function addGroupAction()
     {
         $request = $this->getRequest();
-        $level = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Level_Factory')
-            ->restore($request->getParam('level'));
+        $level = HM_Model_Counseling_Structure_Level::load($request->getParam('level'));
         if($level instanceof HM_Model_Counseling_Structure_Level) {
             if($request->isPost()){
                 if(array_key_exists('group', $request->getPost())) {
@@ -340,8 +330,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function editGroupInfoAction()
     {
         $request = $this->getRequest();
-        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
-            ->restore($request->getParam('group'));
+        $group = HM_Model_Counseling_Structure_Group::load($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($request->isPost()){
                 if(array_key_exists('group', $request->getPost())) {
@@ -377,8 +366,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function getGroupBoardAction()
     {
         $request = $this->getRequest();
-        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
-            ->restore($request->getParam('group'));
+        $group = HM_Model_Counseling_Structure_Group::load($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             $this->view->assign('data', $group->getData());
         }
@@ -390,8 +378,7 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function getGroupExpertsAction()
     {
         $request = $this->getRequest();
-        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
-            ->restore($request->getParam('group'));
+        $group = HM_Model_Counseling_Structure_Group::load($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             $this->view->assign(array('data' => $group->getExperts(), 'is_writable' => (bool)$request->getQuery('is_writable')));
         }
@@ -403,15 +390,13 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function addGroupExpertsAction()
     {
         $request = $this->getRequest();
-        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
-            ->restore($request->getParam('group'));
+        $group = HM_Model_Counseling_Structure_Group::load($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($this->getRequest()->isPost()) {
                 if(array_key_exists('users', $request->getPost())){
                     $attaching = array();
-                    $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
                     foreach($request->getPost('users') as $userId) {
-                        $user = $userFactory->restore($userId);
+                        $user = HM_Model_Account_User::load($userId);
                         if($user instanceof HM_Model_Account_User) {
                             $expert = $group->attachExpert($user);
                             if($expert != -1){
@@ -435,15 +420,13 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
     public function removeGroupExpertsAction()
     {
         $request = $this->getRequest();
-        $group = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Group_Factory')
-            ->restore($request->getParam('group'));
+        $group = HM_Model_Counseling_Structure_Group::load($request->getParam('group'));
         if($group instanceof HM_Model_Counseling_Structure_Group){
             if($this->getRequest()->isPost()) {
                 if(array_key_exists('experts', $request->getPost())){
                     $detaching = array();
-                    $userFactory = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory');
                     foreach($request->getPost('experts') as $userId) {
-                        $user = $userFactory->restore($userId);
+                        $user = HM_Model_Account_User::load($userId);
                         if($user instanceof HM_Model_Account_User) {
                             $expert = $group->detachExpert($user);
                             if($expert != -1){

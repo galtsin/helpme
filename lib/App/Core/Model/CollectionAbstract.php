@@ -28,23 +28,7 @@ abstract class App_Core_Model_CollectionAbstract
     private $_idsCollection = array();
 
     /**
-     * @deprecated
-     * @var App_Core_Model_FactoryAbstract|null
-     */
-    private $_factory = null;
-
-    /**
-     * ru: Список ресурсов
-     * @deprecated
-     * @var array
-     */
-    protected $_resources = array();
-
-
-    /**
-     * TODO:
-     * Замена self::_factory
-     * @var null
+     * @var string|null
      */
     private $_modelRestore = null;
 
@@ -101,8 +85,7 @@ abstract class App_Core_Model_CollectionAbstract
         if(array_key_exists($id, $this->_objectsCollection)) {
             return $this->_objectsCollection[$id];
         } else {
-            $object = $this->getFactory()->restore($id);
-            // $object = forward_static_call(array($this->getModelRestore, 'load'), array($id));
+            $object = forward_static_call_array(array($this->getModelRestore(), 'load'), array($id));
             if($object instanceof App_Core_Model_Data_Entity) {
                 if(!in_array($id, $this->getIdsIterator())){
                     $this->_idsCollection[] = $id;
@@ -214,87 +197,37 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * Получить фабрику
-     * @deprecated
-     * @return App_Core_Model_FactoryAbstract|null
-     * @throws Exception
-     */
-    public function getFactory()
-    {
-        if($this->_factory instanceof App_Core_Model_FactoryAbstract) {
-            return $this->_factory;
-        }
-        throw new Exception("Factory not assigned (Фабрика не назначена)");
-    }
-
-    /**
-     * @deprecated
-     * Назначить фабрику
-     * @param App_Core_Model_FactoryAbstract $factory
-     * @return App_Core_Model_CollectionAbstract
-     */
-    public function setFactory(App_Core_Model_FactoryAbstract $factory)
-    {
-        $this->_factory = $factory;
-        return $this;
-    }
-
-    /**
-     * Добавить ресурс.
-     * @deprecated
-     * @param App_Core_Resource_Abstract $resource
-     * @param string $name
-     * @throws Exception
-     */
-    public function addResource(App_Core_Resource_Abstract $resource, $name)
-    {
-        if(is_string($name)) {
-            if(array_key_exists($name, $this->_resources)) {
-                throw new Exception('Resource named "' . $name . '" has initiated a class "' . get_class($resource) . '" (Ресурс уже инициирован ранее)');
-            }
-            $this->_resources[$name] = $resource;
-        } else {
-            throw new Exception('Incorrect name "' . $name . '"');
-        }
-    }
-
-    /**
-     * ru: Вернуть ресурс
-     * @deprecated
-     * @param string $name
-     * @return App_Core_Resource_Abstract
-     * @throws Exception
-     */
-    public function getResource($name)
-    {
-        if(is_string($name)) {
-            if(array_key_exists($name, $this->_resources)) {
-                return $this->_resources[$name];
-            }
-        }
-        throw new Exception('Resource named "' . $name . '" is not defined. (Ресурс отсутствует)');
-    }
-
-    /**
      * Назначить модель восстановления
      * @param string $model
+     * @return static
      * @throws Exception
      */
     public function setModelRestore($model)
     {
-        if(class_exists($model) && method_exists($model, 'load')) {
-            $this->_modelRestore = $model;
+        if(class_exists($model)) {
+            if(method_exists($model, 'load')) {
+                $this->_modelRestore = $model;
+            } else {
+                throw new Exception("Модель '" . $model . "' не содержит метод восстановления load");
+            }
         } else {
-            throw new Exception('Класс ' . $model . 'не существует или не содержит метод восстановления load');
+            throw new Exception("Модель '" . $model . "' не существует");
         }
+
+        return $this;
     }
 
     /**
      * Получить модель восстановления
-     * @return string|null
+     * @return null|string
+     * @throws Exception
      */
     public function getModelRestore()
     {
+        if(null == $this->_modelRestore){
+            throw new Exception("Model Restore not assigned (Модель восстановления не назначен)");
+        }
+
         return $this->_modelRestore;
     }
 }

@@ -26,116 +26,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     private $_properties = array();
 
     /**
-     * TODO:
-     * Данные сущности в виде Объектов
-     * @deprecated use self::_dataObjects
-     * @var array
-     */
-    private $_dataInstances = array();
-
-    /**
-     * Сопутствующие ссылки на другие объекты
-     * @deprecated
-     * @var array
-     */
-    private $_dataObjects = array();
-
-    /**
-     * @deprecated
-     * @param $key
-     * @return bool
-     */
-    public function hasDataInstance($key)
-    {
-        return array_key_exists($key, $this->_dataInstances);
-    }
-
-    /**
-     * TODO:  В разработке
-     * Извлечь экземпляр из Хранилища
-     * @deprecated
-     * @param $key
-     * @return null
-     */
-    protected function _getDataInstance($key){
-        if(is_string($key)) {
-            if(self::hasDataInstance($key)) {
-                return $this->_dataInstances[$key];
-            } else {
-                // Замена нотации, например: user_owner = setUserOwner();
-                $method = 'set';
-                foreach(explode('_', $key) as $part) {
-                    $method .= ucfirst($part);
-                }
-                if(method_exists($this, $method) && $this->getData($key)) {
-                    // Заглушка от бесконечного зацикливания. Не пройдет из за self::hasDataInstance
-                    $this->_dataInstances[$key] = null;
-                    $this->{$method}($this->getData($key));
-                    return self::_getDataInstance($key);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * TODO: В разработке
-     * Установить экземпляр в Хранилище
-     * @deprecated
-     * @param $key
-     * @param App_Core_Model_Data_Entity $value
-     * @return self
-     */
-    protected function _setDataInstance($key, App_Core_Model_Data_Entity $value)
-    {
-        if(is_string($key) && $value instanceof App_Core_Model_Data_Entity) {
-            $this->getData()->set($key, $value->getData()->getId());
-            $this->_dataInstances[$key] = $value;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @deprecated use self::setProperty
-     * @param $key
-     * @param $entry
-     */
-    protected function _setDataObject($key, $entry)
-    {
-        $this->_dataObjects[$key] = $entry;
-    }
-
-    /**
-     * Good
-     * Получить экземпляр связанной сущности из Хранилища объектов
-     * @deprecated
-     * @param string $key
-     * @return mixed
-     */
-    protected function _getDataObject($key)
-    {
-        if(!array_key_exists($key, $this->_dataObjects)) {
-            $this->_dataObjects[$key] = null;
-            // Пробуем получить данные путем создания объектов через данные self::getData()
-            // Используется возможность отложенной загрузки Lazy Load
-            // Замена нотации ключа в массиве на нотацию функции, например: user_owner = setUserOwner();
-            $method = 'set';
-            foreach(explode('_', $key) as $part) {
-                $method .= ucfirst($part);
-            }
-
-            if(method_exists($this, $method) && $this->getData()->has($key)) {
-                $this->{$method}($this->getData($key));
-            }
-        }
-
-        return $this->_dataObjects[$key];
-    }
-
-    /**
-     * TODO: Будующая реализация! В разработке
+     * TODO: Доработка и тестирование
      * Внимание! Назначенные через данный метод свойства являются публичными
      * и доступны через метод self::getProperty
      * @param $key
@@ -147,7 +38,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * TODO: Будующая реализация! В разработке
+     * TODO: Доработка и тестирование
      * Получить свойство сущности
      * @param $key
      * @return mixed
@@ -207,7 +98,8 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     *  Сохранить объект-сущность. Проверка по вставке сущности в БД осуществляется косвенно по наличию getId();
+     * Сохранить объект-сущность.
+     * Проверка по вставке сущности в БД осуществляется косвенно по наличию getId();
      * Работаем только с Identity данными
      * @return bool
      * @throws Exception
@@ -244,7 +136,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * TODO: Возможно стоит использовать данный метод вместо фабрик!!!!
+     * TODO: Необходимо использовать данный метод вместо фабрик!!!!
      * Аналог Factory::restore
      * Использование позднего статического связывания для реализации метода наследуемыми потомками
      */

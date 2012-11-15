@@ -14,8 +14,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
         $pageRole = 'ADM_COMPANY';
-        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $admin = HM_Model_Account_User::load($account['user']);
 
         $companyColl = new HM_Model_Billing_Company_Collection();
         foreach($admin->getRoles() as $roleIdentifier => $companies) {
@@ -39,8 +38,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
         $pageRole = 'ADM_COMPANY';
-        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $admin = HM_Model_Account_User::load($account['user']);
 
         $companyOwnerColl = new HM_Model_Billing_Company_Collection();
         foreach($admin->getRoles() as $roleIdentifier => $companies) {
@@ -77,8 +75,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
                 ->set('tariff', $agreementParams['tariff'])
                 ->set('date_end', $agreementParams['date_end']['day'] . '.' . $agreementParams['date_end']['month'] . '.' . $agreementParams['date_end']['year']);
             if(empty($agreementParams['invoice'])) {
-                $companyClient = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
-                    ->restore($request->getParam('company_client'));
+                $companyClient = HM_Model_Billing_Company::load($request->getParam('company_client'));
                 $invoice = $companyClient->addInvoice();
                 if($invoice > 0) {
                     $agreement->getData()
@@ -95,12 +92,8 @@ class Manager_BillingController extends App_Zend_Controller_Action
             }
 
         } else {
-
-
-            $companyClient = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
-                ->restore($request->getParam('company_client'));
-            $companyOwner = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
-                ->restore($request->getParam('company_owner'));
+            $companyClient = HM_Model_Billing_Company::load($request->getParam('company_client'));
+            $companyOwner = HM_Model_Billing_Company::load($request->getParam('company_owner'));
             $this->view->assign('companyClient', $companyClient);
             $this->view->assign('companyOwner', $companyOwner);
         }
@@ -141,8 +134,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
     public function getAgreementBoardAction()
     {
         $request = $this->getRequest();
-        $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
-            ->restore($request->getParam('agreement'));
+        $agreement = HM_Model_Billing_Agreement::load($request->getParam('agreement'));
         if($agreement instanceof HM_Model_Billing_Agreement) {
             $this->view->assign('agreement', $agreement);
         }
@@ -155,8 +147,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
     public function getSubscribersAction()
     {
         $request = $this->getRequest();
-        $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
-            ->restore($request->getParam('agreement'));
+        $agreement = HM_Model_Billing_Agreement::load($request->getParam('agreement'));
         if($agreement instanceof HM_Model_Billing_Agreement) {
             $this->view->assign('agreement', $agreement);
         }
@@ -182,8 +173,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
             $this->setAjaxResult(2);
             $this->setAjaxStatus('ok');
         } else {
-            $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
-                ->restore($request->getParam('agreement'));
+            $agreement = HM_Model_Billing_Agreement::load($request->getParam('agreement'));
             if($agreement instanceof HM_Model_Billing_Agreement) {
                 $this->view->assign('agreement', $agreement);
             }
@@ -279,8 +269,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
     public function editAgreementInfoAction()
     {
         $request = $this->getRequest();
-        $agreement = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory')
-            ->restore($request->getParam('agreement'));
+        $agreement = HM_Model_Billing_Agreement::load($request->getParam('agreement'));
         if($agreement instanceof HM_Model_Billing_Agreement) {
             $this->view->assign('agreement', $agreement);
         }

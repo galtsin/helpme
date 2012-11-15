@@ -36,8 +36,7 @@ $agreement = $this->agreement;
                 <td>
                     <?php
                         $company =
-                        App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory')
-                            ->restore(
+                        HM_Model_Billing_Company::load(
                                 $agreement->getTariff()
                                     ->getLine()
                                     ->getData('company_owner')

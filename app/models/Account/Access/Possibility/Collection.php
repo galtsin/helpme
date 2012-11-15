@@ -13,8 +13,6 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
      */
     protected function _init()
     {
-        $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Access_Possibility_Factory'));
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->setModelRestore('HM_Model_Account_Access_Possibility');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'company');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'urc');
@@ -30,7 +28,7 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
 
         if(count($this->getEqualFilterValues('company')) > 0) {
             foreach($this->getEqualFilterValues('company') as $company) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('possibility_by_company', array(
                         'id_company' => $company
                     )
@@ -47,7 +45,7 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
     }
 
     /**
-     * Фильтр по связке пользователь + роль + компания
+     * Фильтр по связке пользователь + роль + компания (User + Role + Company)
      * @return array
      */
     protected function _doUrcEqualFilterCollection()
@@ -57,7 +55,7 @@ class HM_Model_Account_Access_Possibility_Collection extends App_Core_Model_Coll
         if(count($this->getEqualFilterValues('urc')) > 0) {
             foreach($this->getEqualFilterValues('urc') as $urc) {
                 if(is_array($urc)) {
-                    $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                    $result = App::getResource('FnApi')
                         ->execute('possibility_by_urc', array(
                             'id_user'       => (int)$urc['user'],
                             'id_role'       => HM_Model_Account_Access::getInstance()->getRole($urc['role'])->getId(),

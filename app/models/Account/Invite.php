@@ -9,11 +9,6 @@
  */
 class HM_Model_Account_Invite extends App_Core_Model_Data_Entity
 {
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
     /**
      * @param int $id
      * @return HM_Model_Account_Invite|null
@@ -50,7 +45,7 @@ class HM_Model_Account_Invite extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('account_add_invite', array(
                 'id_guest' => $this->getData('guest')
             )
@@ -71,7 +66,7 @@ class HM_Model_Account_Invite extends App_Core_Model_Data_Entity
     protected function _remove()
     {
         if($this->isIdentity()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('account_remove_invite', array(
                     'id_invite' => $this->getData('id')
                 )

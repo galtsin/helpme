@@ -8,11 +8,6 @@
  */
 class HM_Model_Account_Guest extends App_Core_Model_Data_Entity
 {
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
     /**
      * @param int $id
      * @return HM_Model_Account_Guest|null
@@ -53,7 +48,7 @@ class HM_Model_Account_Guest extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('account_add_guest', array(
                 'email'         => $this->getData('email'),
                 'first_name'    => $this->getData('first_name'),

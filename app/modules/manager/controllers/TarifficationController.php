@@ -15,11 +15,11 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
         // Узнать по какой роли стоит осуществлять поиск
         // Мы знаем URL-адрес
         $pageRole = $access->getRole('ADM_TARIFF'); // TODO: Как то нужно узнавать!
-        $user = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']);
+        $user = HM_Model_Account_User::load($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'));
+            ->setModelRestore('HM_Model_Counseling_Structure_Line');
 
         $data = array();
 
@@ -58,13 +58,12 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     {
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $pageRole = 'ADM_LINE';
-        $admin = App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')
-            ->restore($account['user']);
+        $admin = HM_Model_Account_User::load($account['user']);
 
         $accessColl = new HM_Model_Account_Access_Collection();
         $tariffColl = new HM_Model_Billing_Tariff_Collection();
         $accessColl->setType('LINE')
-            ->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory'))
+            ->setModelRestore('HM_Model_Counseling_Structure_Line')
             ->setRestrictionByInheritanceFromRole($pageRole);
 
         $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
@@ -92,8 +91,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     public function addTariffAction()
     {
         $request = $this->getRequest();
-        $line = App_Core_Model_Factory_Manager::getFactory('HM_Model_Counseling_Structure_Line_Factory')
-            ->restore($request->getParam('line'));
+        $line = HM_Model_Counseling_Structure_Line::load($request->getParam('line'));
         if($line instanceof HM_Model_Counseling_Structure_Line) {
             if($request->isPost()){
                 if(array_key_exists('tariff', $request->getPost())) {
@@ -127,8 +125,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     public function editTariffInfoAction()
     {
         $request = $this->getRequest();
-        $tariff = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Tariff_Factory')
-            ->restore($request->getParam('tariff'));
+        $tariff = HM_Model_Billing_Tariff::load($request->getParam('tariff'));
         if($tariff instanceof HM_Model_Billing_Tariff){
             if($request->isPost()){
                 if(array_key_exists('tariff', $request->getPost())) {
@@ -165,8 +162,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
     public function removeTariffAction()
     {
         $request = $this->getRequest();
-        $tariff = App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Tariff_Factory')
-            ->restore($request->getParam('tariff'));
+        $tariff = HM_Model_Billing_Tariff::load($request->getParam('tariff'));
         if($tariff instanceof HM_Model_Billing_Tariff){
             if($request->isPost()){
                 if(false == $tariff->getData('used')) {

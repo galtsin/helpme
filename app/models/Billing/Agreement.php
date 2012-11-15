@@ -8,11 +8,6 @@
  */
 class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
 {
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
     /**
      * @param $id
      * @return HM_Model_Billing_Agreement|null
@@ -54,7 +49,7 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('agreement_add', array(
                 'id_tariff'     => (int)$this->getData('tariff'),
                 'id_invoice'    => (int)$this->getData('invoice'),
@@ -78,7 +73,6 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
     public function getSubscription()
     {
         $property = 'subscription';
-
         if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
                 $subscription = new HM_Model_Billing_Agreement_Subscription();
@@ -103,7 +97,6 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
     public function getTariff()
     {
         $property = 'tariff';
-
         if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
                 $tariffColl = new HM_Model_Billing_Tariff_Collection();

@@ -21,14 +21,6 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
     private $_rules = null;
 
     /**
-     * Инициализация
-     */
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
-    /**
      * @param int $id
      * @return HM_Model_Counseling_Structure_Level|null
      */
@@ -64,7 +56,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('level_add', array(
                 'id_line'   => $this->getData('line'),
                 'name'      => $this->getData('name')
@@ -86,7 +78,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
     protected function _update()
     {
         if($this->getData()->isDirty()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('level_update_identity', array(
                     'id_level'  => $this->getData('id'),
                     'name'      => $this->getData('name')
@@ -154,7 +146,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
         if(null === $this->_rules){
             if($this->isIdentity()){
                 $rules = array();
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('level_get_forwarding_rules', array(
                         'id_level' => $this->getData('id')
                     )
@@ -189,7 +181,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
             foreach($this->getRules() as $rule) {
                 if(true === $rule->isDirty()) {
                     try{
-                        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                        $result = App::getResource('FnApi')
                             ->execute('level_update_forwarding_rule', array(
                                 'id_rule'       => $rule->get('id'),
                                 'id_duration'   => $rule->get('duration'),

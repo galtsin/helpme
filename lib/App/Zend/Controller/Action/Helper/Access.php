@@ -33,7 +33,7 @@ class App_Zend_Controller_Action_Helper_Access extends Zend_Controller_Action_He
         foreach($this->getActionAllowedRoles() as $role) {
             $accessColl->resetFilters();
             $accessColl->setAccessFilter(
-                App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_User_Factory')->restore($account['user']),
+                HM_Model_Account_User::load($account['user']),
                 $access->getRole($role),
                 $companyOwner)->getCollection();
             $possibilities = array_merge($accessColl->getPossibilities(), $possibilities);

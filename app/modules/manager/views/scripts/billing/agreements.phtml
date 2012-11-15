@@ -344,7 +344,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                 on(addSubscriberForm['send'], 'click', function(){
                     if(domForm.fieldToObject(addSubscriberForm['user[email]'])) {
                         Layout.send({
-                            url: Layout.baseUrl('manager/billing/add-subscriber'),
+                            url: Layout.baseUrl('manager/billing/add-subscription-guest'),
                             format: 'json',
                             args: domForm.toObject(addSubscriberForm)
                         }).then(function(response){
