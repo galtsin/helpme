@@ -10,7 +10,7 @@
  * "id" — идентификатор объекта
  * "data" — данные объекта
  */
-final class App_Core_Model_Data_Store
+final class App_Core_Model_Store_Data
 {
     /**
     * en: Unique identifier of entity
@@ -97,7 +97,7 @@ final class App_Core_Model_Data_Store
      * Пример: self::_data['name'] = 'andrey'; соответственно self::getName() и self::setName('alex');
      * @param $method
      * @param $arg
-     * @return App_Core_Model_Data_Store|array|int
+     * @return App_Core_Model_Store_Data|array|int
      * @throws Exception
      */
     public function __call($method, $arg)
@@ -139,7 +139,7 @@ final class App_Core_Model_Data_Store
     /**
      * @param $key
      * @param $value
-     * @return App_Core_Model_Data_Store
+     * @return App_Core_Model_Store_Data
      * @throws Exception
      */
     public function set($key, $value)
@@ -203,7 +203,7 @@ final class App_Core_Model_Data_Store
     /**
      * ПОметка объекта на изменение
      * @param bool $flag
-     * @return App_Core_Model_Data_Store
+     * @return App_Core_Model_Store_Data
      */
     public function setDirty($flag)
     {
@@ -226,7 +226,7 @@ final class App_Core_Model_Data_Store
     /**
      * Установить флаг записи
      * @param bool $flag
-     * @return App_Core_Model_Data_Store
+     * @return App_Core_Model_Store_Data
      */
     public function setWritable($flag)
     {
@@ -249,7 +249,7 @@ final class App_Core_Model_Data_Store
     /**
      * Установить флаг на удаление объекта
      * @param $flag
-     * @return App_Core_Model_Data_Store
+     * @return App_Core_Model_Store_Data
      */
     public function setRemoved($flag)
     {

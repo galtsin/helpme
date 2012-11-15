@@ -61,15 +61,15 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
 
 
 
-        /*        $this->view->assign('data2', new App_Core_Model_Data_Store());
+        /*        $this->view->assign('data2', new App_Core_Model_Store_Data());
         $ar = array();
         foreach($this->view->getVars() as $_var => $value) {
-            if($value instanceof App_Core_Model_Data_Entity || $value instanceof App_Core_Model_Data_Store) {
+            if($value instanceof App_Core_Model_Store_Entity || $value instanceof App_Core_Model_Store_Data) {
                 $ar[$_var] = $value->toArray();
             } elseif (is_array($value)) {
                 $_ar = array();
                 foreach($value as $val) {
-                    if($val instanceof App_Core_Model_Data_Entity || $val instanceof App_Core_Model_Data_Store) {
+                    if($val instanceof App_Core_Model_Store_Entity || $val instanceof App_Core_Model_Store_Data) {
                         $_ar[] = $val->toArray();
                     }
                 }

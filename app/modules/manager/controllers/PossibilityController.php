@@ -203,7 +203,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
     /**
      * Получить те роли Менеджера, от имени которых он может назначать права другим Менеджерам
      */
-    public function getManagerAllowedRoles(HM_Model_Account_User $user, App_Core_Model_Data_Store $role)
+    public function getManagerAllowedRoles(HM_Model_Account_User $user, App_Core_Model_Store_Data $role)
     {
 
     }
@@ -308,7 +308,7 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
                     }
                 }
                 foreach($safeIds as $id) {
-                    $objectAdded = new App_Core_Model_Data_Store(array(
+                    $objectAdded = new App_Core_Model_Store_Data(array(
                             'id'        => $id,
                             'type'      => $access->getType($objectType),
                             'writable'  => true

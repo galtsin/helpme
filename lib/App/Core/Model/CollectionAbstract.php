@@ -18,7 +18,7 @@
 abstract class App_Core_Model_CollectionAbstract
 {
 	/**
-     * @var array App_Core_Model_Data_Entity
+     * @var array App_Core_Model_Store_Entity
      */
     private $_objectsCollection = array();
 
@@ -78,7 +78,7 @@ abstract class App_Core_Model_CollectionAbstract
     /**
      * Центральный загрузочный метод
      * @param int $id
-     * @return App_Core_Model_Data_Entity|null
+     * @return App_Core_Model_Store_Entity|null
      */
     public function load($id)
     {
@@ -86,7 +86,7 @@ abstract class App_Core_Model_CollectionAbstract
             return $this->_objectsCollection[$id];
         } else {
             $object = forward_static_call_array(array($this->getModelRestore(), 'load'), array($id));
-            if($object instanceof App_Core_Model_Data_Entity) {
+            if($object instanceof App_Core_Model_Store_Entity) {
                 if(!in_array($id, $this->getIdsIterator())){
                     $this->_idsCollection[] = $id;
                 }
@@ -99,7 +99,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * @return App_Core_Model_Data_Entity[]
+     * @return App_Core_Model_Store_Entity[]
      */
     public function getObjectsIterator()
     {
@@ -112,7 +112,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * @return App_Core_Model_Data_Store[]
+     * @return App_Core_Model_Store_Data[]
      */
     public function getDataIterator()
     {
@@ -154,7 +154,7 @@ abstract class App_Core_Model_CollectionAbstract
             if(!in_array($entry, $this->getIdsIterator())) {
                 $this->_idsCollection[] = $entry;
             }
-        } elseif ($entry instanceof App_Core_Model_Data_Entity) {
+        } elseif ($entry instanceof App_Core_Model_Store_Entity) {
             if(!array_key_exists($entry->getData()->getId(), $this->getObjectsIterator()) && !in_array($entry->getData()->getId(), $this->getIdsIterator())) {
                 $this->_idsCollection[] = $entry->getData()->getId();
                 $this->_objectsCollection[$entry->getData()->getId()] = $entry;

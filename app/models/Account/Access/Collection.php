@@ -25,7 +25,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
     /**
      * Ограничение наследования от роли
-     * @var App_Core_Model_Data_Store|null
+     * @var App_Core_Model_Store_Data|null
      */
     private $_restrictionByInheritanceFromRole = null;
 
@@ -88,7 +88,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     public function setRestrictionByInheritanceFromRole($roleIdentifier)
     {
         $access = HM_Model_Account_Access::getInstance();
-        if($access->getRole($roleIdentifier) instanceof App_Core_Model_Data_Store) {
+        if($access->getRole($roleIdentifier) instanceof App_Core_Model_Store_Data) {
             $this->_restrictionByInheritanceFromRole = $roleIdentifier;
         }
 

@@ -7,14 +7,14 @@
  * TODO: Дабавить валидацию данных Zend_Validate?
  * ru: Абстрактный класс-контейнер для сущностей
  */
-class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
+class App_Core_Model_Store_Entity extends App_Core_Model_ModelAbstract
 {
     const DATA_STORE_NOT_FOUND = 'Данные не найдены';
 
     /**
      * Данные сущности - объект-значение
      * Здесь хранятся только данные простых типов: int, string, bool, array
-     * @var null|App_Core_Model_Data_Store
+     * @var null|App_Core_Model_Store_Data
      */
     private $_data = null;
 
@@ -65,12 +65,12 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
     /**
      * Получить идентификационные данные сущности
      * @param null|string $key
-     * @return App_Core_Model_Data_Store|array|int|null
+     * @return App_Core_Model_Store_Data|array|int|null
      */
     public function getData($key = null)
     {
-        if(!$this->_data instanceof App_Core_Model_Data_Store) {
-            $this->_data = new App_Core_Model_Data_Store();
+        if(!$this->_data instanceof App_Core_Model_Store_Data) {
+            $this->_data = new App_Core_Model_Store_Data();
         }
 
         if(!is_null($key)) {
@@ -86,14 +86,14 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      */
     public function setData(array $options)
     {
-        if($this->_data instanceof App_Core_Model_Data_Store) {
+        if($this->_data instanceof App_Core_Model_Store_Data) {
             foreach($options as $key => $value) {
                 if(is_string($key) || is_int($key)) {
                     $this->getData()->set($key, $value);
                 }
             }
         } else {
-            $this->_data = new App_Core_Model_Data_Store($options);
+            $this->_data = new App_Core_Model_Store_Data($options);
         }
     }
 
@@ -106,7 +106,7 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      */
     public function save()
     {
-        if($this->getData() instanceof App_Core_Model_Data_Store) {
+        if($this->getData() instanceof App_Core_Model_Store_Data) {
             if($this->isIdentity()){
                 if($this->getData()->isRemoved()) {
                     // Удаление записи

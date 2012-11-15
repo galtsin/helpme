@@ -6,7 +6,7 @@
 /**
  * Группа
  */
-class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
+class HM_Model_Counseling_Structure_Group extends App_Core_Model_Store_Entity
 {
     /**
      * Список специалистов

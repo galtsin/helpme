@@ -6,7 +6,7 @@
 /**
  * ru: Модель сущности Компания
  */
-class HM_Model_Billing_Tariff extends App_Core_Model_Data_Entity
+class HM_Model_Billing_Tariff extends App_Core_Model_Store_Entity
 {
     /**
      * @param int $id

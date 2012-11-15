@@ -6,7 +6,7 @@
 /**
  * ru: Модель сущности Компания
  */
-class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
+class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
 {
     /**
      * @param int $id
@@ -98,7 +98,7 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
 
     /**
      * Получить счета компании
-     * @return App_Core_Model_Data_Store|array|int|null
+     * @return int[]|null
      */
     public function getInvoices()
     {

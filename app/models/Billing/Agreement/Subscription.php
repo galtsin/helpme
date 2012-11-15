@@ -7,7 +7,7 @@
  * Подписка пользователей
  * TODO: ID Договора == ID Подписки
  */
-class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Data_Entity
+class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entity
 {
     protected function _init()
     {

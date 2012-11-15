@@ -6,7 +6,7 @@
 /**
  * Привилегии и Доступные объекты
  */
-class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
+class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
 {
     /**
      * Индекс Привелегии на Запись
@@ -237,7 +237,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
                         );
                         if($result->rowCount() > 0){
                             foreach($result->fetchAll() as $row){
-                                $_object = new App_Core_Model_Data_Store(array(
+                                $_object = new App_Core_Model_Store_Data(array(
                                         'id'    => (int)$row['o_id_object'],
                                         'type'  => $access->getType($typeIdentifier)
                                     )
@@ -258,11 +258,11 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * TODO: В Идеале передавать объекты App_Core_Model_Data_Entity
+     * TODO: В Идеале передавать объекты App_Core_Model_Store_Entity
      * Добавить объект к набору
-     * @param App_Core_Model_Data_Store $object
+     * @param App_Core_Model_Store_Data $object
      */
-    public function addObject(App_Core_Model_Data_Store $object)
+    public function addObject(App_Core_Model_Store_Data $object)
     {
         if(!$this->has($object)) {
             $this->_objects[$object->get('type')->get('code')][] = $object;
@@ -291,10 +291,10 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
 
     /**
      * Вставить объект в БД
-     * @param App_Core_Model_Data_Store $object
+     * @param App_Core_Model_Store_Data $object
      * @return int
      */
-    private function _insertObject(App_Core_Model_Data_Store $object)
+    private function _insertObject(App_Core_Model_Store_Data $object)
     {
         $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
             ->execute('possibility_add_object', array(
@@ -319,7 +319,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
      * @param $object
      * @return int
      */
-    private function _removeObject(App_Core_Model_Data_Store $object)
+    private function _removeObject(App_Core_Model_Store_Data $object)
     {
         if($this->isIdentity()) {
             $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
@@ -342,10 +342,10 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
-     * @param App_Core_Model_Data_Store $object
+     * @param App_Core_Model_Store_Data $object
      * @return bool
      */
-    public function has(App_Core_Model_Data_Store $object)
+    public function has(App_Core_Model_Store_Data $object)
     {
         foreach($this->getObjects($object->get('type')->get('code')) as $_object) {
             if($_object->getId() === $object->getId()) {

@@ -6,7 +6,7 @@
 /**
  * Пользователь
  */
-class HM_Model_Account_User extends App_Core_Model_Data_Entity
+class HM_Model_Account_User extends App_Core_Model_Store_Entity
 {
     /**
      * Восстановить сущность Пользователь

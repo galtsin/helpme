@@ -74,7 +74,7 @@ class Service_QueryController extends App_Zend_Controller_Action
 
 /*                // Accessible block
                 // TODO: Проверка на доступность только те объекты которые присутствуют в системе
-                if(HM_Model_Account_Access::getInstance()->getType(strtoupper($entity)) instanceof App_Core_Model_Data_Store) {
+                if(HM_Model_Account_Access::getInstance()->getType(strtoupper($entity)) instanceof App_Core_Model_Store_Data) {
                     // Get Possibility
                     $possibilityOptions = explode(":", $possibility);
                     // Get Account

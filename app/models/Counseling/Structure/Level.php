@@ -6,7 +6,7 @@
 /**
  * Уровень
  */
-class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
+class HM_Model_Counseling_Structure_Level extends App_Core_Model_Store_Entity
 {
     /**
      * Массив групп
@@ -154,7 +154,7 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
 
                 if($result->rowCount() > 0) {
                     foreach($result->fetchAll() as $row) {
-                        $rule = new App_Core_Model_Data_Store();
+                        $rule = new App_Core_Model_Store_Data();
                         $rule->set('id', (int)$row['o_id_rule'])
                             ->set('level_to', $row['o_id_level_to'])
                             ->set('name_level_to', $row['o_name_level_to'])

@@ -25,13 +25,13 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Массив ТипоОбъектов.
      * Null используется для отложенной загрузки
-     * @var null|array App_Core_Model_Data_Store
+     * @var null|array App_Core_Model_Store_Data
      */
     private $_types = null;
 
     /**
      * Массив системных ролей
-     * @var null|array App_Core_Model_Data_Store
+     * @var null|array App_Core_Model_Store_Data
      */
     private $_roles = null;
 
@@ -104,7 +104,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 ->execute('possibility_get_object_types', array());
 
             foreach($result->fetchAll() as $row) {
-                $type = new App_Core_Model_Data_Store(array(
+                $type = new App_Core_Model_Store_Data(array(
                         'id'    => (int)$row['id'],
                         'code'  => $row['code'],
                         'name'  => $row['name']
@@ -124,7 +124,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Получить список ролей системы
      * Автоматическая привязка ролей при наличии корневой роли. (pid == NULL)
-     * @return array App_Core_Model_Data_Store
+     * @return array App_Core_Model_Store_Data
      */
     public function getRoles()
     {
@@ -136,7 +136,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 ->execute('possibility_get_roles', array());
 
             foreach($result->fetchAll() as $row) {
-                $role = new App_Core_Model_Data_Store(array(
+                $role = new App_Core_Model_Store_Data(array(
                         'id'    => (int)$row['id'],
                         'pid'   => $row['pid'],
                         'code'  => $row['code'],
@@ -166,7 +166,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Получить объект данных Тип
      * @param $typeIdentifier
-     * @return App_Core_Model_Data_Store
+     * @return App_Core_Model_Store_Data
      * @throws Exception
      */
     public function getType($typeIdentifier)
@@ -175,7 +175,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             $field = 'id';
         } elseif(is_string($typeIdentifier)) {
             $field = 'code';
-        } elseif($typeIdentifier instanceof App_Core_Model_Data_Store) {
+        } elseif($typeIdentifier instanceof App_Core_Model_Store_Data) {
             return $this->getType((int)$typeIdentifier->getId());
         } else{
             throw new Exception("Type incorrect identifier value (Некорректное значение идентификатора типа)");
@@ -191,7 +191,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Получить объект данных Роль
      * @param mixed $roleIdentifier
-     * @return App_Core_Model_Data_Store
+     * @return App_Core_Model_Store_Data
      * @throws Exception
      */
     public function getRole($roleIdentifier)
@@ -200,7 +200,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             $field = 'id';
         } elseif(is_string($roleIdentifier)) {
             $field = 'code';
-        } elseif($roleIdentifier instanceof App_Core_Model_Data_Store) {
+        } elseif($roleIdentifier instanceof App_Core_Model_Store_Data) {
             return $this->getRole((int)$roleIdentifier->getId());
         } else{
             throw new Exception("Role incorrect identifier value (Некорректное значение идентификатора роли)");
@@ -247,11 +247,11 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 
     /**
      * Получить массив ролей от которых происходит наследование
-     * @param App_Core_Model_Data_Store $role
+     * @param App_Core_Model_Store_Data $role
      * @param bool $recursive
-     * @return array App_Core_Model_Data_Store
+     * @return array App_Core_Model_Store_Data
      */
-    public function getInheritsRoles(App_Core_Model_Data_Store $role, $recursive = false)
+    public function getInheritsRoles(App_Core_Model_Store_Data $role, $recursive = false)
     {
         $inherits = array();
         foreach($this->getRoles() as $_role) {
@@ -272,9 +272,9 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     /**
      * Построить цепочку связей ролей снизу вверх c привязкой к роделельским элементам
      * TODO: Не должно быть использование вызовов self::getRole и self::getRoles внутри данной функции т.к. приведет к зацикливанию в автоматической привязке ролей в методе getRoles()
-     * @param App_Core_Model_Data_Store $role
+     * @param App_Core_Model_Store_Data $role
      */
-    public function linkChainRoles(App_Core_Model_Data_Store $role)
+    public function linkChainRoles(App_Core_Model_Store_Data $role)
     {
         if(!$this->getAcl()->hasRole($role->get('code'))) {
             $parents = $this->getInheritsRoles($role);
@@ -308,10 +308,10 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 
     /**
      * @param HM_Model_Account_User $user
-     * @param App_Core_Model_Data_Store $role
+     * @param App_Core_Model_Store_Data $role
      * @return bool
      */
-    public function isAllowedRole(HM_Model_Account_User $user, App_Core_Model_Data_Store $role)
+    public function isAllowedRole(HM_Model_Account_User $user, App_Core_Model_Store_Data $role)
     {
         foreach($user->getRoles() as $roleIdentifier => $companies) {
             if($this->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
