@@ -248,9 +248,9 @@ class App_Core_Model_Data_Entity extends App_Core_Model_ModelAbstract
      * Аналог Factory::restore
      * Использование позднего статического связывания для реализации метода наследуемыми потомками
      */
-    public static function load($id)
+    public static function load()
     {
-
+        return null;
     }
 
     /**

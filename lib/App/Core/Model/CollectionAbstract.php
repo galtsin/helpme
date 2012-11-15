@@ -35,6 +35,7 @@ abstract class App_Core_Model_CollectionAbstract
 
     /**
      * ru: Список ресурсов
+     * @deprecated
      * @var array
      */
     protected $_resources = array();
@@ -101,6 +102,7 @@ abstract class App_Core_Model_CollectionAbstract
             return $this->_objectsCollection[$id];
         } else {
             $object = $this->getFactory()->restore($id);
+            // $object = forward_static_call(array($this->getModelRestore, 'load'), array($id));
             if($object instanceof App_Core_Model_Data_Entity) {
                 if(!in_array($id, $this->getIdsIterator())){
                     $this->_idsCollection[] = $id;
@@ -211,10 +213,6 @@ abstract class App_Core_Model_CollectionAbstract
         return Zend_Json::encode($this->toArray());
     }
 
-    public function setModelRestore($model){}
-
-    public function getModelRestore(){}
-
     /**
      * Получить фабрику
      * @deprecated
@@ -243,6 +241,7 @@ abstract class App_Core_Model_CollectionAbstract
 
     /**
      * Добавить ресурс.
+     * @deprecated
      * @param App_Core_Resource_Abstract $resource
      * @param string $name
      * @throws Exception
@@ -261,6 +260,7 @@ abstract class App_Core_Model_CollectionAbstract
 
     /**
      * ru: Вернуть ресурс
+     * @deprecated
      * @param string $name
      * @return App_Core_Resource_Abstract
      * @throws Exception
@@ -273,5 +273,28 @@ abstract class App_Core_Model_CollectionAbstract
             }
         }
         throw new Exception('Resource named "' . $name . '" is not defined. (Ресурс отсутствует)');
+    }
+
+    /**
+     * Назначить модель восстановления
+     * @param string $model
+     * @throws Exception
+     */
+    public function setModelRestore($model)
+    {
+        if(class_exists($model) && method_exists($model, 'load')) {
+            $this->_modelRestore = $model;
+        } else {
+            throw new Exception('Класс ' . $model . 'не существует или не содержит метод восстановления load');
+        }
+    }
+
+    /**
+     * Получить модель восстановления
+     * @return string|null
+     */
+    public function getModelRestore()
+    {
+        return $this->_modelRestore;
     }
 }

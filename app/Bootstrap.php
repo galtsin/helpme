@@ -136,10 +136,11 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     }
 
     /**
-     * Инициализация API функций базы данных в Реестр
+     * Инициализация ресурсов
      */
-    protected function _initPostgresApi()
+    protected function _initResources()
     {
+        // Инициализация Postgres функций
         $files = glob(APPLICATION_PATH . "/configs/postgres_api/*.xml", GLOB_BRACE);
         $config = null;
         foreach($files as $file) {
@@ -149,6 +150,10 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
                 $config->merge(new Zend_Config_Xml($file));
             }
         }
+
         Zend_Registry::set(App_Core_Resource_DbApi::RESOURCE_NAMESPACE, $config);
+
+        // Регистрируем ресурс в системе
+        App::registerResource('FnApi', new App_Core_Resource_DbApi());
     }
 }

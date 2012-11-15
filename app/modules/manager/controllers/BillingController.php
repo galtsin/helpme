@@ -169,6 +169,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
     {
         $request = $this->getRequest();
         if($request->isPost()) {
+            // Определить
             $userParams = $request->getPost('user');
             $userColl = new HM_Model_Account_User_Collection();
             if(array_key_exists('id', $userParams) && isset($userParams['id'])) {
@@ -189,10 +190,85 @@ class Manager_BillingController extends App_Zend_Controller_Action
         }
     }
 
+    public function addSubscriptionUserAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost()) {
+            $user = HM_Model_Account_User::load($request->getPost('user'));
+            if($user instanceof HM_Model_Account_User) {
+                $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
+                if($agreement instanceof HM_Model_Billing_Agreement){
+                    if($agreement->getSubscription()->addUser($user) == $user->getData()->getId()){
+                        $this->setAjaxResult($user->getData()->getId());
+                        $this->setAjaxStatus('ok');
+                    }
+                }
+            }
+        }
+    }
+
+    public function addSubscriptionGuestAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost()) {
+            $userParams = $request->getPost('user');
+            $guestColl = new HM_Model_Account_Guest_Collection();
+            $guestColl->addEqualFilter('email', $userParams['email'])
+                ->getCollection();
+
+            if(current($guestColl->getObjectsIterator()) instanceof HM_Model_Account_Guest){
+                $guest = current($guestColl->getObjectsIterator());
+            } else {
+                // Регистрируем нового гостя
+                $guest = new HM_Model_Account_Guest();
+                $guest->getData()
+                    ->set('email', $userParams['email'])
+                    ->set('first_name', $userParams['first_name'])
+                    ->set('middle_name', $userParams['middle_name'])
+                    ->set('last_name', $userParams['last_name']);
+                $guest->save();
+            }
+
+            if($guest instanceof HM_Model_Account_Guest) {
+                $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
+                if($agreement instanceof HM_Model_Billing_Agreement){
+                    if($agreement->getSubscription()->addGuest($guest) == $guest->getData()->getId()){
+                        $this->setAjaxResult($guest->getData()->getId());
+                        $this->setAjaxStatus('ok');
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Удалить подписчика
      */
     public function removeSubscriberAction()
+    {
+
+    }
+
+    public function removeSubscriptionUserAction()
+    {
+        $request = $this->getRequest();
+        if($request->isPost()) {
+            foreach($request->getPost('users') as $id){
+                $user = HM_Model_Account_User::load($id);
+                if($user instanceof HM_Model_Account_User) {
+                    $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
+                    if($agreement instanceof HM_Model_Billing_Agreement){
+                        if($agreement->getSubscription()->removeUser($user) == $user->getData()->getId()){
+                            $this->setAjaxResult($user->getData()->getId());
+                            $this->setAjaxStatus('ok');
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function removeSubscriptionGuestAction()
     {
 
     }

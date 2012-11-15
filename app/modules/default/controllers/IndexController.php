@@ -84,12 +84,12 @@ class Default_IndexController extends App_Zend_Controller_Action
             )
         );
 
-        Zend_Debug::dump(App::getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE));
+
 
         Zend_Debug::dump($result1->fetchRow());
         Zend_Debug::dump($result2->fetchRow());
 
-        App::getResource(App::getNamespace('FN_API'));
+        Zend_Debug::dump(HM_Model_Billing_Agreement::load(1));
 
 
     }
