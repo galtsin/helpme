@@ -14,6 +14,41 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param $id
+     * @return HM_Model_Billing_Agreement|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+            $result = App::getResource('FnApi')
+                ->execute('agreement_get_identity', array(
+                    'id_agreement' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $agreement = new self();
+                $agreement->getData()
+                    ->set('id', $id)
+                    ->set('date_begin', strtotime($row['o_date_begin']))
+                    ->set('date_end', strtotime($row['o_date_end']))
+                    ->set('tariff', (int)$row['o_id_tarif'])
+                    ->set('invoice', (int)$row['o_id_account'])
+                // Компания - Владелец ЛК; оказывает услуги
+                    ->set('company_owner', (int)$row['o_id_company_owner_line'])
+                // Компания-контрагент; поребляет услуги
+                    ->set('company_client', (int)$row['o_id_company_client'])
+                    ->setDirty(false);
+
+                return $agreement;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Создать договор
      * @return int
      */
