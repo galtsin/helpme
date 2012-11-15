@@ -327,9 +327,9 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                 on(searchUserForm['send'], 'click', function(){
                     if(domForm.fieldToObject(searchUserForm['user[id]'])) {
                         Layout.send({
-                            url: Layout.baseUrl('manager/billing/add-subscriber'),
+                            url: Layout.baseUrl('manager/billing/add-subscription-user'),
                             format: 'json',
-                            args: {user: domForm.fieldToObject(searchUserForm['user[id]'])}
+                            args: {user: domForm.fieldToObject(searchUserForm['user[id]']), agreement: args.agreement}
                         }).then(function(response){
                             var tbody = query('tbody', dom.byId('search-results'))[0];
                             if(response.result > 0) {
@@ -468,8 +468,12 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(editSubscribersForm['remove'], 'click', function(){
                     Layout.send({
-                        url:    Layout.baseUrl('manager/billing/remove-subscriber'),
+                        url:    Layout.baseUrl('manager/billing/remove-subscription-user'),
                         args: domForm.toObject(editSubscribersForm)
+                    }).then(function(response){
+                        if(response.result != -1) {
+
+                        }
                     })
                 });
 

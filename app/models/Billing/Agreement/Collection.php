@@ -15,6 +15,7 @@ class HM_Model_Billing_Agreement_Collection extends App_Core_Model_Collection_Fi
     {
         $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Agreement_Factory'));
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+        $this->setModelRestore('HM_Model_Billing_Agreement');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyOwner');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyClient');
     }

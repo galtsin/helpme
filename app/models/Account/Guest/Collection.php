@@ -16,6 +16,7 @@ class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
     {
         $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Account_Guest_Factory'));
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+        $this->setModelRestore('HM_Model_Account_Guest');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'email');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'hashActivation');
     }

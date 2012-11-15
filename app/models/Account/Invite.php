@@ -15,6 +15,36 @@ class HM_Model_Account_Invite extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param int $id
+     * @return HM_Model_Account_Invite|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+            $result = App::getResource('FnApi')
+                ->execute('account_get_identity_invite', array(
+                    'id_invite' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $invite = new self();
+                $invite->getData()
+                    ->set('id', $id)
+                    ->set('date_created', strtotime($row['o_date_created']))
+                    ->set('guest', $row['o_id_guest'])
+                    ->set('is_activated', $row['o_is_activated'])
+                    ->setDirty(false);
+
+                return $invite;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Добавить Приглашение
      * @return int
      */

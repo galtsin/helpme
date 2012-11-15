@@ -23,6 +23,37 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param int $id
+     * @return HM_Model_Counseling_Structure_Line|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+            $result = App::getResource('FnApi')
+                ->execute('line_get_identity', array(
+                    'id_line' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $line = new self();
+                $line->getData()
+                    ->set('id', $id)
+                    ->set('name', $row['o_name'])
+                    ->set('description', $row['o_description'])
+                    ->set('logo', $row['o_logo'])
+                    ->set('company_owner', (int)$row['o_id_company'])
+                    ->setDirty(false);
+
+                return $line;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Добавить Уровень на Линию Консультации
      * @param array $options
      * @return HM_Model_Counseling_Structure_Level|null

@@ -35,6 +35,38 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param int $id
+     * @return HM_Model_Account_Access_Possibility|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+
+            $result = App::getResource('FnApi')
+                ->execute('possibility_get_identity', array(
+                    'id_possibility' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $possibility = new self();
+                $possibility->setUser((int)$row['o_id_user'])
+                    ->setRole((int)$row['o_id_role'])
+                    ->setCompany((int)$row['o_id_company']);
+                $possibility->getData()
+                    ->set('id', $id)
+                    ->setDirty(false);
+
+                return $possibility;
+            }
+        }
+
+
+        return null;
+    }
+
+    /**
      * Назначить Пользователя
      * @param $user
      * @return HM_Model_Account_Access_Possibility

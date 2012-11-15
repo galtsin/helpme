@@ -68,7 +68,6 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Data_Entity
 
             if($result->rowCount() > 0) {
                 $row = $result->fetchRow();
-                Zend_Debug::dump($row);
                 if((int)$row["o_id_user"] > 0) {
                     $this->getData()
                         ->set('users', array_merge($this->getData('users'), array($user->getData()->getId())));

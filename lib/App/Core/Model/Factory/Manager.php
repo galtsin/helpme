@@ -4,6 +4,7 @@
  * @author: GaltsinAK
  */
 /**
+ * @deprecated
  * ru: Абстрактная Фабрика для создания, инициализации и восстановления объектов из БД
  */
 class App_Core_Model_Factory_Manager

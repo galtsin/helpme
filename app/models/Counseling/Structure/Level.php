@@ -29,6 +29,36 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param int $id
+     * @return HM_Model_Counseling_Structure_Level|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+            $result = App::getResource('FnApi')
+                ->execute('level_get_identity', array(
+                    'id_level' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $level = new self();
+                $level->getData()
+                    ->set('id', $id)
+                    ->set('name', $row['o_name'])
+                    ->set('line', $row['o_id_line'])
+                    ->set('priority', $row['o_priority'])
+                    ->setDirty(false);
+
+                return $level;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Вставить Уровень на Линию Консультации
      * @return int
      */

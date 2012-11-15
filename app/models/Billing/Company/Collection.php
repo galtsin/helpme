@@ -16,6 +16,7 @@ class HM_Model_Billing_Company_Collection extends App_Core_Model_Collection_Filt
     {
         $this->setFactory(App_Core_Model_Factory_Manager::getFactory('HM_Model_Billing_Company_Factory'));
         $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
+        $this->setModelRestore('HM_Model_Billing_Company');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'inn');
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'kpp');
     }

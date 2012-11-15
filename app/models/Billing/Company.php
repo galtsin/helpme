@@ -22,6 +22,37 @@ class HM_Model_Billing_Company extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param int $id
+     * @return HM_Model_Billing_Company|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+            $result = App::getResource('FnApi')
+                ->execute('company_get_identity', array(
+                    'id' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $company = new HM_Model_Billing_Company();
+                $company->getData()
+                    ->set('id', $id)
+                    ->set('name', $row['o_name'])
+                    ->set('inn', $row['o_inn'])
+                    ->set('kpp', $row['o_kpp'])
+                    ->set('user_creator', $row['o_id_creator'])
+                    ->setDirty(false);
+
+                return $company;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Получить список договоров, где компания является владельцем ЛК (Партнером)
      * @return HM_Model_Billing_Agreement[]|null
      */

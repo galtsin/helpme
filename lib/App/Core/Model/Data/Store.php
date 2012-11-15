@@ -56,7 +56,7 @@ final class App_Core_Model_Data_Store
         if(is_array($options)){
             if(count($options) > 0) {
                 foreach($options as $key => $value) {
-                    if(method_exists($this, 'set' . ucfirst($key))) {
+                    if(method_exists($this, 'set' . ucfirst(trim($key)))) {
                         $method = 'set' . ucfirst($key);
                         $this->{$method}($value);
                     } else {

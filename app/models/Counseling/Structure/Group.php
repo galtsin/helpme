@@ -23,6 +23,36 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Data_Entity
     }
 
     /**
+     * @param int $id
+     * @return HM_Model_Counseling_Structure_Group|null
+     */
+    public static function load($id)
+    {
+        if(isset($id)) {
+            $result = App::getResource('FnApi')
+                ->execute('group_get_identity', array(
+                    'id_group' => (int)$id
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $group = new self();
+                $group->getData()
+                    ->set('id', $id)
+                    ->set('name', $row['o_name'])
+                    ->set('level', $row['o_id_level'])
+                    ->set('company_owner', $row['o_id_company_owner'])
+                    ->setDirty(false);
+
+                return $group;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Добавить группу на уровень
      * @return int
      */
