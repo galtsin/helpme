@@ -83,14 +83,10 @@ class App_Core_Event_Subject implements SplSubject
     }
 
     /**
-     * en: Set options for Observers
-     * Attention! The merger follows the rules of the function array_merge_recursive
-     * It is possible duplicate records
-     *
-     * ru: Установить переменные(параметры) для наблюдателей
+     * Установить переменные(параметры) для наблюдателей
      * Внимание! Слияние идет по правилам массива
      * Возможно дублирование записей
-     *
+     * @deprecated
      * @param array $option
      * @return App_Core_Event_Subject
      */
@@ -98,6 +94,11 @@ class App_Core_Event_Subject implements SplSubject
     {
         $this->_options = array_merge_recursive((array)$option, (array)$this->_options);
         return $this;
+    }
+
+    public function setOptions(array $options)
+    {
+        $this->_options = $options;
     }
 
     /**

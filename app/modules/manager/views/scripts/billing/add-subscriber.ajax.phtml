@@ -1,0 +1,167 @@
+<?php
+$agreement = $this->agreement;
+?>
+<form id="search-subscriber">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Поиск пользователя</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td>
+                    <button type="button" name="search">Найти</button>
+                </td>
+            </tr>
+        </tfoot>
+        <tbody>
+        <tr>
+            <td>
+                <label>Email:</label>
+                <input type="text" name="search[email]"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+
+<div style="width: 700px" id="search-results">
+
+    <form id="add-subscriber-user" class="hidden">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="50"/>
+                <col width="80"/>
+                <col width="150"/>
+                <col width="150"/>
+                <col/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>Фото</th>
+                    <th>Email</th>
+                    <th>Login</th>
+                    <th>ФИО</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="5">
+                        <input type="hidden" name="agreement" value="<?=$agreement->getData('id')?>">
+                        <button type="button" name="send">Сохранить</button>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody></tbody>
+        </table>
+    </form>
+
+    <form id="add-subscriber-guest" class="hidden">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="50"/>
+                <col width="150"/>
+                <col width="150"/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>Email</th>
+                    <th>ФИО</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <input type="hidden" name="agreement" value="<?=$agreement->getData('id')?>">
+                        <button type="button" name="send">Сохранить</button>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody></tbody>
+        </table>
+    </form>
+
+    <form id="add-subscriber-new-guest" class="hidden">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="200"/>
+                <col/>
+            </colgroup>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <input type="hidden" name="agreement" value="<?=$agreement->getData('id')?>">
+                        <button type="button" name="send">Сохранить</button>
+                    </td>
+                </tr>
+            </tfoot>
+            <tbody>
+                <tr>
+                    <td colspan="3">
+                        <em>На выбранный email будет добавлен новый пользователь</em>
+                        <input type="hidden" name="guest[email]" value=""/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Фамилия:</label>
+                        <input type="text" name="guest[last_name]"/>
+                    </td>
+                    <td>
+                        <label>Имя:</label>
+                        <input type="text" name="guest[first_name]"/>
+                    </td>
+                    <td>
+                        <label>Отчество:</label>
+                        <input type="text" name="guest[middle_name]"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+
+</div>
+<!-- Шаблон для зарегистрированного пользователя-->
+<script id="user-item" type="text/x-handlebars-template">
+    {{#if id}}
+    <tr>
+        <td colspan="5"><em>Найден зарегистрированный пользователь</em></td>
+    </tr>
+    <tr>
+        <td>
+            {{id}}
+            <input type="hidden" name="user" value="{{id}}">
+        </td>
+        <td>
+            {{#if data.logo}}
+            <img width="60" height="78" style="width: 60px; height: 78px; border: 1px solid #C7CED6" src="data:image/png;base64,{{data.logo}}">
+            {{else}}
+            <img width="60" height="78" style="width: 60px; height: 78px; border: 1px solid #C7CED6" src="<?=$this->baseUrl('theme/default/images/not_image.png')?>">
+            {{/if}}
+        </td>
+        <td>{{data.email}}</td>
+        <td>{{data.login}}</td>
+        <td>{{data.last_name}} {{data.first_name}} {{data.middle_name}}</td>
+    </tr>
+    {{/if}}
+</script>
+
+<!-- Шаблон для уже существующего приглашенного пользователя -->
+<script id="guest-item" type="text/x-handlebars-template">
+    {{#if id}}
+    <tr>
+        <td colspan="3"><em>Найден приглашенный ранее пользователь</em></td>
+    </tr>
+    <tr>
+        <td>
+            {{id}}
+            <input type="hidden" name="guest" value="{{id}}">
+        </td>
+        <td>{{data.email}}</td>
+        <td>{{data.last_name}} {{data.first_name}} {{data.middle_name}}</td>
+    </tr>
+    {{/if}}
+</script>

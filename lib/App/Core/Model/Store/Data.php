@@ -70,8 +70,7 @@ final class App_Core_Model_Store_Data
     }
 
     /**
-    * en: Overwriting the magic method __get
-    * ru: Доступ к Данным модели как к переменным. Например, $entity->info;
+    * Доступ к данным модели как к переменным. Например, $entity->info;
     * @param int|string $key
     * @return mixed
     */
@@ -81,8 +80,7 @@ final class App_Core_Model_Store_Data
     }
 
     /**
-     * en: Overwriting the magic method __set
-     * ru: Доступ к Данным модели как к переменным. Например, $entity->info;
+     * Доступ к данным модели как к переменным. Например, $entity->info;
      * @param int|string $key
      * @param mixed $value
      * @return mixed
@@ -203,7 +201,7 @@ final class App_Core_Model_Store_Data
     /**
      * ПОметка объекта на изменение
      * @param bool $flag
-     * @return App_Core_Model_Store_Data
+     * @return self
      */
     public function setDirty($flag)
     {
@@ -226,7 +224,7 @@ final class App_Core_Model_Store_Data
     /**
      * Установить флаг записи
      * @param bool $flag
-     * @return App_Core_Model_Store_Data
+     * @return self
      */
     public function setWritable($flag)
     {
@@ -248,8 +246,8 @@ final class App_Core_Model_Store_Data
 
     /**
      * Установить флаг на удаление объекта
-     * @param $flag
-     * @return App_Core_Model_Store_Data
+     * @param bool $flag
+     * @return self
      */
     public function setRemoved($flag)
     {
@@ -261,8 +259,8 @@ final class App_Core_Model_Store_Data
     }
 
     /**
-     * ru: Очистить данные
-     * @return array
+     * Очистить данные
+     * @return self
      */
     public function clear()
     {

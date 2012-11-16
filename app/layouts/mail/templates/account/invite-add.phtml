@@ -1,0 +1,18 @@
+<table border="0">
+    <tbody>
+        <thead>
+            <tr>
+                <p>Уважаемый <?=$this->user->detail['last_name'] . " " . $this->user->detail['first_name'] . " " . $this->user->detail['middle_name']?> (<?=$this->user->security['email']?>).<br/>
+                Ваш аккаунт были указан в приглашении в качестве подписчика к <strong>договору #<?=$this->agreement->getId()?> от <?=date("d.m.Y", $this->agreement->identity['date_begin'])?></strong></p>
+            </tr>
+            <tr>
+                <p>Чтобы активировать данную операцию, необходимо перейти по ссылке ниже:<br/>
+                <a href="<?=$this->baseUrl('billing/agreement/subscription-activate/hashlink/' . $this->hashlink)?>">
+                <?=$this->baseUrl('billing/agreement/subscription-activate/hashlink/' . $this->hashlink)?></a></p>
+            </tr>
+            <tr>
+                <p><em><strong>Внимание!</strong> Если данная операция была инициирована не вами, проигнорируйте данное письмо.</em></p>
+            </tr>
+        </thead>
+    </tbody>
+</table>

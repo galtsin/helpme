@@ -63,7 +63,7 @@ class App_Core_Mail
 
         // Layout Init
         $this->_layout->setLayoutPath($config->email->layoutPath);
-        $this->_layout->setLayout('default');
+        $this->_layout->setLayout('mail');
 
         // View Init
         $emailPath = $config->email->templatePath;
@@ -79,6 +79,16 @@ class App_Core_Mail
     public function __set($name, $value)
     {
         $this->_templateVariables[$name] = $value;
+    }
+
+    public function assign(array $options)
+    {
+
+    }
+
+    public function getView()
+    {
+        return $this->_view;
     }
 
     /**

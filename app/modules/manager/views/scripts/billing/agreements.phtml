@@ -303,58 +303,76 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                 DialogBox.set('content', response);
                 DialogBox.show();
             }).then(function(){
-                var searchUserForm = dom.byId('search-user');
-                var addSubscriberForm = dom.byId('add-subscriber');
+                var searchSubscriberForm = dom.byId('search-subscriber');
+                var addSubscriberUserForm = dom.byId('add-subscriber-user');
+                var addSubscriberGuestForm = dom.byId('add-subscriber-guest');
+                var addSubscriberNewGuestForm = dom.byId('add-subscriber-new-guest');
 
-                on(searchUserForm['search'], 'click', function(event){
+                on(searchSubscriberForm['search'], 'click', function(event){
                     event.preventDefault();
+                    query('form', dom.byId('search-results')).forEach(function(item){
+                       if(!domClass.contains(item, "hidden")) {
+                           domClass.toggle(item, "hidden");
+                       }
+                    });
+
                     Layout.load({
                         url: Layout.baseUrl('service/query/user'),
                         format: 'json',
-                        args: {'filters[equal][email][]': searchUserForm['user[email]'].value}
+                        args: {'filters[equal][email][]': searchSubscriberForm['search[email]'].value}
                     }).then(function(response){
-                        var tbody = query('tbody', dom.byId('search-results'))[0];
+
                         if(response.data.length == 0) {
-                            domHtml.set(tbody, Handlebars.compile(dojo.byId("search-user-results-items").innerHTML)({}));
-                            addSubscriberForm['user[email]'].value = searchUserForm['user[email]'].value
+                            Layout.load({
+                                url: Layout.baseUrl('service/query/guest'),
+                                format: 'json',
+                                args: {'filters[equal][email][]': searchSubscriberForm['search[email]'].value}
+                            }).then(function(response){
+                                if(response.data.length == 0) {
+                                    domClass.toggle(addSubscriberNewGuestForm, "hidden");
+                                    addSubscriberNewGuestForm['guest[email]'].value = searchSubscriberForm['search[email]'].value;
+                                } else {
+                                    domHtml.set(query('table > tbody', addSubscriberGuestForm)[0], Handlebars.compile(dojo.byId("guest-item").innerHTML)(response.data[0]));
+                                    domClass.toggle(addSubscriberGuestForm, "hidden");
+                                }
+                            });
                         } else {
-                            domHtml.set(tbody, Handlebars.compile(dojo.byId("search-user-results-items").innerHTML)(response.data[0]));
-                            searchUserForm['send'].disabled = false;
+                            domHtml.set(query('table > tbody', addSubscriberUserForm)[0], Handlebars.compile(dojo.byId("user-item").innerHTML)(response.data[0]));
+                            domClass.toggle(addSubscriberUserForm, "hidden");
                         }
-                    });
+                    })
                 });
 
-                on(searchUserForm['send'], 'click', function(){
-                    if(domForm.fieldToObject(searchUserForm['user[id]'])) {
-                        Layout.send({
-                            url: Layout.baseUrl('manager/billing/add-subscription-user'),
-                            format: 'json',
-                            args: {user: domForm.fieldToObject(searchUserForm['user[id]']), agreement: args.agreement}
-                        }).then(function(response){
-                            var tbody = query('tbody', dom.byId('search-results'))[0];
-                            if(response.result > 0) {
-                                domConstruct.empty(tbody);
-                                searchUserForm['send'].disabled = true;
-                            }
-                        })
-                    }
-
+                on(addSubscriberUserForm['send'], 'click', function(){
+                    Layout.send({
+                        url: Layout.baseUrl('manager/billing/add-subscription-user'),
+                        format: 'json',
+                        args: domForm.toObject(addSubscriberUserForm)
+                    }).then(function(response){
+                        if(response.result > 0) {
+                            domConstruct.empty(query('table > tbody', addSubscriberUserForm)[0]);
+                        }
+                    })
                 });
 
-                on(addSubscriberForm['send'], 'click', function(){
-                    if(domForm.fieldToObject(addSubscriberForm['user[email]'])) {
-                        Layout.send({
-                            url: Layout.baseUrl('manager/billing/add-subscription-guest'),
-                            format: 'json',
-                            args: domForm.toObject(addSubscriberForm)
-                        }).then(function(response){
-                            var tbody = query('tbody', dom.byId('search-results'))[0];
-                            if(response.result > 0) {
-                                addSubscriberForm.reset();
-                            }
-                        })
-                    }
+                on(addSubscriberGuestForm['send'], 'click', function(){
+                    Layout.send({
+                        url: Layout.baseUrl('manager/billing/add-subscription-guest'),
+                        format: 'json',
+                        args: domForm.toObject(addSubscriberGuestForm)
+                    }).then(function(response){
+                        if(response.result > 0) {
+                            domConstruct.empty(query('table > tbody', addSubscriberGuestForm)[0]);
+                        }
+                    })
+                });
 
+                on(addSubscriberNewGuestForm['send'], 'click', function(){
+                    Layout.send({
+                        url: Layout.baseUrl('manager/billing/add-subscription-guest'),
+                        format: 'json',
+                        args: domForm.toObject(addSubscriberNewGuestForm)
+                    })
                 });
 
             })
@@ -464,12 +482,34 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                 actionParser(dom.byId('contentAgreement'));
             }).then(function(){
                 var editSubscribersForm = dom.byId('edit-agreement-subscribers');
-                var editInvitedSubscribersForm = dom.byId('edit-agreement-invited-subscribers');
+                var editSubscriptionGuestForm = dom.byId('edit-agreement-subscription-guests');
 
                 on(editSubscribersForm['remove'], 'click', function(){
                     Layout.send({
                         url:    Layout.baseUrl('manager/billing/remove-subscription-user'),
                         args: domForm.toObject(editSubscribersForm)
+                    }).then(function(response){
+                        if(response.result != -1) {
+
+                        }
+                    })
+                });
+
+                on(editSubscriptionGuestForm['remove'], 'click', function(){
+                    Layout.send({
+                        url:    Layout.baseUrl('manager/billing/remove-subscription-guest'),
+                        args: domForm.toObject(editSubscriptionGuestForm)
+                    }).then(function(response){
+                        if(response.result != -1) {
+
+                        }
+                    })
+                });
+
+                on(editSubscriptionGuestForm['resend'], 'click', function(){
+                    Layout.send({
+                        url:    Layout.baseUrl('manager/billing/resend-subscription-invite'),
+                        args: domForm.toObject(editSubscriptionGuestForm)
                     }).then(function(response){
                         if(response.result != -1) {
 

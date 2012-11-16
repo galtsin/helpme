@@ -18,4 +18,7 @@
     <billing_agreement_unsubscribe>
         <observer>HM_Model_Billing_Agreement_Observer_Unsubscribe</observer>
     </billing_agreement_unsubscribe>
+    <invite_add>
+        <observer>HM_Model_Account_Invite_Observers_InviteAdd</observer>
+    </invite_add>
 </events>

@@ -18,16 +18,19 @@
 abstract class App_Core_Model_CollectionAbstract
 {
 	/**
-     * @var array App_Core_Model_Store_Entity
+     * Массив объектов
+     * @var App_Core_Model_Store_Entity[]
      */
     private $_objectsCollection = array();
 
     /**
-     * @var array|null IDs
+     * Массив идентификаторов
+     * @var int[]|null
      */
     private $_idsCollection = array();
 
     /**
+     * Класс-Модель по которой должен восстанавливаться объект в методе load
      * @var string|null
      */
     private $_modelRestore = null;
@@ -41,7 +44,7 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * ru: Пользовательская инициализация
+     * Пользовательская инициализация
      */
     protected function _init()
     {
@@ -68,7 +71,7 @@ abstract class App_Core_Model_CollectionAbstract
     abstract protected function _doCollection();
 
     /**
-     * @return array|null
+     * @return int[]|null
      */
     public function getIdsIterator()
     {
@@ -129,7 +132,7 @@ abstract class App_Core_Model_CollectionAbstract
     /**
      * Добавить запись или набор записей в текущую коллекцию
      * @param mixed $set
-     * @return App_Core_Model_CollectionAbstract
+     * @return static
      */
     public function addToCollection($set)
     {

@@ -92,6 +92,8 @@ class Default_IndexController extends App_Zend_Controller_Action
         $uc = new HM_Model_Account_User_Collection();
         Zend_Debug::dump($uc->load(4)->getRoles());
 
+        $b = new App_Core_Model_Store_Data();
+
 
     }
 

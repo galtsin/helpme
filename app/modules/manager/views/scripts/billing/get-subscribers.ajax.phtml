@@ -47,7 +47,7 @@ $agreement = $this->agreement;
     </table>
 </form>
 
-<form id="edit-agreement-invited-subscribers">
+<form id="edit-agreement-subscription-guests">
     <table class="table table-bordered">
         <colgroup>
             <col width="50"/>
@@ -70,18 +70,17 @@ $agreement = $this->agreement;
         <tr>
             <td colspan="5">
                 <input type="hidden" name="agreement" value="<?=$agreement->getData('id')?>">
-                <button type="button" name="add">Добавить</button>
                 <button type="button" name="remove">Удалить приглашения</button>
-                <button type="button" name="remove">Отправить приглашения повторно</button>
+                <button type="button" name="resend">Отправить приглашения повторно</button>
             </td>
         </tr>
         </tfoot>
         <tbody>
         <?php foreach($agreement->getSubscription()->getGuests() as $guest): ?>
             <tr>
-                <td><?=$guest->getData('id')?></td>
+                <td><?=$guest->getData()->getId()?></td>
                 <td>
-                    <input type="checkbox" name="users[]" value="<?=$user->getData('id')?>"/>
+                    <input type="checkbox" name="guests[]" value="<?=$guest->getData()->getId()?>"/>
                 </td>
                 <td><?=$guest->getData('email')?></td>
                 <td><?=$guest->getData('last_name')?> <?=$guest->getData('first_name')?> <?=$guest->getData('middle_name')?></td>
