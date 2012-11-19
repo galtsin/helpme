@@ -64,6 +64,11 @@
     </possibility_get_objects>
 
     <!-- TODO Верная нотация-->
+    <account_activate_guest>
+        <id_guest type="integer"/>
+        <login type="string"/>
+        <password type="string"/>
+    </account_activate_guest>
     <account_add_invite>
         <id_guest type="integer"/>
     </account_add_invite>

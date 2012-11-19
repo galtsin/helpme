@@ -34,8 +34,9 @@ class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
                         'hash_activation' => $hashActivation
                     )
                 );
-                $row = $result->fetchRow();
-                if($row['o_id_guest'] !== -1) {
+
+                if($result->rowCount() > 0){
+                    $row = $result->fetchRow();
                     $ids[] = (int)$row['o_id_guest'];
                 }
             }
@@ -59,8 +60,9 @@ class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
                         'email' => $email
                     )
                 );
-                $row = $result->fetchRow();
-                if($row['o_id_guest'] != -1) {
+
+                if($result->rowCount() > 0){
+                    $row = $result->fetchRow();
                     $ids[] = (int)$row['o_id_guest'];
                 }
             }

@@ -211,13 +211,14 @@ class Manager_BillingController extends App_Zend_Controller_Action
                     ->set('first_name', $guestParams['first_name'])
                     ->set('middle_name', $guestParams['middle_name'])
                     ->set('last_name', $guestParams['last_name']);
-                $guest->save();
-                // Отправить письмо с подпиской
-                // Оповестить наблюдателей о событии. В частности сделать рассылку
-/*                $events = Zend_Registry::get('events');
-                $events['invite_add']
-                    ->setOptions(array('guest' => $guest))
-                    ->notify();*/
+                if($guest->save()){
+                    // Отправить письмо с подпиской
+                    // Оповестить наблюдателей о событии. В частности сделать рассылку
+                    $events = Zend_Registry::get('events');
+                    $events['account_create_guest']
+                        ->setGuest($guest)
+                        ->notify();
+                }
             } else {
                 $guest = HM_Model_Account_Guest::load($request->getPost('guest'));
             }

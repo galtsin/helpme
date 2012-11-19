@@ -81,11 +81,6 @@ class App_Core_Mail
         $this->_templateVariables[$name] = $value;
     }
 
-    public function assign(array $options)
-    {
-
-    }
-
     public function getView()
     {
         return $this->_view;
@@ -123,13 +118,16 @@ class App_Core_Mail
             $this->_view->assign($key, $value);
         }
 
-        $this->_layout->content = $this->_view->render($this->_templateName . '.phtml');
+        if(isset($this->_templateName)){
+            $this->_layout->content = $this->_view->render($this->_templateName . '.phtml');
+        }
+
         $this->_layout->subject = $this->_subject;
         $html = $this->_layout->render();
 
         $this->_mail->setBodyHtml($html);
         // TODO: брать из конфига
-        $this->_mail->setFrom('mail@helpme.ru', 'HELPME');
+        //$this->_mail->setFrom('mail@helpme.ru', 'HELPME');
         $this->_mail->addTo($this->_recipient['email'], $this->_recipient['name']);
         $this->_mail->setSubject($this->_subject);
         $this->_mail->send();

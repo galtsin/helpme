@@ -16,40 +16,27 @@ class App_Core_Event_Subject implements SplSubject
     protected $_observers;
 
     /**
-     * Название события
-     * @var string
-     */
-    protected $_name;
-
-    /**
-     * Параметры события
+     * Опции подписки
      * @var array
      */
     protected $_options = array();
 
-    /**
-     * Заблокировать событие. Отложить оповещение
-     * Метод notify не срабатывает
-     * @var bool
-     */
-    protected $_lock = false;
-
-    /**
-     * @param string
-     */
-    public function __construct($name)
+    public function __construct()
     {
         $this->_observers = new SplObjectStorage();
-        $this->_name = $name;
     }
 
-    /**
-     * Вернуть имя события
-     * @return string
-     */
-    public function getName()
+    public function __call($method, $params)
     {
-        return $this->_name;
+        $methodType = substr($method, 0, 3);
+
+        if($methodType == 'get') {
+            return $this->_options[lcfirst(substr($method, 3))];
+        } elseif ($methodType == 'set') {
+            $this->_options[lcfirst(substr($method, 3))] = array_shift($params);
+        }
+
+        return $this;
     }
 
     /**
@@ -75,70 +62,8 @@ class App_Core_Event_Subject implements SplSubject
      */
     public function notify()
     {
-        if(false == $this->_lock) {
-            foreach($this->_observers as $observer) {
-                $observer->update($this);
-            }
-        }
-    }
-
-    /**
-     * Установить переменные(параметры) для наблюдателей
-     * Внимание! Слияние идет по правилам массива
-     * Возможно дублирование записей
-     * @deprecated
-     * @param array $option
-     * @return App_Core_Event_Subject
-     */
-    public function setOption(array $option)
-    {
-        $this->_options = array_merge_recursive((array)$option, (array)$this->_options);
-        return $this;
-    }
-
-    public function setOptions(array $options)
-    {
-        $this->_options = $options;
-    }
-
-    /**
-     * ru: Получить параметры события
-     * @return mixed
-     */
-    public function getOptions()
-    {
-        return $this->_options;
-    }
-
-    /**
-     * ru: Заблокировать оповещение
-     */
-    public function lock()
-    {
-        $this->_lock = true;
-    }
-
-    /**
-     * ru: Разблокировать оповещение
-     */
-    public function unlock()
-    {
-        $this->_lock = false;
-    }
-
-    /**
-     * ru: Получить наблюдателя по имени класса
-     * @param string $className
-     * @return SplObserver
-     */
-    public function getObserver($className)
-    {
         foreach($this->_observers as $observer) {
-            if($observer instanceof $className) {
-                return $observer;
-            }
+            $observer->update($this);
         }
-
-        return null;
     }
 }

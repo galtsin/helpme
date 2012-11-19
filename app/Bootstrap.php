@@ -130,9 +130,21 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
      */
     protected function _initEmailTransport()
     {
-        $configOptions = $this->getOptions();
+        // Настройка из глобального пространства
+/*        $configOptions = $this->getOptions();
         $tr = new Zend_Application_Resource_Mail($configOptions['resources']['mail']);
-        $tr->init();
+        $tr->init();*/
+
+        $transport = new Zend_Mail_Transport_Smtp('smtp.yandex.ru', array(
+                'auth'  => 'login',
+                'port'  => 25,
+                'username'  => 'galtsin@yandex.ru',
+                'password'  => 'AGzDINQz'
+            )
+        );
+
+        Zend_Mail::setDefaultFrom('galtsin@yandex.ru');
+        Zend_Mail::setDefaultTransport($transport);
     }
 
     /**
@@ -162,6 +174,45 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
      */
     protected function _initEvents()
     {
+        $config = new Zend_Config_Xml(APPLICATION_PATH . "/configs/events.xml", null);
+        $events = array();
 
+        foreach($config->toArray() as $event => $options) {
+
+            if(array_key_exists('subject', $options)){
+                $subject = new $options['subject']();
+            } else {
+                $subject = new App_Core_Event_Subject();
+            }
+
+            if(is_array($options['observer'])){
+                foreach($options['observer'] as $observer){
+                    $subject->attach(new $observer());
+                }
+            } else {
+                $subject->attach(new $options['observer']());
+            }
+
+            $events[$event] = $subject;
+        }
+
+        Zend_Registry::set('events', $events);
+
+/*        $tr = new Zend_Mail_Transport_Smtp('smtp.yandex.ru', array(
+                'auth'  => 'login',
+                'port'  => 25,
+                'username'  => 'galtsin@yandex.ru',
+                'password'  => 'AGzDINQz'
+            )
+        );*/
+
+        //Zend_Mail::setDefaultTransport($tr);
+
+/*        $mail = new Zend_Mail();
+        $mail->setBodyText('This is the text of the mail.');
+        $mail->setFrom('galtsin@yandex.ru', 'Some Sender');
+        $mail->addTo('galtsin@gmail.com', 'Some Recipient');
+        $mail->setSubject('TestSubject');
+        $mail->send($tr);*/
     }
 }

@@ -65,7 +65,7 @@ class App_Core_Model_Store_Entity extends App_Core_Model_ModelAbstract
     /**
      * Получить идентификационные данные сущности
      * @param null|string $key
-     * @return App_Core_Model_Store_Data|array|int|null
+     * @return App_Core_Model_Store_Data|mixed|null
      */
     public function getData($key = null)
     {

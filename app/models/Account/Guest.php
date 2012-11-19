@@ -59,13 +59,87 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
 
         if($result->rowCount() > 0) {
             $row = $result->fetchRow();
-            return (int)$row['o_id_guest'];
+            $guestId = (int)$row['o_id_guest'];
+
+            // Загрузить новые данные
+            $result = App::getResource('FnApi')
+                ->execute('account_get_identity_guest', array(
+                    'id_guest' => $guestId
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                $this->getData()
+                    ->set('hash_activation', $row['o_hash_activation'])
+                    ->set('date_created', strtotime($row['o_date_created']))
+                    ->setDirty(false);
+
+                return $guestId;
+            }
         }
 
         return parent::_insert();
     }
 
-    public function activate(){}
-    public function getInvites(){}
-    public function addInvite(){}
+    /**
+     * @return int
+     */
+    protected function _remove()
+    {
+        if($this->isIdentity()) {
+            $result = App::getResource('FnApi')
+                ->execute('account_remove_guest', array(
+                    'id_guest'  => $this->getData()->getId()
+                )
+            );
+            $row = $result->fetchRow();
+            if((int)$row['o_id_guest'] == $this->getData()->getId()) {
+                $this->getData()->clear();
+                return $row['o_id_guest'];
+            }
+        }
+
+        return parent::_remove();
+    }
+
+    /**
+     * Активировать Гостя в учетную запись Пользователя
+     * @param string $login
+     * @param string $password
+     * @return bool
+     */
+    public function activate($login, $password)
+    {
+        if($this->isIdentity()){
+            $result = App::getResource('FnApi')
+                ->execute('account_activate_guest', array(
+                    'id_guest'  => $this->getData()->getId(),
+                    'login'     => $login,
+                    'password'  => isset($password) ? $password : rand(1000, 9999)
+                )
+            );
+            $row = $result->fetchRow();
+            if((int)$row['o_id_user'] > 0) {
+                $user = HM_Model_Account_User::load((int)$row['o_id_user']);
+                if($user instanceof HM_Model_Account_User) {
+                    $this->getData()->set('activated_user', $user->getData()->getId());
+                    $this->setProperty('activated_user', $user);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Получить активированную учетную запись гостя в системе
+     * @return HM_Model_Account_User|null
+     */
+    public function getActivatedUser()
+    {
+        return $this->getProperty('activated_user');
+    }
+
 }

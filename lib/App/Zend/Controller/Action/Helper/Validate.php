@@ -43,6 +43,7 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
     /**
      * TODO: Лишнее
      * Проверить валидность данных
+     * @deprecated
      * @param array $values
      * @return bool
      */
@@ -118,15 +119,7 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
         }
         return $validatorsChain;
     }
-/*    protected function _getValidatorsChain(array $validators)
-    {
-        $validatorsChain = array();
-        foreach($validators as $validator) {
-            $class = 'Zend_Validate_' . $validator['validator'];
-            $validatorsChain[] = new $class($validator['options']);
-        }
-        return $validatorsChain;
-    }*/
+
 
     /**
      * Получить цепочку фильтров
@@ -176,6 +169,7 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
     /**
      * TODO: Лишнее
      * Получить сообщения об ошибках
+     * @deprecated
      * @param bool $belongTo
      * @return array
      */
