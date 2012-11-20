@@ -1,14 +1,18 @@
+<h1>Войти</h1>
 <p><em>Для работы в системе Helpme, пожалуйста, авторизуйтесь</em></p>
-<form method="post" action="<?=$this->url()?>">
-    <p>
-        <label class="required" for="account-login">Логин</label>
-        <input type="text" value="" id="account-login" name="account[login]">
-    </p>
-    <p>
-        <label class="required" for="account-password">Пароль</label>
-        <input type="password" value="" id="account-password" name="account[password]">
-    </p>
-    <p>
-        <button type="submit" id="send" name="send">Войти в систему</button>
-    </p>
-</form>
+<hr/>
+<div style="margin-top: 20px">
+    <form method="post" action="<?=$this->url()?>">
+        <p>
+            <label class="required" for="account-login">Логин:</label>
+            <input type="text" value="" id="account-login" name="account[login]" style="width: 90%">
+        </p>
+        <p>
+            <label class="required" for="account-password">Пароль:</label>
+            <input type="password" value="" id="account-password" name="account[password]" style="width: 90%">
+        </p>
+        <p>
+            <button type="submit" id="send" name="send">Войти в систему</button>
+        </p>
+    </form>
+</div>

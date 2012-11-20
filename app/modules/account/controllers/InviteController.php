@@ -10,6 +10,7 @@ class Account_InviteController extends App_Zend_Controller_Action
 {
     /**
      * Активация
+     * TODO: Показать информационную страничку с подписками
      */
     public function activateAction()
     {
@@ -53,7 +54,6 @@ class Account_InviteController extends App_Zend_Controller_Action
                             if($guest->activate($form->getValue('login'), $form->getValue('password'))){
 
                                 // Оповещаем наблюдателей
-                                // TODO: Доработать
                                 $events = Zend_Registry::get('events');
                                 $events['account_activate_guest']->setGuest($guest)
                                     ->notify();
@@ -88,7 +88,4 @@ class Account_InviteController extends App_Zend_Controller_Action
         }
 
     }
-
-
-    // Показать информационную страничку с подписками
 }

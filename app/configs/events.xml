@@ -7,4 +7,7 @@
     <account_activate_guest>
         <observer>HM_Model_Billing_Agreement_Event_Observer_InviteActivation</observer>
     </account_activate_guest>
+    <agreement_subscription_add_user>
+        <observer>HM_Model_Billing_Agreement_Event_Observer_SubscriptionAddUser</observer>
+    </agreement_subscription_add_user>
 </events>

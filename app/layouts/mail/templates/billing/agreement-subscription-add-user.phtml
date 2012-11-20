@@ -1,0 +1,15 @@
+<?php
+$user = $this->user;
+$agreement= $this->agreement;
+?>
+<table border="0">
+    <tbody>
+    <thead>
+    <tr>
+        <p>Уважаемый <strong><?=$user->getData('last_name')?> <?=$user->getData('first_name')?> <?=$user->getData('middle_name')?> (<?=$user->getData('email')?>).</strong><br/>
+            Вы были успешно подписаны на договор #<?=$agreement->getData()->getId()?>
+        </p>
+    </tr>
+    </thead>
+    </tbody>
+</table>

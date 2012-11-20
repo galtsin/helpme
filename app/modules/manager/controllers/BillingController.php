@@ -189,6 +189,12 @@ class Manager_BillingController extends App_Zend_Controller_Action
                 $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
                 if($agreement instanceof HM_Model_Billing_Agreement){
                     if($agreement->getSubscription()->addUser($user) == $user->getData()->getId()){
+                        $events = Zend_Registry::get('events');
+                        $events['agreement_subscription_add_user']
+                            ->setUser($user)
+                            ->setAgreement($agreement)
+                            ->notify();
+
                         $this->setAjaxResult($user->getData()->getId());
                         $this->setAjaxStatus('ok');
                     }

@@ -164,6 +164,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             }
         }
 
+        //@deprecated
         Zend_Registry::set(App_Core_Resource_DbApi::RESOURCE_NAMESPACE, $config);
 
         // Регистрируем ресурс в системе
