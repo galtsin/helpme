@@ -69,30 +69,12 @@ class Default_IndexController extends App_Zend_Controller_Action
         $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
         //Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
 
-        $inviteColl = new HM_Model_Account_Invite_Collection();
-        $guest = $inviteColl->load(205)->getGuest();
 
+        //$this->getHelper('Referer')->push('default/index/index/r/ecb57e965957ca3312e3055d4db3c842/g/2');
+        //Zend_Debug::dump($this->getHelper('Referer')->pop());
+        //$this->getHelper('Referer')->remove();
 
-        $r = new App_Core_Resource_DbApi();
-        $result1 = $r->execute('user_identity', array(
-                'id' => 4
-            )
-        );
-
-        $result2 = $r->execute('user_identity', array(
-                'id' => 581
-            )
-        );
-
-
-
-        Zend_Debug::dump($result1->fetchRow());
-        Zend_Debug::dump($result2->fetchRow());
-
-        $uc = new HM_Model_Account_User_Collection();
-        Zend_Debug::dump($uc->load(4)->getRoles());
-
-        $b = new App_Core_Model_Store_Data();
+        $this->getHelper('Referer')->debug();
 
 
     }

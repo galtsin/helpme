@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <events>
-    <account_create_guest>
+    <account_send_invitation_guest>
         <!--<subject>HM_Model_Account_Invite_Event_Subject_InviteCreate</subject>-->
-        <observer>HM_Model_Account_Guest_Event_Observer_GuestCreate</observer>
-    </account_create_guest>
+        <observer>HM_Model_Account_Guest_Event_Observer_SendInvitation</observer>
+    </account_send_invitation_guest>
     <account_activate_guest>
-        <observer>HM_Model_Account_Invite_Event_Observer_InviteCreate</observer>
+        <observer>HM_Model_Billing_Agreement_Event_Observer_InviteActivation</observer>
     </account_activate_guest>
 </events>

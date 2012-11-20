@@ -2,10 +2,9 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 13.11.12
  */
 /**
- * ru:
+ *
  */
 class HM_Model_Account_Guest_Collection extends App_Core_Model_Collection_Filter
 {

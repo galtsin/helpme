@@ -94,9 +94,10 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
                 )
             );
             $row = $result->fetchRow();
+
             if((int)$row['o_id_guest'] == $this->getData()->getId()) {
                 $this->getData()->clear();
-                return $row['o_id_guest'];
+                return (int)$row['o_id_guest'];
             }
         }
 
@@ -119,7 +120,9 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
                     'password'  => isset($password) ? $password : rand(1000, 9999)
                 )
             );
+
             $row = $result->fetchRow();
+            Zend_Debug::dump($row);
             if((int)$row['o_id_user'] > 0) {
                 $user = HM_Model_Account_User::load((int)$row['o_id_user']);
                 if($user instanceof HM_Model_Account_User) {

@@ -9,11 +9,6 @@
  */
 class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entity
 {
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-    }
-
     /**
      * Получить список пользователей
      * @return HM_Model_Account_User[]|null
@@ -26,7 +21,7 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
             if($this->isIdentity()) {
                 $userColl = new HM_Model_Account_User_Collection();
 
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('subscription_get_users', array( // refactor
                         'id_agreement' => $this->getData()->getId()
                     )
@@ -59,7 +54,7 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
         }
 
         if($this->isIdentity()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('subscription_add_user', array(
                     'id_agreement'  => $this->getData()->getId(),
                     'id_user'       => $user->getData()->getId()
@@ -91,7 +86,7 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
         // Проверка аличия пользователя в текущей подписке
         if($this->hasUser($user)) {
             if($this->isIdentity()) {
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('subscription_remove_user', array(
                         'id_agreement'  => $this->getData()->getId(),
                         'id_user'       => $user->getData()->getId()
@@ -118,7 +113,6 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
                         return $user->getData()->getId();
                     }
                 }
-
             }
         }
 
@@ -200,7 +194,7 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
 
             if($invite->save()){
 
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                $result = App::getResource('FnApi')
                     ->execute('subscription_add_invite', array(
                         'id_invite'     => $invite->getData()->getId(),
                         'id_agreement'  => $this->getData()->getId()
@@ -223,7 +217,7 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
     }
 
     /**
-     * Удалить гостя из текущей подписки
+     * Удалить гостя из текущей подписки. Удаляется подписка. Гость в системе остается
      * @param HM_Model_Account_Guest $guest
      * @return int
      */
@@ -273,8 +267,8 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
             if($this->isIdentity()) {
                 $inviteColl = new HM_Model_Account_Invite_Collection();
 
-                $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
-                    ->execute('subscription_get_invites', array( // refactor
+                $result = App::getResource('FnApi')
+                    ->execute('subscription_get_invites', array(
                         'id_agreement' => $this->getData()->getId()
                     )
                 );

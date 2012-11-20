@@ -21,11 +21,21 @@ class App_Core_Event_Subject implements SplSubject
      */
     protected $_options = array();
 
+    /**
+     * Инициализация
+     */
     public function __construct()
     {
         $this->_observers = new SplObjectStorage();
     }
 
+    /**
+     * Магический метод позволяющий получять и устанавливать опции События
+     * Например: setUser(10); getUser();
+     * @param string $method
+     * @param mixed $params
+     * @return App_Core_Event_Subject
+     */
     public function __call($method, $params)
     {
         $methodType = substr($method, 0, 3);

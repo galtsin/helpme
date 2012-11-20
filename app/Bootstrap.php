@@ -98,6 +98,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // http://framework.zend.com/manual/1.12/en/zend.controller.actionhelpers.html
         //Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Access());
+        Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Referer());
     }
 
     /**
@@ -153,7 +154,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     protected function _initResources()
     {
         // Инициализация Postgres функций
-        $files = glob(APPLICATION_PATH . "/configs/postgres_api/*.xml", GLOB_BRACE);
+        $files = glob(APPLICATION_PATH . "/configs/fn_api/*.xml", GLOB_BRACE);
         $config = null;
         foreach($files as $file) {
             if(null === $config) {
@@ -170,7 +171,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     }
 
     /**
-     * Инициализация системы событий
+     * Инициализация событий
      */
     protected function _initEvents()
     {
@@ -197,22 +198,5 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         }
 
         Zend_Registry::set('events', $events);
-
-/*        $tr = new Zend_Mail_Transport_Smtp('smtp.yandex.ru', array(
-                'auth'  => 'login',
-                'port'  => 25,
-                'username'  => 'galtsin@yandex.ru',
-                'password'  => 'AGzDINQz'
-            )
-        );*/
-
-        //Zend_Mail::setDefaultTransport($tr);
-
-/*        $mail = new Zend_Mail();
-        $mail->setBodyText('This is the text of the mail.');
-        $mail->setFrom('galtsin@yandex.ru', 'Some Sender');
-        $mail->addTo('galtsin@gmail.com', 'Some Recipient');
-        $mail->setSubject('TestSubject');
-        $mail->send($tr);*/
     }
 }

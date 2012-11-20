@@ -2,10 +2,9 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 19.11.12
  */
 /**
- * ru:
+ *
  */
 class Account_InviteController extends App_Zend_Controller_Action
 {
@@ -14,6 +13,13 @@ class Account_InviteController extends App_Zend_Controller_Action
      */
     public function activateAction()
     {
+        // Перед активацией необходимо выйти из текущего Аккаунта
+        if(HM_Model_Account_Auth::getInstance()->isAuth()) {
+            $this->getHelper('Referer')->initialize();
+            $this->getHelper('Referer')->push($this->view->url());
+            $this->getHelper('Referer')->go($this->view->baseUrl('account/access/logout'));
+        }
+
         $request = $this->getRequest();
         if(array_key_exists('g', $request->getParams())){
 
@@ -29,7 +35,7 @@ class Account_InviteController extends App_Zend_Controller_Action
                 if($request->isPost()) {
                     $form->getElement('login')
                         ->setRequired(true)
-                        ->addValidator(new Zend_Validate_Regex('/^[0-9a-z_-]{1,50}$/iu'));
+                        ->addValidator(new Zend_Validate_Regex('/^[a-z]{1}[0-9a-z_-]{1,50}$/iu'));
 
                     $form->getElement('password')
                         ->setRequired(true)
@@ -49,10 +55,13 @@ class Account_InviteController extends App_Zend_Controller_Action
                                 // Оповещаем наблюдателей
                                 // TODO: Доработать
                                 $events = Zend_Registry::get('events');
-                                $events['account_activate_guest']->setGuest($guest)->notify();
-                                $guest->getData()->setRemoved(true);
+                                $events['account_activate_guest']->setGuest($guest)
+                                    ->notify();
 
+                                // Удаляем Гостя
+                                $guest->getData()->setRemoved(true);
                                 if($guest->save()){
+                                    // Переадресация на вход в личный кабинет
                                     $this->_redirect($this->view->baseUrl('account/access/login'));
                                 }
                             }
@@ -60,7 +69,7 @@ class Account_InviteController extends App_Zend_Controller_Action
                             $error = 'Во время работы произошла ошибка';
                         } else {
                             // Аккаунт уже существует
-                            $error = 'Аккаунт уже существует';
+                            $error = 'Аккаунт с логином `' . $form->getValue('login') . '` уже существует';
                         }
                     }
                 }
@@ -79,4 +88,7 @@ class Account_InviteController extends App_Zend_Controller_Action
         }
 
     }
+
+
+    // Показать информационную страничку с подписками
 }

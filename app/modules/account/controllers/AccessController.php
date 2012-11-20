@@ -16,8 +16,7 @@ class Account_AccessController extends App_Zend_Controller_Action
      */
     public function loginAction()
     {
-        if(true == HM_Model_Account_Auth::getInstance()->isAuth()) {
-            //$this->_redirect($this->view->baseUrl('account/access/possibility'));
+        if(HM_Model_Account_Auth::getInstance()->isAuth()) {
             $this->_redirect($this->view->baseUrl());
         }
 
@@ -32,12 +31,12 @@ class Account_AccessController extends App_Zend_Controller_Action
             if($filterInput->isValid()){
                 $auth = HM_Model_Account_Auth::getInstance();
                 if($auth->authenticate($filterInput->getEscaped('login'), $filterInput->getEscaped('password'))) {
-                    //$url = 'account/access/possibility';
-                    $url = '';
-                    if($request->getParam('ref')) {
-                        $url .= '/ref/' . $request->getParam('ref');
+                    if($this->getHelper('Referer')->hasReferer()) {
+                        $this->getHelper('Referer')->initialize();
+                        $this->getHelper('Referer')->jump();
+                    } else {
+                        $this->_redirect($this->view->baseUrl());
                     }
-                    $this->_redirect($this->view->baseUrl($url));
                 }
             }
         }
@@ -45,7 +44,7 @@ class Account_AccessController extends App_Zend_Controller_Action
 
     /*
      * final
-     * ru: Выход пользователя из системы
+     * Выход пользователя из системы
      */
     public function logoutAction()
     {
@@ -56,10 +55,12 @@ class Account_AccessController extends App_Zend_Controller_Action
             HM_Model_Account_Auth::getInstance()->unsetAuth();
         }
 
-        $url = ($this->getRequest()->getParam('ref')) ?
-            'account/access/login/ref/' . $this->getRequest()->getParam('ref') :
-            'account/access/login';
-        $this->_redirect($this->view->baseUrl($url));
+        if($this->getHelper('Referer')->hasReferer()) {
+            $this->getHelper('Referer')->initialize();
+            $this->getHelper('Referer')->jump();
+        } else {
+            $this->_redirect($this->view->baseUrl('account/access/login'));
+        }
     }
 
     /**

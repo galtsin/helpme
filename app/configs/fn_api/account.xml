@@ -132,4 +132,7 @@
         <id_object type="integer"/>
         <rw type="string"/>
     </possibility_add_object>
+    <account_remove_guest>
+        <id_guest type="integer"/>
+    </account_remove_guest>
 </functions>

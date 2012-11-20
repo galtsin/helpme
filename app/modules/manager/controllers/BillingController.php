@@ -215,7 +215,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
                     // Отправить письмо с подпиской
                     // Оповестить наблюдателей о событии. В частности сделать рассылку
                     $events = Zend_Registry::get('events');
-                    $events['account_create_guest']
+                    $events['account_send_invitation_guest']
                         ->setGuest($guest)
                         ->notify();
                 }
@@ -274,7 +274,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
     }
 
     /**
-     * Переотправить приглашения
+     * Повторная отправка приглашения пользователю в систему
      */
     public function resendSubscriptionInviteAction()
     {
@@ -285,6 +285,10 @@ class Manager_BillingController extends App_Zend_Controller_Action
                 if($guest instanceof HM_Model_Account_Guest) {
                     $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
                     if($agreement instanceof HM_Model_Billing_Agreement){
+                        $events = Zend_Registry::get('events');
+                        $events['account_send_invitation_guest']
+                            ->setGuest($guest)
+                            ->notify();
                         $this->setAjaxResult($guest->getData()->getId());
                         $this->setAjaxStatus('ok');
                     }

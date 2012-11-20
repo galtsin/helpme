@@ -135,6 +135,7 @@ final class App_Core_Model_Store_Data
     }
 
     /**
+     * TODO: Реализовать запись свойств только при флаге self::isWritable() == true!
      * @param $key
      * @param $value
      * @return App_Core_Model_Store_Data

@@ -9,6 +9,8 @@
 class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_Helper_Abstract
 {
     /**
+     * Пространство имен настроек.
+     * Например: account, tariff
      * @var null
      */
     private $_namespace = null;
@@ -31,7 +33,6 @@ class App_Zend_Controller_Action_Helper_Validate extends Zend_Controller_Action_
     private $_validators = array();
 
     /**
-     * Пространство имен
      * @param $namespace
      */
     public function __construct($namespace)
