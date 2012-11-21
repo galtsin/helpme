@@ -24,7 +24,11 @@
 <body style="background: #5F99D3">
 <div class="container">
     <div class="well" style="margin: 10% auto 0; width: 300px; background-color: #F5FAFF;">
-        <p style="margin-bottom: 30px"><img src="http://192.168.1.51/theme/default/images/logo.jpg"></p>
+        <p style="margin-bottom: 30px">
+            <a href="<?php echo $this->baseUrl(); ?>">
+                <img src="<?php echo $this->baseUrl('theme/default/images/logo.jpg')?>"/>
+            </a>
+        </p>
         <?php echo $this->layout()->content; ?>
     </div>
 </div>

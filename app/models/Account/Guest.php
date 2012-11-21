@@ -144,5 +144,4 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
     {
         return $this->getProperty('activated_user');
     }
-
 }

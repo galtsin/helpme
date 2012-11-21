@@ -132,6 +132,10 @@
         <id_object type="integer"/>
         <rw type="string"/>
     </possibility_add_object>
+    <possibility_get_pages/>
+    <possibility_get_roles_by_page>
+        <id_page type="integer"/>
+    </possibility_get_roles_by_page>
     <account_remove_guest>
         <id_guest type="integer"/>
     </account_remove_guest>
