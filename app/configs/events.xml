@@ -1,13 +1,24 @@
 <?xml version="1.0"?>
 <events>
-    <account_send_invitation_guest>
-        <!--<subject>HM_Model_Account_Invite_Event_Subject_InviteCreate</subject>-->
-        <observer>HM_Model_Account_Guest_Event_Observer_SendInvitation</observer>
-    </account_send_invitation_guest>
+    <!-- Активация аккаунта Гостя -->
     <account_activate_guest>
-        <observer>HM_Model_Billing_Agreement_Event_Observer_InviteActivation</observer>
+        <observer>HM_Model_Account_Guest_Event_Observer_SuccessActivate</observer>
+        <observer>HM_Model_Billing_Agreement_Event_Observer_ActivateSubscriptionGuest</observer>
     </account_activate_guest>
-    <agreement_subscription_add_user>
-        <observer>HM_Model_Billing_Agreement_Event_Observer_SubscriptionAddUser</observer>
-    </agreement_subscription_add_user>
+
+    <!-- Отправка приглашения Гостю в Систему -->
+    <account_send_register_invitation>
+        <!--<subject>HM_Model_Account_Invite_Event_Subject_InviteCreate</subject>-->
+        <observer>HM_Model_Account_Guest_Event_Observer_RegisterInvitation</observer>
+    </account_send_register_invitation>
+
+    <!-- Подписать Пользователя на Договор -->
+    <agreement_subscribe_user>
+        <observer>HM_Model_Billing_Agreement_Event_Observer_SubscribeUser</observer>
+    </agreement_subscribe_user>
+
+    <!-- Отписать Пользователя от Договора -->
+    <agreement_unsubscribe_user>
+        <observer>HM_Model_Billing_Agreement_Event_Observer_UnsubscribeUser</observer>
+    </agreement_unsubscribe_user>
 </events>

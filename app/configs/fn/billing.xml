@@ -118,10 +118,10 @@
     <billing_invoice_get_identity>
         <id_invoce type="integer"/>
     </billing_invoice_get_identity>
-    <agreement_get_invited_users>
-        <id_agreement type="integer"/>
-    </agreement_get_invited_users>
     <company_get_invoices>
         <id_company type="integer"/>
     </company_get_invoices>
+    <agreement_get_agreements_by_guest>
+        <id_guest type="integer"/>
+    </agreement_get_agreements_by_guest>
 </functions>

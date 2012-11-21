@@ -180,6 +180,11 @@ class Manager_BillingController extends App_Zend_Controller_Action
         }
     }
 
+    /**
+     * subscribeUser
+     * unsubscribeUser
+     * resendSubscriptionGuest
+     */
     public function addSubscriptionUserAction()
     {
         $request = $this->getRequest();
@@ -190,7 +195,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
                 if($agreement instanceof HM_Model_Billing_Agreement){
                     if($agreement->getSubscription()->addUser($user) == $user->getData()->getId()){
                         $events = Zend_Registry::get('events');
-                        $events['agreement_subscription_add_user']
+                        $events['agreement_subscribe_user']
                             ->setUser($user)
                             ->setAgreement($agreement)
                             ->notify();
@@ -221,7 +226,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
                     // Отправить письмо с подпиской
                     // Оповестить наблюдателей о событии. В частности сделать рассылку
                     $events = Zend_Registry::get('events');
-                    $events['account_send_invitation_guest']
+                    $events['account_send_register_invitation']
                         ->setGuest($guest)
                         ->notify();
                 }
@@ -251,6 +256,12 @@ class Manager_BillingController extends App_Zend_Controller_Action
                     $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
                     if($agreement instanceof HM_Model_Billing_Agreement){
                         if($agreement->getSubscription()->removeUser($user) == $user->getData()->getId()){
+                            $events = Zend_Registry::get('events');
+                            $events['agreement_unsubscribe_user']
+                                ->setUser($user)
+                                ->setAgreement($agreement)
+                                ->notify();
+
                             $this->setAjaxResult($user->getData()->getId());
                             $this->setAjaxStatus('ok');
                         }
@@ -292,7 +303,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
                     $agreement = HM_Model_Billing_Agreement::load($request->getPost('agreement'));
                     if($agreement instanceof HM_Model_Billing_Agreement){
                         $events = Zend_Registry::get('events');
-                        $events['account_send_invitation_guest']
+                        $events['account_send_register_invitation']
                             ->setGuest($guest)
                             ->notify();
                         $this->setAjaxResult($guest->getData()->getId());

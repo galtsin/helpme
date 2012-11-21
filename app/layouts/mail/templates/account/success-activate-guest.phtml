@@ -1,0 +1,22 @@
+<?php
+$guest = $this->guest;
+?>
+<table border="0">
+    <tbody>
+        <tr>
+            <td>
+                <p>Уважаемый <strong><?=$guest->getData('last_name')?> <?=$guest->getData('first_name')?> <?=$guest->getData('middle_name')?> (<?=$guest->getData('email')?>).</strong><br/>
+                    Ваша учетная запись была успешно активирована в сервисе HelpMe.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>Ваши учетные данные:<br/>
+                    <strong>login(логин): </strong><br/>
+                    <strong>psw(пароль): </strong>
+                </p>
+            </td>
+        </tr>
+    </tbody>
+</table>

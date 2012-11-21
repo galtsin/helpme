@@ -40,7 +40,7 @@ class Account_InviteController extends App_Zend_Controller_Action
 
                     $form->getElement('password')
                         ->setRequired(true)
-                        ->addValidator(new Zend_Validate_Regex('/^[0-9a-z_-]{1,50}$/iu'));
+                        ->addValidator(new Zend_Validate_Regex('/^[0-9a-z_-]{1,50}$/iu')); // TODO: Разрешить больше спец символов
 
                     if($form->isValid($request->getPost('account'))){
                         // Проверка логина
@@ -66,21 +66,21 @@ class Account_InviteController extends App_Zend_Controller_Action
                                 }
                             }
                             // Во время работы произошла ошибка
-                            $error = 'Во время работы произошла ошибка';
+                            $error = 'Во время выполнения операции произошла ошибка';
                         } else {
                             // Аккаунт уже существует
-                            $error = 'Аккаунт с логином `' . $form->getValue('login') . '` уже существует';
+                            $error = 'Учетная запись `' . $form->getValue('login') . '` уже существует';
                         }
                     }
                 }
                 $this->view->assign('form', $form);
             } else {
                 // Невенный код приглашения
-                $error = 'Невенный код приглашения';
+                $error = 'Получен неверный код приглашения';
             }
         } else {
             // Отсутствует приглашение
-            $error = 'Отсутствует приглашение';
+            $error = 'Отсутствует код приглашения';
         }
 
         if(isset($error)){

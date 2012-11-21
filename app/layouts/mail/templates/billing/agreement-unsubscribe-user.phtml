@@ -1,0 +1,15 @@
+<?php
+$user = $this->user;
+$agreement= $this->agreement;
+?>
+<table border="0">
+    <tbody>
+        <tr>
+            <td>
+                <p>Уважаемый <strong><?=$user->getData('last_name')?> <?=$user->getData('first_name')?> <?=$user->getData('middle_name')?> (<?=$user->getData('email')?>).</strong><br/>
+                    Вы были отписаны от договора #<?=$agreement->getData()->getId()?>
+                </p>
+            </td>
+        </tr>
+    </tbody>
+</table>

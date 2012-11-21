@@ -2,17 +2,15 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 05.05.12
  */
 /**
- * ru: Почтовый класс
+ * Почтовый класс
  * Использует вспомогательные классы Zend_Mail, Zend_Layout, Zend_View, Zend_Registry
  */
 class App_Core_Mail
 {
     /**
-     *  Основной шаблон письма
-     *
+     * Шаблон для писем
      * @var Zend_Layout
      */
     protected $_layout;
@@ -47,7 +45,9 @@ class App_Core_Mail
      */
     protected $_recipient = array();
 
-
+    /**
+     * Инициализация
+     */
     public function __construct()
     {
         $this->_mail = new Zend_Mail('utf-8');
@@ -81,6 +81,10 @@ class App_Core_Mail
         $this->_templateVariables[$name] = $value;
     }
 
+    /**
+     * Получить экземпляр Вида
+     * @return Zend_View
+     */
     public function getView()
     {
         return $this->_view;
@@ -96,12 +100,17 @@ class App_Core_Mail
         $this->_templateName = $filename;
     }
 
+    /**
+     * Указать тему письма
+     * @param string $subject
+     */
     public function setSubject($subject)
     {
         $this->_subject = $subject;
     }
 
     /**
+     * Назначить получателя
      * @param string $email
      * @param string $name
      */
@@ -111,7 +120,10 @@ class App_Core_Mail
         $this->_recipient['name'] = $name;
     }
 
-
+    /**
+     * Отправить письмо
+     * @return mixed
+     */
     public function send()
     {
         foreach ($this->_templateVariables as $key => $value) {
@@ -131,8 +143,6 @@ class App_Core_Mail
         $this->_mail->addTo($this->_recipient['email'], $this->_recipient['name']);
         $this->_mail->setSubject($this->_subject);
         $this->_mail->send();
-
-        return $html;
     }
 
 }

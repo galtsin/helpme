@@ -2,13 +2,15 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 20.11.12
  */
 /**
- * Оповещение пользователя о добавлении его в подписку на Договор
+ * Оповестить Пользователя о добавлении его в Подписку на Договор
  */
-class HM_Model_Billing_Agreement_Event_Observer_SubscriptionAddUser implements SplObserver
+class HM_Model_Billing_Agreement_Event_Observer_UnsubscribeUser implements SplObserver
 {
+    /**
+     * @param SplSubject $subject
+     */
     public function update(SplSubject $subject)
     {
         $user = $subject->getUser();
@@ -19,7 +21,7 @@ class HM_Model_Billing_Agreement_Event_Observer_SubscriptionAddUser implements S
             $mail->getView()->assign('user', $user);
             $mail->getView()->assign('agreement', $agreement);
 
-            $mail->setTemplate('billing/agreement-subscription-add-user');
+            $mail->setTemplate('billing/agreement-unsubscribe-user');
             $mail->setRecipient($user->getData('email'), implode(' ', array(
                         $user->getData('last_name'),
                         $user->getData('first_name'),
@@ -27,7 +29,7 @@ class HM_Model_Billing_Agreement_Event_Observer_SubscriptionAddUser implements S
                     )
                 )
             );
-            $mail->setSubject("Подписка на договор #" . $agreement->getData()->getId());
+            $mail->setSubject("Отписка от договора #" . $agreement->getData()->getId());
             $mail->send();
         }
     }

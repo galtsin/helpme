@@ -1,9 +1,7 @@
 <?php
-// TODO: Может заносить данные в StoreMemory?
-?>
-<?php
 $companies = $this->companies;
 $store = array();
+
 foreach($companies as $companyOwner) {
     $companyColl = new HM_Model_Billing_Company_Collection();
     foreach($companyOwner->getOwnerAgreements() as $agreements) {
@@ -15,7 +13,6 @@ foreach($companies as $companyOwner) {
 }
 
 $storeJson = Zend_Json::encode($store);
-
 ?>
 <?php
 $jScript = <<<JS

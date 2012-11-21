@@ -5,45 +5,6 @@ $json = $this->json;
 $jScript = <<<JS
 require(["core/Layout", "dojo/_base/lang", "core/helper/Validation"]);
 dojo.ready(function(){
-var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
-//console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
-/*var processing = core.layout.Processing({node: dojo.byId('loader')});
-processing.show('SEND');*/
-
-
-
-var Layout = new core.Layout({
-    timeout: 3000,
-    messenger: {
-        node: dojo.byId('messenger')
-    },
-    processing: {
-        node: dojo.byId('loader')
-    }
-});
-console.log(Layout.baseUrl('test'));
-console.log(window.location);
-
-//protocol + host
-
-console.log(dojo.window.get('location'));
-require(["dojo/router", "dojo/_base/lang"], function(router, lang){
-  router.register("something/:id", function(evt){
-    // Will fire when the hash matches
-    // evt.params.id will contain what is passed in :id
-  });
-
-  // Startup must be called in order to "activate" the router
-  router.startup();
-  router.go('something/14');
-});
-
-var valid = new core.helper.Validation(dojo.byId('testform'));
-valid.setMessages({});
-valid.checkRequired();
-valid.display();
-
-
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
@@ -51,19 +12,3 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 <div style="text-align: center; margin: 20px 0 0; padding: 100px 0; background: #f3f3f3;">
     <img src="<?php echo $this->baseUrl('theme/default/images/hm.jpg')?>"/>
 </div>
-<form id="testform">
-    <label for="_1_">f</label>
-    <input type="text" id="_1_" name="account" required="true">
-</form>
-<!-- Шаблон для -->
-<script id="entry-template" type="text/x-handlebars-template">
-    <div class="entry">
-        <h1>{{title}}</h1>
-        <div class="body">
-            {{body}}
-            <ul class="people_list">
-                {{#each people}}<li>{{this}}</li>{{/each}}
-            </ul>
-        </div>
-    </div>
-</script>

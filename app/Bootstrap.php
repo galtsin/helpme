@@ -4,7 +4,7 @@
  * @author: GaltsinAK
  */
 /**
- * ru: Настройка и инициализация приложения перед первым запуском
+ * Настройка и инициализация приложения перед запуском
  */
 class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
@@ -19,9 +19,14 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             'development'
         );
 
+        //@deprecated
         $validate = new Zend_Config_Ini(
             APPLICATION_PATH . '/configs/validate.ini'
           );
+
+        $filterInput = new Zend_Config_Ini(
+            APPLICATION_PATH . '/configs/filter-input.ini'
+        );
 
         // Инициализация адаптера БД
         Zend_Db_Table::setDefaultAdapter(
@@ -36,7 +41,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
             array(
                 'adapter' => 'array',
                 'content' => APPLICATION_PATH . '/languages/ru.php',
-                'locale'  => 'ru_RU',
+                'locale'  => 'ru_RU'
             )
         );
 
@@ -46,7 +51,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         // Регистрируем настройки в Реестре
         Zend_Registry::set('translate', $translate);
         Zend_Registry::set('configs', $config);
-        Zend_Registry::set('validate', $validate);
+        Zend_Registry::set('validate', $validate); // @deprecated
+        Zend_Registry::set('filter_input', $filterInput);
         Zend_Registry::set('acl', new Zend_Acl());
     }
 
@@ -154,7 +160,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     protected function _initResources()
     {
         // Инициализация Postgres функций
-        $files = glob(APPLICATION_PATH . "/configs/fn_api/*.xml", GLOB_BRACE);
+        $files = glob(APPLICATION_PATH . "/configs/fn/*.xml", GLOB_BRACE);
         $config = null;
         foreach($files as $file) {
             if(null === $config) {
