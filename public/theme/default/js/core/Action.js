@@ -1,9 +1,10 @@
 define([
     "dojo/_base/declare", // declare
     "dojo/dom",
+    "dojo/_base/lang",
     "dojo/query",
     "dojo/store/Memory"
-], function(declare, dom, query, storeMemory){
+], function(declare, dom, lang, query, storeMemory){
 
     return declare(null, {
         constructor: function(){
@@ -14,16 +15,16 @@ define([
         },
         //invocation, summons, defiance
         // method/:paramName1/:paramName2
-        register: function(/* String */callRequest, fn) {
-            if(callRequest.length > 0){
+        register: function(/* String */route, fn) {
+            if(route.length > 0){
 
                 var action = {
-                    request: callRequest,
+                    route: route, // TODO: заменить на route
                     fn: fn,
                     params: []
                 };
 
-                var parts = action.request.split('/:');
+                var parts = action.route.split('/:');
 
                 if(parts.length > 0){
                     action.method = parts.shift();
@@ -39,7 +40,7 @@ define([
         onApply: function(method, args){
             var action = this._store.get(method);
             if(action){
-                action.fn.apply(this, [args]);
+                action.fn.apply(this, [args, lang.mixin({}, action)]);
             }
         },
         // Преобразование массива в объект
@@ -63,7 +64,8 @@ define([
                 for(var i = 0, len = action.params.length; i < len; i ++) {
                     obj[action.params[i]] = parts[i + 1];
                 }
-                this.onApply(action.method, obj);
+                //this.onApply(action.method, obj);
+                action.fn.apply(this, [obj, lang.mixin({request: request}, action)]);
             }
         }
     });
