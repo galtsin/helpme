@@ -20,7 +20,9 @@ class App_Zend_Controller_Plugin_Page extends Zend_Controller_Plugin_Abstract
         );
 
         // Определить текущую страницу
-        $currentPage = $this->getPages()->findOneBy('privilege', $uri);
+        $currentPage = HM_Model_Account_Access::getInstance()
+            ->getPages()
+            ->findOneBy('privilege', $uri);
 
         if($currentPage instanceof Zend_Navigation_Page){
 
@@ -50,7 +52,13 @@ class App_Zend_Controller_Plugin_Page extends Zend_Controller_Plugin_Abstract
         return;
     }
 
-
+    /**
+     * Проверка на доступ текущей роли
+     * TODO: Перенести в HM_Model_Account_Access
+     * @deprecated
+     * @param App_Core_Model_Store_Data $role
+     * @return bool
+     */
     public function isAllowed(App_Core_Model_Store_Data $role)
     {
         $acl = HM_Model_Account_Access::getInstance()->getAcl();
@@ -71,30 +79,5 @@ class App_Zend_Controller_Plugin_Page extends Zend_Controller_Plugin_Abstract
         }
 
         return false;
-    }
-
-    /**
-     * Получить список доступных системных страниц
-     * @return Zend_Navigation
-     */
-    public function getPages()
-    {
-
-        $pages = new Zend_Navigation();
-
-        $result = App::getResource('FnApi')
-            ->execute('possibility_get_pages', array());
-
-        if($result->rowCount() > 0) {
-            foreach($result->fetchAll() as $row) {
-                $page = new Zend_Navigation_Page_Uri();
-                $page->setLabel($row['o_label'])
-                    ->setId((int)$row['o_id_page'])
-                    ->setPrivilege($row['o_uri']);
-                $pages->addPage($page);
-            }
-        }
-
-        return $pages;
     }
 }

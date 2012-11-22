@@ -99,7 +99,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     public function getTypes()
     {
         if(null === $this->_types) {
-            $types = array();
+            $this->_types = array();
 
             $result = App::getResource('FnApi')
                 ->execute('possibility_get_object_types', array());
@@ -113,10 +113,8 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 );
 
                 $this->getAcl()->addResource($type->get('code'));
-                $types[] = $type;
+                $this->_types[] = $type;
             }
-
-            $this->_types = $types;
         }
 
         return $this->_types;
@@ -130,7 +128,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     public function getRoles()
     {
         if(null === $this->_roles) {
-            $roles = array();
+            $this->_roles = array();
             $rootRole = null;
 
             $result = App::getResource('FnApi')
@@ -144,7 +142,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                         'name'  => $row['name']
                     )
                 );
-                $roles[] = $role;
+                $this->_roles[] = $role;
 
                 // Определяем корневую роль, у которой в БД запись = NULL.
                 // TODO: При отсутствии данной записи в БД - необходимо использовать ручную привязку ролей
@@ -152,8 +150,6 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                     $rootRole = $role;
                 }
             }
-
-            $this->_roles = $roles;
 
             // Привязка ролей от корня ролей
             if(!is_null($rootRole)) {

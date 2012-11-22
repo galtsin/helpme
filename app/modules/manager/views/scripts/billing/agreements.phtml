@@ -42,10 +42,10 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
         var Layout = new coreLayout({
             messenger: {
                 node: dom.byId('messenger')
-                },
+            },
             processing: {
                 node: dom.byId('loader')
-                }
+            }
         });
 
         // Список действий
@@ -80,7 +80,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
         // Экземпляр диалогового окна
         var DialogBox = new dijitDialog();
 
-        // Парсер
+        // DOM action parser. Находит ссылки на действия в связанном узле refNode и передает их диспетчеру
         function actionParser(/*String|Node*/refNode) {
             query('[data-action]', dom.byId(refNode)).on('click', function(event){
                 event.preventDefault();
@@ -88,7 +88,10 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
             });
         }
 
-        // Диспетчер
+        // Action dispatcher
+        // Существуют 2 вида маршрута:
+        // 1. Страница (router)
+        // 2. Подписка на действие (subscription)
         function actionDispatcher(/*String*/ request) {
             var parts = request.split('/');
             if(actionStore.get(parts[0])) {
@@ -103,7 +106,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
             }
         }
 
-
+        //@deprecated
         var Agr = {
             addCompanyClientEvents: function(node){
                 query('[data-action^="addAgreement"]', node).on('click', function(event){
@@ -115,6 +118,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                 });
             }
         };
+
 
         // Используем набор вспомогательных виджетов, которые можно использовать по всей системе
         // Поиск компании
@@ -228,6 +232,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
                                 td.setAttribute('rowspan', Number(td.getAttribute('rowspan')) + 1);
 
                                 // Навесить обработчики на вставленный объект
+                                // TODO: ПЕРЕДЕЛАТЬ
                                 Agr.addCompanyClientEvents(dom.byId('company-client-item-' + selectCompany));
                             });
                         } else {
@@ -342,7 +347,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(addSubscriberUserForm['send'], 'click', function(){
                     Layout.send({
-                        url: Layout.baseUrl('manager/billing/add-subscription-user'),
+                        url: Layout.baseUrl('manager/billing/subscribe-user'),
                         format: 'json',
                         args: domForm.toObject(addSubscriberUserForm)
                     }).then(function(response){
@@ -354,7 +359,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(addSubscriberGuestForm['send'], 'click', function(){
                     Layout.send({
-                        url: Layout.baseUrl('manager/billing/add-subscription-guest'),
+                        url: Layout.baseUrl('manager/billing/subscribe-guest'),
                         format: 'json',
                         args: domForm.toObject(addSubscriberGuestForm)
                     }).then(function(response){
@@ -483,7 +488,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(editSubscribersForm['remove'], 'click', function(){
                     Layout.send({
-                        url:    Layout.baseUrl('manager/billing/remove-subscription-user'),
+                        url:    Layout.baseUrl('manager/billing/unsubscribe-user'),
                         args: domForm.toObject(editSubscribersForm)
                     }).then(function(response){
                         if(response.result != -1) {
@@ -494,7 +499,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(editSubscriptionGuestForm['remove'], 'click', function(){
                     Layout.send({
-                        url:    Layout.baseUrl('manager/billing/remove-subscription-guest'),
+                        url:    Layout.baseUrl('manager/billing/unsubscribe-guest'),
                         args: domForm.toObject(editSubscriptionGuestForm)
                     }).then(function(response){
                         if(response.result != -1) {
@@ -505,7 +510,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(editSubscriptionGuestForm['resend'], 'click', function(){
                     Layout.send({
-                        url:    Layout.baseUrl('manager/billing/resend-subscription-invite'),
+                        url:    Layout.baseUrl('manager/billing/resend-subscribe-guest'),
                         args: domForm.toObject(editSubscriptionGuestForm)
                     }).then(function(response){
                         if(response.result != -1) {
@@ -546,11 +551,22 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             <col/>
         </colgroup>
         <thead>
-        <tr>
-            <th colspan="3">Компания (владелец ЛК)</th>
-        </tr>
+            <tr>
+                <th colspan="3">Компания (владелец ЛК)</th>
+            </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            <!--
+            <tr>
+                <td colspan="2">
+                    Лад-Сервис ООО (0000000000 / 00000000)
+                </td>
+                <td>
+                    <a>развернуть</a>
+                </td>
+            </tr>
+            -->
+        </tbody>
     </table>
 </div>
 
@@ -585,9 +601,13 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     </tr>
 </script>
 
+<!-- Шаблон добавления контрагента -->
 <script id="new-company-client-item" type="text/x-handlebars-template">
     <tr id="new-company-client-item-{{company.id}}">
         <td>{{company.data.name}} ({{company.data.inn}} / {{company.data.kpp}}) <span class="error-anchor label label-important"><span>новый</span></span></td>
         <td><a data-action="addAgreement/{{parent}}/{{company.id}}">+ новый</a></td>
     </tr>
 </script>
+<div id="_test_">
+<button data-action="getClient/geronimo" type="button">get clients</button>
+</div>

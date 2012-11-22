@@ -38,7 +38,6 @@ define([
                 var formNode = dom.byId('search-company');
                 on(formNode['send'], 'click', function(){
                     that._searchRequest(formNode);
-                    that._searchRequest(formNode)
                 });
             });
         },

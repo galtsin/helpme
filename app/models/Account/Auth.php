@@ -54,6 +54,7 @@ class HM_Model_Account_Auth extends App_Core_Model_ModelAbstract
         if (null === $this->_auth) {
             $this->setAuth();
         }
+
         return $this->_auth;
     }
 

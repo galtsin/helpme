@@ -56,7 +56,7 @@ require([
         // TODO: заменить на dojo.lang::mixin
         /**
          * Передать свойства источника, свойству приемника при условии совпадения свойств
-         * @deprecated see dojo-lang-mixin
+         * @deprecated use dojo-lang-mixin
          * @param recipient
          * @param source
          * @return {*}

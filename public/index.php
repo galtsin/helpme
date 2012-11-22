@@ -14,14 +14,14 @@ set_include_path(implode(PATH_SEPARATOR, array(
     get_include_path()
 )));
 
-/** Zend_Application */
+// Zend_Application
 require_once 'Zend/Application.php';
 require_once 'Zend/Session.php';
 require_once APPLICATION_PATH . '/App.php';
 
 $defaultNamespace = new Zend_Session_Namespace();
 
-/** Номинальная защита от угона сессии */
+// Защита от угона сессии
 if (!isset($defaultNamespace->initialized)) {
     Zend_Session::regenerateId();
     $defaultNamespace->initialized = true;

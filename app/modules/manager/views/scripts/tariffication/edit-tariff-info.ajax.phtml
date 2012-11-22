@@ -43,21 +43,25 @@ $tariff = $this->data;
         <tbody>
         <tr>
             <td>
+                <input type="hidden" name="tariff[active]" value="0"/>
                 <input type="checkbox" name="tariff[active]" id="edit-tariff-active"
                     <?=$tariff->getData('active') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-active" class="inline">Активен</label>
             </td>
             <td>
+                <input type="hidden" name="tariff[not_available]" value="0"/>
                 <input type="checkbox" name="tariff[not_available]" id="edit-tariff-not-available"
                     <?=$tariff->getData('not_available') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-not-available" class="inline">Доступен клиенту</label>
             </td>
             <td>
+                <input type="hidden" name="tariff[need_committer]" value="0"/>
                 <input type="checkbox" name="tariff[need_committer]" id="edit-tariff-need-committer"
                     <?=$tariff->getData('need_committer') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-need-committer" class="inline">Требует подтверждения администратора ЛК</label>
             </td>
             <td>
+                <input type="hidden" name="tariff[specchoice]" value="0"/>
                 <input type="checkbox" name="tariff[specchoice]" id="edit-tariff-specchoice"
                     <?=$tariff->getData('specchoice') ? "checked=\"true\"" : ""; ?> value="1" />
                 <label for="edit-tariff-specchoice" class="inline">Доступен выбор специалиста</label>
@@ -103,18 +107,21 @@ $tariff = $this->data;
         </tr>
         <tr>
             <td>
+                <input type="hidden" name="tariff[consultation_enabled]" value="0"/>
                 <input type="checkbox" name="tariff[consultation_enabled]" id="edit-tariff-consultation-enabled"
                     <?=$tariff->getData('consultation_enabled') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
                 <label for="edit-tariff-consultation-enabled" class="inline">Консультации разрешены</label>
             </td>
             <td>
+                <input type="hidden" name="tariff[consultation_unlimited]" value="0"/>
                 <input type="checkbox" name="tariff[consultation_unlimited]" id="edit-tariff-consultation-unlimited"
                     <?=$tariff->getData('consultation_unlimited') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
                 <label for="edit-tariff-consultation-unlimited" class="inline">Консультации без ограничений</label>
             </td>
             <td>
+                <input type="hidden" name="tariff[auto_prolongate]" value="0"/>
                 <input type="checkbox" name="tariff[auto_prolongate]" id="edit-tariff-auto-prolongate"
                     <?=$tariff->getData('auto_prolongate') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?> />
@@ -166,12 +173,14 @@ $tariff = $this->data;
         <tbody>
         <tr>
             <td>
+                <input type="hidden" name="tariff[message_enabled]" value="0"/>
                 <input type="checkbox" name="tariff[message_enabled]" id="edit-tariff-message-enabled"
                     <?=$tariff->getData('message_enabled') ? "checked=\"true\"" : ""; ?> value="1"
                     <?$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
                 <label for="edit-tariff-message-enabled" class="inline">Сообщения разрешены</label>
             </td>
             <td>
+                <input type="hidden" name="tariff[message_unlimited]" value="0"/>
                 <input type="checkbox" name="tariff[message_unlimited]" id="edit-tariff-message-unlimited"
                     <?=$tariff->getData('message_unlimited') ? "checked=\"true\"" : ""; ?> value="1"
                     <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>

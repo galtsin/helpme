@@ -181,11 +181,9 @@ class Manager_BillingController extends App_Zend_Controller_Action
     }
 
     /**
-     * subscribeUser
-     * unsubscribeUser
-     * resendSubscriptionGuest
+     * Добавить Пользователя в Подписку на Договор
      */
-    public function addSubscriptionUserAction()
+    public function subscribeUserAction()
     {
         $request = $this->getRequest();
         if($request->isPost()) {
@@ -208,7 +206,10 @@ class Manager_BillingController extends App_Zend_Controller_Action
         }
     }
 
-    public function addSubscriptionGuestAction()
+    /**
+     * Добавить Гостя в Подписку на Договор
+     */
+    public function subscribeGuestAction()
     {
         $request = $this->getRequest();
         if($request->isPost()) {
@@ -246,7 +247,10 @@ class Manager_BillingController extends App_Zend_Controller_Action
         }
     }
 
-    public function removeSubscriptionUserAction()
+    /**
+     * Исключить Пользователя из Подписки на Договор
+     */
+    public function unsubscribeUserAction()
     {
         $request = $this->getRequest();
         if($request->isPost()) {
@@ -271,7 +275,10 @@ class Manager_BillingController extends App_Zend_Controller_Action
         }
     }
 
-    public function removeSubscriptionGuestAction()
+    /**
+     * Исключить Гостя из Подписки на Договор
+     */
+    public function unsubscribeGuestAction()
     {
         $request = $this->getRequest();
         if($request->isPost()) {
@@ -291,9 +298,9 @@ class Manager_BillingController extends App_Zend_Controller_Action
     }
 
     /**
-     * Повторная отправка приглашения пользователю в систему
+     * Повторная отправка Гостю Подписки на Договор
      */
-    public function resendSubscriptionInviteAction()
+    public function resendSubscribeGuestAction()
     {
         $request = $this->getRequest();
         if($request->isPost()) {
