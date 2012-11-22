@@ -50,7 +50,6 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     protected function _init()
     {
         $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'possibility');
-
         $class = get_called_class(); //  Для доступа наследуемым классам
         $this->setType($class::OBJECT_TYPE);
     }

@@ -126,6 +126,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $view->headLink()->appendStylesheet($this->baseUrl.'/theme/default/js/dojo/dijit/themes/dijit.css');
         $view->headLink()->appendStylesheet($this->baseUrl.'/theme/default/js/dojo/dijit/themes/hm/hm.css');
         $view->headLink()->appendStylesheet($this->baseUrl.'/theme/default/css/template.css');
+
         // Библиотека Dojo
         //$view->headScript()->appendFile($this->baseUrl.'/theme/default/js/dojo/dojo/dojo.js', $type = 'text/javascript', $attrs = array());
         $view->headScript()->appendFile($this->baseUrl.'/theme/default/js/dojo-release-1.8.1/dojo/dojo.js', $type = 'text/javascript', $attrs = array());

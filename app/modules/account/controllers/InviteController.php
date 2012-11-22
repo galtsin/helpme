@@ -36,10 +36,12 @@ class Account_InviteController extends App_Zend_Controller_Action
                 if($request->isPost()) {
                     $form->getElement('login')
                         ->setRequired(true)
+                        ->addFilter(new Zend_Filter_StringTrim())
                         ->addValidator(new Zend_Validate_Regex('/^[a-z]{1}[0-9a-z_-]{1,50}$/iu'));
 
                     $form->getElement('password')
                         ->setRequired(true)
+                        ->addFilter(new Zend_Filter_StringTrim())
                         ->addValidator(new Zend_Validate_Regex('/^[0-9a-z_-]{1,50}$/iu')); // TODO: Разрешить больше спец символов
 
                     if($form->isValid($request->getPost('account'))){

@@ -137,7 +137,7 @@ $tariff = $this->data;
                     <input type="text" name="tariff[tmin]" id="edit-tariff-tmin" value="<?=$tariff->getData('tmin')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
                 </td>
                 <td>
-                    <label for="edit-tariff-tqmin">Нетарифицируемое время (сек.)</label>
+                    <label for="edit-tariff-tqmin">Мин. тарифицируемое время (сек.)</label>
                     <input type="text" name="tariff[tqmin]" id="edit-tariff-tqmin" value="<?=$tariff->getData('tqmin')?>" <?=$tariff->getData('used') ? "disabled=\"true\"" : "" ?>/>
                 </td>
                 <td>

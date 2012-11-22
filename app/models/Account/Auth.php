@@ -28,7 +28,6 @@ class HM_Model_Account_Auth extends App_Core_Model_ModelAbstract
      */
     public function __construct()
     {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
         $this->addResource(new Zend_Auth_Storage_Session(self::AUTH_NAMESPACE, 'account'), 'account');
         $this->addResource(new Zend_Auth_Storage_Session(self::AUTH_NAMESPACE, 'account_settings'), 'account_settings');
     }
@@ -78,7 +77,7 @@ class HM_Model_Account_Auth extends App_Core_Model_ModelAbstract
      */
     public function authenticate($login, $password)
     {
-        $adapter = new App_Zend_Auth_Adapter_DbApi($this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE));
+        $adapter = new App_Zend_Auth_Adapter_DbApi(App::getResource('FnApi'));
         $adapter->setLogin($login)
             ->setPassword($password);
 
@@ -86,7 +85,7 @@ class HM_Model_Account_Auth extends App_Core_Model_ModelAbstract
     }
 
     /**
-     *
+     * Параметра выхода
      * 'login'     => $userRow['login'],
      * 'token'     => md5($userRow['password'] . $userRow['login']),
      * 'is_auth'   => true,
@@ -121,28 +120,6 @@ class HM_Model_Account_Auth extends App_Core_Model_ModelAbstract
     public function getSettings()
     {
         return $this->getResource('account_settings')->read();
-    }
-
-    /**
-     * Назначить привилегии для аккаунта
-     * @param array $possibility
-     * @return HM_Model_Account_Auth
-     */
-    public function setPossibility(array $possibility)
-    {
-        $settings = $this->getSettings();
-        $settings['possibility'] = $possibility;
-        return $this->setSettings($settings);
-    }
-
-    /**
-     * Получить привелегии для аккаунта
-     * @return mixed
-     */
-    public function getPossibility()
-    {
-        $settings = $this->getSettings();
-        return $settings['possibility'];
     }
 
     /*

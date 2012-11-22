@@ -9,18 +9,20 @@
 
 class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 {
+    /**
+     * @deprecated
+     */
     const RESOURCE_NAMESPACE = 'account_access';
 
     /**
-     * Пустая роль
+     * Роль "по умолчанию"
      */
     const EMPTY_ROLE = 'GUEST';
 
     /**
-     * Пустой тип
+     * Тип ресурсов "по умолчанию"
      */
     const EMPTY_TYPE = 'EMPTY';
-
 
     /**
      * Массив ТипоОбъектов.
@@ -37,7 +39,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 
     /**
      * Список страниц
-     * @var null|array Zend_Navigation_Page_Uri
+     * @var null|Zend_Navigation_Page
      */
     private $_pages = null;
 
@@ -65,13 +67,12 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     {
         $this->_acl = Zend_Registry::get('acl');
         $this->_acl->deny();
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
 
         // TODO: Необходимо ли?
         $this->getRoles();
         $this->getTypes();
 
-        // Выставить доступ
+        // TODO: Перенести в БД. Выставить доступ
         $this->getAcl()
             ->allow('ADM_TARIFF', 'TARIFF', array('W', 'R'))
             ->allow('ADM_GROUP', 'GROUP', array('W', 'R'))
@@ -100,7 +101,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
         if(null === $this->_types) {
             $types = array();
 
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('possibility_get_object_types', array());
 
             foreach($result->fetchAll() as $row) {
@@ -132,7 +133,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             $roles = array();
             $rootRole = null;
 
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('possibility_get_roles', array());
 
             foreach($result->fetchAll() as $row) {
@@ -146,7 +147,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                 $roles[] = $role;
 
                 // Определяем корневую роль, у которой в БД запись = NULL.
-                // TODO: При отсутствии данной записи - необходимо использовать ручную привязку ролей
+                // TODO: При отсутствии данной записи в БД - необходимо использовать ручную привязку ролей
                 if(is_null($role->get('pid'))){
                     $rootRole = $role;
                 }
@@ -161,6 +162,32 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
         }
 
         return $this->_roles;
+    }
+
+    /**
+     * Получить список доступных системных страниц
+     * @return Zend_Navigation
+     */
+    public function getPages()
+    {
+        if(null === $this->_pages) {
+            $this->_pages = new Zend_Navigation();
+
+            $result = App::getResource('FnApi')
+                ->execute('possibility_get_pages', array());
+
+            if($result->rowCount() > 0) {
+                foreach($result->fetchAll() as $row) {
+                    $page = new Zend_Navigation_Page_Uri();
+                    $page->setLabel($row['o_label'])
+                        ->setId((int)$row['o_id_page'])
+                        ->setPrivilege($row['o_uri']);
+                    $this->_pages->addPage($page);
+                }
+            }
+        }
+
+        return $this->_pages;
     }
 
     /**
@@ -237,7 +264,6 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Вернуть Zend_Acl
      * @return Zend_Acl
      */
     public function getAcl()
@@ -336,7 +362,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     public function getActionRoles($action)
     {
         $roles = array();
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('possibility_get_roles_by_action', array(
                 'action'           => $action,
             )
@@ -362,7 +388,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     {
         $objects = array();
         if($this->isAllowedUserRole($user, $company, $role)) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('possibility_get_objects', array(
                     'id_user'           => $user->getData()->getId(),
                     'id_role'           => $role->get('id'),
