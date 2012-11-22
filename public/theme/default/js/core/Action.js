@@ -43,7 +43,7 @@ define([
             }
         },
         // Преобразование массива в объект
-        parse: function(/*String|Node*/refNode) {
+        parsing: function(/*String|Node*/refNode) {
             var that = this;
             query('[data-action]', dom.byId(refNode)).on('click', function(event){
                 event.preventDefault();

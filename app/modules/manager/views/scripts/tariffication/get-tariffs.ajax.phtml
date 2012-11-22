@@ -1,0 +1,33 @@
+<?php
+$data = $this->data;
+?>
+<table class="table table-bordered">
+    <colgroup>
+        <col width="350">
+        <col width="50">
+        <col/>
+    </colgroup>
+    <thead>
+    <tr>
+        <th colspan="3">Линия Консультации</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach($data as $entry):?>
+    <tr>
+        <td rowspan="<?=count($entry['tariffs']) + 1?>"><?=$entry['line']->getData('name')?></td>
+        <th>#ID</th>
+        <th>Тариф</th>
+    </tr>
+        <?php foreach($entry['tariffs'] as $tariff): ?>
+        <tr>
+            <td><?=$tariff->getData('id')?></td>
+            <td><a title="<?=$tariff->getData('name')?>" data-action="editTariffInfo/<?=$tariff->getData('id')?>" class="engineAjax"><?=$tariff->getData('name')?></a></td>
+        </tr>
+            <?php endforeach; ?>
+    <tr>
+        <td colspan="3"><div style="text-align: right;"><button type="button" data-action="addTariff/<?=$entry['line']->getData('id')?>">Добавить</button></div></td>
+    </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

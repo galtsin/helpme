@@ -84,7 +84,35 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
         $this->view->assign('chainLineWithTariffs', $lines);
     }
 
-    public function getTariffsAction(){}
+    public function getTariffsAction()
+    {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $pageRole = 'ADM_LINE';
+        $admin = HM_Model_Account_User::load($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $tariffColl = new HM_Model_Billing_Tariff_Collection();
+        $accessColl->setType('LINE')
+            ->setModelRestore('HM_Model_Counseling_Structure_Line')
+            ->setRestrictionByInheritanceFromRole($pageRole);
+
+        $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
+            ->getCollection();
+
+        $lines = array();
+        foreach($accessColl->getObjectsIterator() as $line) {
+            if(!array_key_exists($line->getData('id'), $lines)) {
+                $lines[$line->getData('id')] = array(
+                    'line'      => $line,
+                    'tariffs'   => array()
+                );
+            }
+            $tariffColl->resetFilters();
+            $tariffColl->clear();
+            $lines[$line->getData('id')]['tariffs'] = $tariffColl->addEqualFilter('line', $line->getData('id'))->getCollection()->getObjectsIterator();
+        }
+        $this->view->assign('data', $lines);
+    }
 
     /**
      * TODO: Пример для подражаения последний
@@ -109,6 +137,7 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
                             ->set('name', $filterInput->getEscaped('name'));
                         if($tariff->save()) {
                             $this->setAjaxResult($tariff->getData('id'));
+                            $this->setAjaxStatus('ok');
                         }
                     } else {
                         $this->addAjaxError($filterInput->getMessages(), 'tariff');
