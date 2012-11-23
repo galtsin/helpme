@@ -73,6 +73,37 @@ class Manager_CounselingStructureController extends App_Zend_Controller_Action
 
     }
 
+    /**
+     * Получить Линии Консультации
+     */
+    public function getLinesAction()
+    {
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $pageRole = 'ADM_LINE';
+        $admin = HM_Model_Account_User::load($account['user']);
+
+        $accessColl = new HM_Model_Account_Access_Collection();
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        $accessColl->setType('LINE')
+            ->setModelRestore('HM_Model_Counseling_Structure_Line')
+            ->setRestrictionByInheritanceFromRole($pageRole);
+
+        $accessColl->addEqualFilter('possibility', $admin->getPossibilities())
+            ->getCollection();
+
+        $companies = array();
+        foreach($accessColl->getObjectsIterator() as $line) {
+            if(!array_key_exists($line->getData('company_owner'), $companies)) {
+                $companies[$line->getData('company_owner')] = array(
+                    'company'   =>$companyColl->load($line->getData('company_owner')),
+                    'lines'     => array()
+                );
+            }
+            $companies[$line->getData('company_owner')]['lines'][] = $line;
+        }
+        $this->view->assign('chainCompanyWithLines', $companies);
+    }
+
     public function _groupsAction()
     {
         $groupColl = new HM_Model_Counseling_Structure_Group_Collection();

@@ -74,7 +74,7 @@ require([
          */
         _fillText: function(status){
             if(!this._statuses.hasOwnProperty(status)) {
-                throw new Error('Статус сообщения неопределен1');
+                throw new Error('Статус сообщения неопределен');
             }
             this._init.node.innerHTML = '<span id="messenger-text">' + this._statuses[status] + '</span>';
             return this._init.node;

@@ -1,0 +1,76 @@
+<?php
+$chainCompanyWithLines = $this->chainCompanyWithLines;
+?>
+<?php
+$jScript = <<<JS
+require([
+    "dojo/dom",
+    "dojo/dom-construct",
+    "dojo/dom-form",
+    "dojo/html",
+    "dojo/on",
+    "dojo/query",
+    "dojo/hash",
+    "dojo/router",
+    "core/Dispatcher",
+    "core/Layout",
+    "dijit/Dialog"
+], function(dom, domConstruct, domForm, html, on, query, hash, router, coreDispatcher, coreLayout, dijitDialog){
+    dojo.ready(function(){
+
+        var Layout = new coreLayout({
+            messenger: {
+                node: dom.byId('messenger')
+            },
+            processing: {
+                node: dom.byId('loader')
+            }
+        });
+
+        var DialogBox = new dijitDialog();
+
+        coreDispatcher.register('getLines', function(){
+            Layout.load({
+                url:    Layout.baseUrl('manager/counseling-structure/get-lines'),
+                format: 'html'
+            }).then(function(response){
+                html.set('contentLines', response);
+            }).then(function(){
+                coreDispatcher.parsing(dom.byId('contentLines'));
+            });
+        }, true);
+
+        coreDispatcher.register('getLineBoard/:line', function(routerEvent){
+            Layout.load({
+                url:    Layout.baseUrl('manager/counseling-structure/get-line-board'),
+                format: 'html',
+                args: routerEvent.params
+            }).then(function(response){
+                html.set('contentLines', response);
+            })
+        }, true);
+
+        coreDispatcher.register('editLineInfo/:line', function(routerEvent){
+            Layout.load({
+                url:    Layout.baseUrl('manager/counseling-structure/edit-line-info'),
+                format: 'html',
+                args: routerEvent.params
+            }).then(function(response){
+                html.set('contentLine', response);
+            })
+        }, true);
+
+        (function(){
+            // Активируем роутер
+            coreDispatcher.startup();
+            if(hash().length == 0){
+                coreDispatcher.dispatch('getLines');
+            }
+        })();
+
+    });
+});
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript');
+?>
+<div id="contentLines"></div>
