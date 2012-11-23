@@ -1,3 +1,4 @@
+// @deprecated
 dojo.provide("core.Loader");
 require([], function(){
     core.Loader = function(){};

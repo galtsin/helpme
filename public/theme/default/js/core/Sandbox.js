@@ -1,3 +1,4 @@
+// @deprecated
 dojo.provide("core.Sandbox");
 require(["core/sandbox/Base", "core/sandbox/Screen", "core/sandbox/Layout"], function(Base, Screen, Layout){
     core.Sandbox = function(){};
