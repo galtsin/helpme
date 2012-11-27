@@ -60,8 +60,9 @@ class Default_IndexController extends App_Zend_Controller_Action
 
 
 
-
-        Zend_Debug::dump(HM_Model_Account_Access::getInstance()->getOperation('default/index/test'));
+        Zend_Debug::dump(HM_Model_Account_User::load(4)->getRoles());
+        $access = HM_Model_Account_Access::getInstance()->isUserInheritedRole(HM_Model_Account_User::load(4), 'JR_ADM_AGREEMENT', 19);
+        Zend_Debug::dump($access);
     }
 
 }

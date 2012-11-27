@@ -73,6 +73,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
         $this->getTypes();
 
         // TODO: Перенести в БД. Выставить доступ
+        // Привилегии чтение/запись
         $this->getAcl()
             ->allow('ADM_TARIFF', 'TARIFF', array('W', 'R'))
             ->allow('ADM_GROUP', 'GROUP', array('W', 'R'))
@@ -341,7 +342,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     }
 
     /**
-     * Получить массив ролей от которых происходит наследование
+     * Получить массив ролей-родителей от которых происходит наследование прав текущей роли $role
      * @param App_Core_Model_Store_Data $role
      * @param bool $recursive
      * @return array App_Core_Model_Store_Data
@@ -397,102 +398,26 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
      * if(isAllowed && isWritable)
      */
 
+
     public function isWritable($user, $role, $company, $type, $objectId){}
 
-
-
     /**
+     * Унаследовал ли пользователь текущую роль
      * @param HM_Model_Account_User $user
-     * @param App_Core_Model_Store_Data $role
+     * @param $roleIdentifier
+     * @param null|int $company
      * @return bool
      */
-    public function isAllowedRole(HM_Model_Account_User $user, App_Core_Model_Store_Data $role)
+    public function isUserInheritedRole(HM_Model_Account_User $user, $roleIdentifier, $company = null)
     {
+        $role = $this->getRole($roleIdentifier);
         foreach($user->getRoles() as $roleIdentifier => $companies) {
             if($this->getAcl()->inheritsRole($roleIdentifier, $role->get('code')) || $roleIdentifier === $role->get('code')) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /**
-     * TODO: Объединить текущий класс с HM_Model_Account_AccessMenu
-     */
-
-    /**
-     * TODO: в разработке.
-     * Загрузить список ролей для текущего действия
-     * В приложении перебрать роли и объединить объекты
-     * @param string $action
-     * @return array App_Core_Model_DataObject
-     */
-    public function getActionRoles($action)
-    {
-        $roles = array();
-        $result = App::getResource('FnApi')
-            ->execute('possibility_get_roles_by_action', array(
-                'action'           => $action,
-            )
-        );
-        if($result->rowCount() > 0) {
-            foreach($result->fetchAll() as $row) {
-                array_push($roles, $this->getRole($row['id_role']));
-            }
-        }
-        return $roles;
-    }
-
-    /**
-     * Final
-     * Получить массив разрешенных объектов для пользователя по определенной роли
-     * @param HM_Model_Account_User $user
-     * @param int $company
-     * @param App_Core_Model_DataObject $role
-     * @param App_Core_Model_DataObject $type
-     * @return array ids
-     */
-    public function getObjectsForUserRole(HM_Model_Account_User $user, $company, App_Core_Model_DataObject $role,  App_Core_Model_DataObject $type)
-    {
-        $objects = array();
-        if($this->isAllowedUserRole($user, $company, $role)) {
-            $result = App::getResource('FnApi')
-                ->execute('possibility_get_objects', array(
-                    'id_user'           => $user->getData()->getId(),
-                    'id_role'           => $role->get('id'),
-                    'id_company'        => $company,
-                    'id_object_type'    => $type->get('id')
-                )
-            );
-            if($result->rowCount() > 0) {
-                foreach($result->fetchAll() as $row) {
-                    array_push($objects, (int)$row['id_object']);
-                }
-            }
-        }
-        return array_unique($objects);
-    }
-
-    /**
-     * Final
-     * Проверить переданные в качестве параметра права на наличие их у данного пользователя с учетом наследования
-     * Используется система наследований
-     * @param HM_Model_Account_User $user
-     * @param int $company
-     * @param App_Core_Model_DataObject $compareRole
-     * @return bool
-     */
-    public function isAllowedUserRole(HM_Model_Account_User $user, $company, App_Core_Model_DataObject $compareRole)
-    {
-        $this->linkRole($compareRole);
-        $listRolesOfCompanies= $user->getRoles();
-        if(array_key_exists($company, $listRolesOfCompanies)) {
-            foreach($listRolesOfCompanies[$company] as $roleIdentifier) {
-                $role = $this->getRole($roleIdentifier);
-                $this->linkRole($role);
-                if($this->getAcl()->inheritsRole($compareRole->get('code'), $role->get('code'))
-                   || $compareRole->get('code') == $role->get('code')) {
+                if(null !== $company){
+                    if(in_array($company, $companies)){
+                        return true;
+                    }
+                } else {
                     return true;
                 }
             }
