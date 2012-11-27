@@ -28,6 +28,64 @@ class Manager_BillingController extends App_Zend_Controller_Action
         $this->view->assign('companies', $companyColl->getObjectsIterator());
     }
 
+    public function agreements2Action()
+    {
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        $companyColl->load(64);
+        $companyColl->load(64);
+
+        Zend_Debug::dump($companyColl->toArray());
+
+        // Получить текущего пользователя
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+        $pageRole = 'ADM_COMPANY';
+        $admin = HM_Model_Account_User::load($account['user']);
+
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        foreach($admin->getRoles() as $roleIdentifier => $companies) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
+                foreach($companies as $company) {
+                    $companyColl->load($company);
+                }
+            }
+        }
+
+        $this->view->assign('companies', $companyColl->getObjectsIterator());
+    }
+
+    public function getCompaniesClientsAction()
+    {
+        // Получить текущего пользователя
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $access = HM_Model_Account_Access::getInstance();
+        $pageRole = 'ADM_COMPANY';
+        $admin = HM_Model_Account_User::load($account['user']);
+
+        $companyColl = new HM_Model_Billing_Company_Collection();
+        foreach($admin->getRoles() as $roleIdentifier => $companies) {
+            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
+                foreach($companies as $company) {
+                    $companyColl->load($company);
+                }
+            }
+        }
+
+        $store = array();
+        foreach($companyColl->getObjectsIterator() as $companyOwner) {
+            $companyClientsIds = array();
+            foreach($companyOwner->getOwnerAgreements() as $agreements) {
+                $companyColl->load($agreements->getData('company_client'));
+                $companyClientsIds[] = $agreements->getData('company_client');
+            }
+            $store['companyOwnerClientBundle'][] = array(
+                'owner' => $companyOwner->getData()->getId(),
+                'clients' => $companyClientsIds
+            );
+        }
+        $store['companies'] = $companyColl->toArray();
+        $this->setAjaxData($store);
+    }
 
     /**
      * Получить соглашения

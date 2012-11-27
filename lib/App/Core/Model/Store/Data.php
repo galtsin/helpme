@@ -177,7 +177,7 @@ final class App_Core_Model_Store_Data
 
     /**
      * Установить идентификатор и запереть его
-     * @param mixed $id
+     * @param string|int $id
      * @throws Exception
      */
     private function _setId($id)
@@ -284,15 +284,17 @@ final class App_Core_Model_Store_Data
     }
 
     /**
-     * ru: Преобразование объекта в массив
+     * Преобразование объекта в массив
      * @return array
      */
     public function toArray()
     {
-        return array(
+        $arr = array(
             'id' => $this->get('id'),
             'data' => $this->get('data')
         );
+        $arr['cs'] = md5(serialize($arr)); // Check sum Контрольная сумма объекта
+        return $arr;
     }
 
     /**

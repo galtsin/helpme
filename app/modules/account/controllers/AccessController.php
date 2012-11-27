@@ -64,10 +64,12 @@ class Account_AccessController extends App_Zend_Controller_Action
     }
 
     /**
+     * TODO: Проработать переключение контекстов!!!
      * Страница закрытого доступа
      */
     public function deniedAction()
     {
-
+        $this->getResponse()->setHttpResponseCode(403);
+        $this->setAjaxStatus('error');
     }
 }

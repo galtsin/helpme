@@ -2,43 +2,96 @@
 /**
  * Product: HELPME
  * @author: GaltsinAK
- * @version: 15.10.12
  */
 /**
- * ru:
+ *
  */
 class App_Zend_Controller_Action_Helper_Access extends Zend_Controller_Action_Helper_Abstract
 {
-    // Получить разешенные для действия роли
-    public function getActionAllowedRoles()
+    public function getUriRoles($type)
     {
-        return array();
+        $request = $this->getRequest();
+        $roles = array();
+
+        // Получаем запрошенный URI
+        $uri = implode('/', array(
+                $request->getParam('module'),
+                $request->getParam('controller'),
+                $request->getParam('action')
+            )
+        );
+
+
     }
 
-    //
-    /**
-     * @param string $type
-     * @param int $companyOwner
-     * @return array
-     */
-    public function getPossibilities($type, $companyOwner, /*временно вместо self::getActionAllowedRoles*/$roles)
+    public function getOperationRoles()
     {
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $access = HM_Model_Account_Access::getInstance();
-        $possibilities = array();
+        $request = $this->getRequest();
+        $roles = array();
 
-        $accessColl = new HM_Model_Account_Access_Collection();
-        $accessColl->setType($type);
+        // Получаем запрошенный URI
+        $uri = implode('/', array(
+                $request->getParam('module'),
+                $request->getParam('controller'),
+                $request->getParam('action')
+            )
+        );
 
-        foreach($this->getActionAllowedRoles() as $role) {
-            $accessColl->resetFilters();
-            $accessColl->setAccessFilter(
-                HM_Model_Account_User::load($account['user']),
-                $access->getRole($role),
-                $companyOwner)->getCollection();
-            $possibilities = array_merge($accessColl->getPossibilities(), $possibilities);
+        $currentOperation = HM_Model_Account_Access::getInstance()
+            ->getOperation($uri);
+
+        if($currentOperation instanceof App_Core_Model_Store_Data){
+            // Загрузить разрешенные для текущей страницы Роли
+            $result = App::getResource('FnApi')
+                ->execute('possibility_get_roles_by_operation', array(
+                    'id_operation' => (int)$currentOperation->getId()
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                foreach($result->fetchAll() as $row) {
+                    $roles[] = HM_Model_Account_Access::getInstance()->getRole($row['o_id_role']);
+                }
+            }
         }
 
-        return $possibilities;
+        return $roles;
     }
+
+    public function getPageRoles()
+    {
+        $request = $this->getRequest();
+        $roles = array();
+
+        // Получаем запрошенный URI
+        $uri = implode('/', array(
+                $request->getParam('module'),
+                $request->getParam('controller'),
+                $request->getParam('action')
+            )
+        );
+
+        $currentPage = HM_Model_Account_Access::getInstance()
+            ->getPages()
+            ->findOneBy('privilege', $uri);
+
+        if($currentPage instanceof Zend_Navigation_Page) {
+
+            // Загрузить список Ролей для текущей Cтраницы
+            $result = App::getResource('FnApi')
+                ->execute('possibility_get_roles_by_page', array(
+                    'id_page' => (int)$currentPage->getId()
+                )
+            );
+
+            if($result->rowCount() > 0) {
+                foreach($result->fetchAll() as $row) {
+                    $roles[] = HM_Model_Account_Access::getInstance()->getRole($row['o_id_role']);
+                }
+            }
+        }
+
+        return $roles;
+    }
+
 }

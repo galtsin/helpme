@@ -187,7 +187,78 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * Получить список системных операций - действий
+     * @return null|App_Core_Model_Store_Data[]
+     */
+    public function getOperations()
+    {
+        if(null === $this->_operations) {
+            $this->_operations = array();
+
+            $result = App::getResource('FnApi')
+                ->execute('possibility_get_operations', array());
+
+            if($result->rowCount() > 0) {
+                foreach($result->fetchAll() as $row) {
+                    $operation = new App_Core_Model_Store_Data();
+                    $operation->set('id', $row['o_id_operation'])
+                        ->set('label', $row['o_label'])
+                        ->set('is_enabled', $row['o_is_enabled'])
+                        ->set('uri', $row['o_uri'])
+                        ->setDirty(false);
+                    $this->_operations[] = $operation;
+                }
+            }
+        }
+
+        return $this->_operations;
+    }
+
+    public function getPage($pageIdentifier)
+    {
+
+    }
+
+    /**
+     * В качестве идентификаторов выступает - id или uri
+     * TODO: RecursiveIteratorIterator для поиска значения
+     * @param int|string (id || uri) $operationIdentifier
+     * @return App_Core_Model_Store_Data
+     * @throws Exception
+     */
+    public function getOperation($operationIdentifier)
+    {
+        switch(gettype(trim($operationIdentifier))){
+            case 'integer':
+                $field = 'id';
+                break;
+            case 'string':
+                $field = 'uri';
+                break;
+            case 'object':
+                if($operationIdentifier instanceof App_Core_Model_Store_Data){
+                    return $operationIdentifier;
+                }
+                break;
+            default:
+                throw new Exception("Type incorrect identifier value (Некорректное значение идентификатора типа)");
+        }
+
+        if(isset($field)){
+            foreach($this->getOperations() as $operation) {
+                if($operationIdentifier === $operation->get($field)) {
+                    return $operation;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Получить объект данных Тип
+     * В качестве идентификаторов выступает - id или code
+     * TODO: RecursiveIteratorIterator для поиска значения
      * @param $typeIdentifier
      * @return App_Core_Model_Store_Data
      * @throws Exception
@@ -213,6 +284,8 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
 
     /**
      * Получить объект данных Роль
+     * В качестве идентификаторов выступает - id или code
+     * TODO: RecursiveIteratorIterator для поиска значения
      * @param mixed $roleIdentifier
      * @return App_Core_Model_Store_Data
      * @throws Exception

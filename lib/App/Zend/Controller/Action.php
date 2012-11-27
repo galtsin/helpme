@@ -28,7 +28,7 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
      * Статус доступности
      * @var string ok | error
      */
-    private $_status = 'failed';
+    private $_status = 'error';
 
     /**
      * Инициализация контекста
@@ -108,7 +108,7 @@ class App_Zend_Controller_Action extends Zend_Controller_Action
      */
     public function setAjaxStatus($status)
     {
-        if(in_array(strtolower($status), array('ok', 'error'))) {
+        if(in_array(strtolower($status), array('ok', 'error' /*failed*/))) {
             $this->_status = strtolower($status);
         }
         return $this;

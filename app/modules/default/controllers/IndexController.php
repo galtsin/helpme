@@ -61,25 +61,7 @@ class Default_IndexController extends App_Zend_Controller_Action
 
 
 
-        // TODO: алгоритм получения доступных данных
-        $account = HM_Model_Account_Auth::getInstance()->getAccount();
-        $user = HM_Model_Account_User::load($account['user']);
-
-        $accessColl = new HM_Model_Account_Access_Collection();
-        $accessColl->setType('LINE')
-            ->setModelRestore('HM_Model_Counseling_Structure_Line')
-            ->setRestrictionByCompany(12)
-            ->setRestrictionByInheritanceFromRole('ADM_COMPANY');
-
-        $accessColl->addEqualFilter('possibility', $user->getPossibilities())->getCollection();
-        //Zend_Debug::dump($accessColl->getCollection()->getDataIterator());
-
-
-        //$this->getHelper('Referer')->push('default/index/index/r/ecb57e965957ca3312e3055d4db3c842/g/2');
-        //Zend_Debug::dump($this->getHelper('Referer')->pop());
-        //$this->getHelper('Referer')->remove();
-
-        $this->getHelper('Referer')->debug();
+        Zend_Debug::dump(HM_Model_Account_Access::getInstance()->getOperation('default/index/test'));
     }
 
 }

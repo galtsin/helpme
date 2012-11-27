@@ -24,6 +24,8 @@ class App_Zend_Controller_Plugin_Page extends Zend_Controller_Plugin_Abstract
             ->getPages()
             ->findOneBy('privilege', $uri);
 
+        // Правило распространяется только для страниц, настроенных в БД
+        // Все остальные страницы считаются открытыми
         if($currentPage instanceof Zend_Navigation_Page){
 
             // Загрузить разрешенные для текущей страницы Роли

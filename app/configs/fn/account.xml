@@ -139,4 +139,8 @@
     <account_remove_guest>
         <id_guest type="integer"/>
     </account_remove_guest>
+    <possibility_get_operations/>
+    <possibility_get_roles_by_operation>
+        <id_operation type="integer"/>
+    </possibility_get_roles_by_operation>
 </functions>

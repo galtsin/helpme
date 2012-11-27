@@ -128,7 +128,7 @@ require([
                                 case 'ok':
                                     that.Messenger.send('PROCESS_OK');
                                     break;
-                                case 'failed':
+                                case 'error':
                                     that.Messenger.send('PROCESS_FAILED');
                                     break;
                             }
@@ -137,7 +137,7 @@ require([
                     return response;
                 });
 
-                // Обработать сообщения Сервера
+                // Обработать сообщения Сервера в случае ошибки при получении/отправки запроса
                 deferred.addErrback(function(ioArgs){
                     that.Messenger.send('SERVER_ERROR');
                     return ioArgs;

@@ -371,7 +371,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreSearchCompany
 
                 on(addSubscriberNewGuestForm['send'], 'click', function(){
                     Layout.send({
-                        url: Layout.baseUrl('manager/billing/add-subscription-guest'),
+                        url: Layout.baseUrl('manager/billing/subscribe-guest'),
                         format: 'json',
                         args: domForm.toObject(addSubscriberNewGuestForm)
                     })
