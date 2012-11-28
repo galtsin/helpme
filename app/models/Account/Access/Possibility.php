@@ -5,6 +5,7 @@
  */
 /**
  * Привилегии и Доступные объекты
+ * Позволяет устанавливать объекты и привилегии для них
  */
 class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
 {

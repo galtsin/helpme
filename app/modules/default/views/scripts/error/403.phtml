@@ -1,13 +1,12 @@
-<h1>Ошибка доступа</h1>
-<hr/>
+<p><strong>Error 403: <?php echo $this->message ?></strong></p>
 <p>
     У вашего аккаунта отсутствуют права на просмотр или редактирование запрошенного ресурса.
 </p>
 <p>
     За соответствующими правами обратитесь к администратору системы или администратору компании-партнера<br/>
 </p>
-<p>
-    <a href="<?=$this->baseUrl('account/access/login');?>">Авторизоваться</a>
-    <span> / </span>
-    <a href="<?=$this->baseUrl();?>">Вернуться на главную</a>
-</p>
+<?php if(!HM_Model_Account_Auth::getInstance()->isAuth()): ?>
+<a href="<?=$this->baseUrl('account/access/login');?>">Авторизоваться</a>
+<span> / </span>
+<?php endif; ?>
+<a href="<?=$this->baseUrl();?>">Вернуться на главную</a>

@@ -29,16 +29,17 @@ require([
     "dojo/query",
     "dojo/router",
     "dojo/store/Memory",
+    "dojo/aspect",
     "core/Layout",
     "core/helper/Validation",
     "core/helper/form",
     "core/helper/common",
     "dijit/Dialog",
     "core/Dispatcher",
-
+    "dojo/Deferred",
     "core/widgets/SearchCompanyDialog"
-], function(dom, domHtml, domClass, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, coreLayout,
-coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, coreSearchCompanyDialog){
+], function(dom, domHtml, domClass, domConstruct, domAttr, domForm, array, on, lang, query, router, storeMemory, aspect, coreLayout,
+coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, Deferred, coreSearchCompanyDialog){
     dojo.ready(function(){
 
         var Layout = new coreLayout({
@@ -50,30 +51,75 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, c
             }
         });
 
+        (function(){
+            var storeTest = new storeMemory({
+                data: [
+                    {id: 1, name: "one", prime: false},
+                    {id: 2, name: "two", even: true, prime: true},
+                    {id: 3, name: "three", prime: true},
+                    {id: 4, name: "four", even: true, prime: false},
+                    {id: 5, name: "five", prime: true}
+                ]
+            });
+
+
+        })(
+
+        );
+
+        dojo.subscribe('getCompaniesClients', function(deferred){
+            deferred.then(function(response){
+                query('.toggle').forEach(function(item){
+                    var handle = on(item, 'click', function(event){
+                        handle.remove();
+                        // Построить вторичное дерево Компаний-Контрагентов
+                        var html = '';
+                        array.forEach(response.companiesClientsStore.data, function(item){
+                            html += Handlebars.compile(dojo.byId("company-client-item").innerHTML)(item);
+                        });
+                        var tbody = query('tbody', dom.byId("#company-owner-" + response.owner)).pop();
+                        domConstruct.place(html, tbody);
+
+                        query('span [class^="toggle-"', item).forEach(function(spanItem){
+                            domClass.toggle(spanItem, "hidden");
+                        });
+
+/*                        on(item, 'click', function(){
+                            if(domClass.contains(tbody, "hidden")){
+                                domClass.remove(tbody, "hidden");
+                                query(tbody)
+                            } else {
+                                domClass.add(tbody, "hidden");
+
+                            }
+
+
+                        });*/
+                    });
+                });
+            });
+
+        });
+
         coreDispatcher.register('getCompaniesClients', function(routeEvent){
             Layout.load({
                 url:    Layout.baseUrl('manager/billing/get-companies-clients'),
                 format: 'json'
             }).then(function(response){
-
-                var companiesStore = new storeMemory({
-                    idProperty: 'id',
-                    data: response.data['companies']
-                });
-
-                var companyOwnerClientBundleStore = new storeMemory({
-                    idProperty: 'owner',
-                    data: response.data['companyOwnerClientBundle']
+                var deferred = new Deferred();
+                dojo.publish('getCompaniesClients', deferred);
+                deferred.resolve({
+                    companyOwner: 16,
+                    companiesClientsStore: new storeMemory({
+                        idProperty: 'id',
+                        data: response.data['companies']
+                    })
                 });
 
                 // Построить список Компаний Владельцев
-                var html = '';
-                array.forEach(companyOwnerClientBundleStore.data, function(item){
-                    html += Handlebars.compile(dojo.byId("new-company-client-item").innerHTML)(companiesStore.get(item.owner));
-                });
-                domHtml.set('contentCompanies', html);
 
-                // Построить список Контрагентов
+
+ /*                // Построить список Контрагентов
                 array.forEach(companyOwnerClientBundleStore.data, function(item){
                     var table = query('#company-owner-' + item['owner'])[0];
                     console.log(item);
@@ -85,7 +131,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, c
                         domConstruct.place(html, query('tbody', table)[0]);
                         handler.remove();
                     });
-/*                    query('#company-owner-' + item.owner + ' > tbody .toggle').on.once('click', function(event){
+                   query('#company-owner-' + item.owner + ' > tbody .toggle').on.once('click', function(event){
                         var html = '';
                         array.forEach(companyOwnerClientBundleStore.data['clients'], function(item){
                             html += Handlebars.compile(dojo.byId("new-company-client-item2").innerHTML)(companiesStore.get(item));
@@ -94,9 +140,9 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, c
                         on(event.target, 'click', function(){
                             domClass.toggle(query('#company-owner-' + item.id + ' > tbody')[0], "hidden");
                         });
-                    });*/
+                    });
                 });
-
+*/
                 // Получить список контрагенов и обработать их
 
 
@@ -113,8 +159,7 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 <div id="contentCompanies">
-    <!--
-    <table class="table table-bordered" id="company-owner-agreements">
+    <table class="table table-bordered" id="company-owner-16">
         <colgroup>
             <col width="50"/>
             <col width="650"/>
@@ -123,53 +168,26 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <thead>
             <tr>
                 <td colspan="3">
-                    Лад-Сервис ООО (0000000000 / 00000000)
+                    {{data.name}} ({{data.inn}} / {{data.kpp}})
                 </td>
             </tr>
         </thead>
         <tfoot>
             <tr>
-                <td colspan="3"><a id="_hide_">свернуть</a><span> | </span><a>+ новый конрагент</a></td>
+                <td colspan="3"><a class="toggle"><span class="toggle-show">развернуть</span><span class="hidden toggle-hide">свернуть</span></a><span> | </span><a>+ новый конрагент</a></td>
             </tr>
         </tfoot>
-        <tbody>
+        <tbody class="hidden">
             <tr>
                 <th>#ID</th>
                 <th>Контрагент</th>
                 <th>Опции</th>
             </tr>
-            <tr>
-                <td>123</td>
-                <td>
-                    Лад-Сервис ООО (0000000000 / 00000000)
-                </td>
-                <td>
-                    <a>+ новый договор</a> <a>договора</a>
-                </td>
-            </tr>
         </tbody>
     </table>
-    <table class="table table-bordered" id="company-owner-agreements2">
-        <colgroup>
-            <col width="50"/>
-            <col width="650"/>
-            <col/>
-        </colgroup>
-        <tbody>
-            <tr>
-                <td colspan="3">
-                    Лад-Сервис ООО (0000000000 / 00000000)
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3"><a>развернуть</a> | <a>+ новый конрагент</a></td>
-            </tr>
-        </tbody>
-    </table>
-    -->
 </div>
 
-<script id="new-company-client-item2" type="text/x-handlebars-template">
+<script id="company-client-item" type="text/x-handlebars-template">
     <tr>
         <td>{{id}}</td>
         <td>
@@ -179,33 +197,4 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             <a>+ новый договор</a> <a>договора</a>
         </td>
     </tr>
-</script>
-
-<script id="new-company-client-item" type="text/x-handlebars-template">
-    <table class="table table-bordered" id="company-owner-{{id}}">
-        <colgroup>
-            <col width="50"/>
-            <col width="650"/>
-            <col/>
-        </colgroup>
-        <thead>
-        <tr>
-            <td colspan="3">
-                {{data.name}} ({{data.inn}} / {{data.kpp}})
-            </td>
-        </tr>
-        </thead>
-        <tfoot>
-        <tr>
-            <td colspan="3"><a class="toggle" data-event="toggle('_bug_')">свернуть</a><span> | </span><a>+ новый конрагент</a></td>
-        </tr>
-        </tfoot>
-        <tbody class="_hidden">
-            <tr>
-                <th>#ID</th>
-                <th>Контрагент</th>
-                <th>Опции</th>
-            </tr>
-        </tbody>
-    </table>
 </script>

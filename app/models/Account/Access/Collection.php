@@ -80,7 +80,8 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
     }
 
     /**
-     * Установить отсечение ролей ниже указанной
+     * Установить ограничение по ролям ниже переданной $roleIdentifier
+     * По $roleIdentifier будет происходить отсечение всех ролей, которые ниже указанной
      * @param $roleIdentifier
      * @return self
      */

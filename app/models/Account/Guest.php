@@ -4,7 +4,8 @@
  * @author: GaltsinAK
  */
 /**
- * Гости системы, сохраненные в Кэше приглашений системы
+ * Гость системы.
+ * Учетная запись, зафиксированная в системе в формате email`a и уникального кода активации
  */
 class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
 {
@@ -137,7 +138,7 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
     }
 
     /**
-     * Получить активированную учетную запись гостя в системе
+     * Получить активированную учетную запись
      * @return HM_Model_Account_User|null
      */
     public function getActivatedUser()

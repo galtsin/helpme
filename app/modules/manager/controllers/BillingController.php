@@ -30,12 +30,6 @@ class Manager_BillingController extends App_Zend_Controller_Action
 
     public function agreements2Action()
     {
-        $companyColl = new HM_Model_Billing_Company_Collection();
-        $companyColl->load(64);
-        $companyColl->load(64);
-
-        Zend_Debug::dump($companyColl->toArray());
-
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
@@ -59,14 +53,16 @@ class Manager_BillingController extends App_Zend_Controller_Action
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
-        $pageRole = 'ADM_COMPANY';
+        $accessHelper = $this->getHelper('access');
         $admin = HM_Model_Account_User::load($account['user']);
 
         $companyColl = new HM_Model_Billing_Company_Collection();
-        foreach($admin->getRoles() as $roleIdentifier => $companies) {
-            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
-                foreach($companies as $company) {
-                    $companyColl->load($company);
+        foreach($accessHelper->getUriRoles() as $operationRole){
+            foreach($admin->getRoles() as $adminRoleIdentifier => $companies) {
+                if($access->getAcl()->inheritsRole($adminRoleIdentifier, $operationRole->get('code')) || $adminRoleIdentifier == $operationRole->get('code')) {
+                    foreach($companies as $company) {
+                        $companyColl->load($company);
+                    }
                 }
             }
         }
@@ -87,25 +83,33 @@ class Manager_BillingController extends App_Zend_Controller_Action
         $this->setAjaxData($store);
     }
 
+
+
+
     /**
-     * Получить соглашения
+     * Получить контрагентов компании
+     * @deprecated use getCompaniesClients
      */
     public function getCompanyOwnerAgreementsAction()
     {
         // Получить текущего пользователя
         $account = HM_Model_Account_Auth::getInstance()->getAccount();
         $access = HM_Model_Account_Access::getInstance();
+        $accessHelper = $this->getHelper('access');
         $pageRole = 'ADM_COMPANY';
         $admin = HM_Model_Account_User::load($account['user']);
 
         $companyOwnerColl = new HM_Model_Billing_Company_Collection();
-        foreach($admin->getRoles() as $roleIdentifier => $companies) {
-            if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole) || $roleIdentifier == $pageRole) {
-                foreach($companies as $company) {
-                    $companyOwnerColl->load($company);
+        foreach($accessHelper->getUriRoles() as $pageRole){
+            foreach($admin->getRoles() as $roleIdentifier => $companies) {
+                if($access->getAcl()->inheritsRole($roleIdentifier, $pageRole->get('code')) || $roleIdentifier == $pageRole->get('code')) {
+                    foreach($companies as $company) {
+                        $companyOwnerColl->load($company);
+                    }
                 }
             }
         }
+
 
         $store = array();
         foreach($companyOwnerColl->getObjectsIterator() as $companyOwner) {
@@ -212,7 +216,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
     }
 
     /**
-     * Добавить подписчика
+     * ФормаДобавить подписчика
      */
     public function addSubscriberAction()
     {

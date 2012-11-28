@@ -293,7 +293,7 @@ final class App_Core_Model_Store_Data
             'id' => $this->get('id'),
             'data' => $this->get('data')
         );
-        $arr['cs'] = md5(serialize($arr)); // Check sum Контрольная сумма объекта
+        $arr['digest'] = md5(serialize($arr)); // Check sum Контрольная сумма объекта
         return $arr;
     }
 

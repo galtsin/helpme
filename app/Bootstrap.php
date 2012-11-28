@@ -106,8 +106,9 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // http://framework.zend.com/manual/1.12/en/zend.controller.actionhelpers.html
         //Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Access());
-        Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Referer());
         Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Access());
+        Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Referer());
+
     }
 
     /**

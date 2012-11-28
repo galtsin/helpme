@@ -103,7 +103,7 @@ class HM_Model_Account_User extends App_Core_Model_Store_Entity
     }
 
     /**
-     * Получить коллекцию Possibility
+     * Получить коллекцию Possibility Пользователя
      * @return HM_Model_Account_Access_Possibility[]|null
      */
     public function getPossibilities()

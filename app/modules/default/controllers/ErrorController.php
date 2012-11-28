@@ -18,6 +18,12 @@ class Default_ErrorController extends Zend_Controller_Action
                 $this->view->message = 'Page not found';
                 //$this->getResponse()->setRawHeader('HTTP/1.1 404 Not Found');
                 break;
+            case App_Zend_Controller_Plugin_Access::EXCEPTION_ACCESS_DENIED:
+                $this->getResponse()->setHttpResponseCode(403);
+                $this->_helper->layout->setLayout('empty');
+                $this->_helper->viewRenderer("403");
+                $this->view->message = 'Forbidden';
+                break;
             default:
                 // application error
                 $this->getResponse()->setHttpResponseCode(500);
