@@ -10,9 +10,7 @@ class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
 {
     const EXCEPTION_ACCESS_DENIED = 'EXCEPTION_ACCESS_DENIED';
 
-
     /**
-     * TODO: Сделать все в виде Exception наподобие ErrorHandler
      * @param Zend_Controller_Request_Abstract $request
      */
     public function preDispatch(Zend_Controller_Request_Abstract $request)
@@ -21,10 +19,9 @@ class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
     }
 
     /**
-     * Перенаправление на дефолтовую страницу с ошибками
      * @param Zend_Controller_Request_Abstract $request
      */
-    protected function _handleAccess(Zend_Controller_Request_Abstract $request)
+    protected function _handleAccessUri(Zend_Controller_Request_Abstract $request)
     {
         // Если отключен вывод ошибок - отключить обработку
         $frontController = Zend_Controller_Front::getInstance();
@@ -32,44 +29,19 @@ class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
             return;
         }
 
-        $response = $this->getResponse();
+        // Если обнаружено внутреннее исключение, то пропустить данную обработку
+        // предоставив обработку ошибки плагину Zend_Controller_Plugin_ErrorHandler
+        if(!$this->getResponse()->isException()) {
+            $error = new ArrayObject(array(), ArrayObject::ARRAY_AS_PROPS);
+            $error->request = clone $request;
 
-/*        // Получаем запрошенный URI
-        $uri = implode('/', array(
-                $request->getModuleName(),
-                $request->getControllerName(),
-                $request->getActionName()
-            )
-        );
-
-        // Определяем тип запрошенного ресурса: Страница (Page) или Операция (Operation)
-
-        // Определить текущую страницу
-        $currentPage = HM_Model_Account_Access::getInstance()
-            ->getPages()
-            ->findOneBy('privilege', $uri);
-
-        if($currentPage instanceof Zend_Navigation_Page) {
-            // Загрузить список Ролей для текущей Cтраницы
-            $result = App::getResource('FnApi')
-                ->execute('possibility_get_roles_by_page', array(
-                    'id_page' => (int)$currentPage->getId()
+            // Получаем запрошенный URI
+            $uri = implode('/', array(
+                    $request->getModuleName(),
+                    $request->getControllerName(),
+                    $request->getActionName()
                 )
             );
-
-            if($result->rowCount() > 0) {
-                foreach($result->fetchAll() as $row) {
-                    $role = HM_Model_Account_Access::getInstance()->getRole($row['o_id_role']);
-                    if($this->_isUserInheritedRole($role)){
-                        return; // Закончить обработку
-                    }
-                }
-            }
-
-            // Ошибка 403
-            $exception = new HM_Model_Account_Access_Exception('Access to the resource is denied', 403);
-
-        } else {
 
             // Определяем текущую операцию
             $currentOperation = HM_Model_Account_Access::getInstance()
@@ -85,73 +57,21 @@ class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
                     }
                 }
                 // Ошибка 403
-                $exception = new HM_Model_Account_Access_Exception('Access to the resource is denied', 403);
+                $error->exception = new HM_Model_Account_Access_Exception('Access to the resource is denied', 403);
+                $error->type = self::EXCEPTION_ACCESS_DENIED;
+            } else {
+                $error->exception = new Zend_Controller_Router_Exception('Resource not fount', 404);
+                $error->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE;
             }
+
+            $errorHandlerPlugin = Zend_Controller_Front::getInstance()->getPlugin('Zend_Controller_Plugin_ErrorHandler');
+
+            $request->setParam('error_handler', $error)
+                ->setModuleName($errorHandlerPlugin->getErrorHandlerModule())
+                ->setControllerName($errorHandlerPlugin->getErrorHandlerController())
+                ->setActionName($errorHandlerPlugin->getErrorHandlerAction());
+                //->setDispatched(false); // Повторить диспетченизацию
         }
-
-        // Ошибка 404
-        // TODO: Во время отладки приложения необходимо комментировать
-
-
-        // Считаем, что запрошенный ресурс не определен в системе, а значет недоступен
-
-        $error->exception = $exception;
-        $error->type = self::EXCEPTION_ACCESS_DENIED;
-        $error->request = clone $this->getRequest();
-
-        // Forward to the error handler
-        $this->getRequest()->setParam('error_handler', $error)
-            ->setModuleName($errorHandlerPlugin->getErrorHandlerModule())
-            ->setControllerName($errorHandlerPlugin->getErrorHandlerController())
-            ->setActionName($errorHandlerPlugin->getErrorHandlerAction());*/
-
-    }
-
-
-    protected function _handleAccessUri(Zend_Controller_Request_Abstract $request)
-    {
-        // Если отключен вывод ошибок - отключить обработку
-        $frontController = Zend_Controller_Front::getInstance();
-        if ($frontController->getParam('noErrorHandler')) {
-            return;
-        }
-
-        $error = new ArrayObject(array(), ArrayObject::ARRAY_AS_PROPS);
-        $error->request = clone $request;
-
-        // Получаем запрошенный URI
-        $uri = implode('/', array(
-                $request->getModuleName(),
-                $request->getControllerName(),
-                $request->getActionName()
-            )
-        );
-
-        // Определяем текущую операцию
-        $currentOperation = HM_Model_Account_Access::getInstance()
-            ->getOperation($uri);
-
-        if($currentOperation instanceof App_Core_Model_Store_Data){
-            $accessHelper = Zend_Controller_Action_HelperBroker::getStaticHelper('access');
-            foreach($accessHelper->getUriRoles() as $role){
-                if($this->_isUserInheritedRole($role)){
-                    // Закончить обработку
-                    // В дальнейшем доступные ресурсы определяются внутри вызываемой операции
-                    return;
-                }
-            }
-            // Ошибка 403
-            $error->exception = new HM_Model_Account_Access_Exception('Access to the resource is denied', 403);
-            $error->type = self::EXCEPTION_ACCESS_DENIED;
-        } else {
-            $error->exception = new Zend_Controller_Router_Exception('Resource not fount', 404);
-            $error->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE;
-        }
-
-        $request->setParam('error_handler', $error)
-            ->setModuleName(Zend_Controller_Front::getInstance()->getDefaultModule())
-            ->setControllerName('error')
-            ->setActionName('error');
     }
 
     /**

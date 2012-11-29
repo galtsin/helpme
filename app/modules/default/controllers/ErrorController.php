@@ -3,6 +3,9 @@
 class Default_ErrorController extends Zend_Controller_Action
 {
 
+    /**
+     * TODO: Обработать AJAX запросы
+     */
     public function errorAction()
     {
         $errors = $this->_getParam('error_handler');
@@ -23,6 +26,7 @@ class Default_ErrorController extends Zend_Controller_Action
                 $this->_helper->layout->setLayout('empty');
                 $this->_helper->viewRenderer("403");
                 $this->view->message = 'Forbidden';
+                $this->_helper->getHelper('AjaxContext')->initContext('json');
                 break;
             default:
                 // application error

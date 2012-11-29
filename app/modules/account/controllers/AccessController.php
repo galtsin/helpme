@@ -62,14 +62,4 @@ class Account_AccessController extends App_Zend_Controller_Action
             $this->_redirect($this->view->baseUrl('account/access/login'));
         }
     }
-
-    /**
-     * TODO: Проработать переключение контекстов!!!
-     * Страница закрытого доступа
-     */
-    public function deniedAction()
-    {
-        $this->getResponse()->setHttpResponseCode(403);
-        $this->setAjaxStatus('error');
-    }
 }

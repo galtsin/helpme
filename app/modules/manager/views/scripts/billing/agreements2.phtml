@@ -103,7 +103,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, D
 
         coreDispatcher.register('getCompaniesClients', function(routeEvent){
             Layout.load({
-                url:    Layout.baseUrl('manager/billing/get-companies-clients'),
+                url:    Layout.baseUrl(''),
                 format: 'json'
             }).then(function(response){
                 var deferred = new Deferred();
