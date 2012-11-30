@@ -14,10 +14,12 @@ class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        // TODO: Возможны варианты, когда id = 0 и empty принимает ее за пустое значение
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('company_get_identity', array(
-                    'id' => (int)$id
+                    'id' => $id
                 )
             );
 

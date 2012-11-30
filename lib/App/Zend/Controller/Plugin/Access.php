@@ -6,7 +6,7 @@
 /**
  * Проверка доступа к ресурсам системы: Страницам и Операциям (Api)
  */
-class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
+final class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
 {
     const EXCEPTION_ACCESS_DENIED = 'EXCEPTION_ACCESS_DENIED';
 
@@ -52,14 +52,15 @@ class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abstract
                 foreach($accessHelper->getUriRoles() as $role){
                     if($this->_isUserInheritedRole($role)){
                         // Закончить обработку
-                        // В дальнейшем доступные ресурсы определяются внутри вызываемой операции
+                        // В дальнейшем доступность конкретных ресурсов определяется внутри вызываемой операции (Zend_Controller_Action)
                         return;
                     }
                 }
-                // Ошибка 403
+                // Error 403
                 $error->exception = new HM_Model_Account_Access_Exception('Access to the resource is denied', 403);
                 $error->type = self::EXCEPTION_ACCESS_DENIED;
             } else {
+                // Error 404
                 $error->exception = new Zend_Controller_Router_Exception('Resource not fount', 404);
                 $error->type = Zend_Controller_Plugin_ErrorHandler::EXCEPTION_NO_ROUTE;
             }

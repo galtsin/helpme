@@ -1,18 +1,8 @@
 <?php
 $companies = $this->companies;
-$store = array();
-
-foreach($companies as $companyOwner) {
-    $companyColl = new HM_Model_Billing_Company_Collection();
-    foreach($companyOwner->getOwnerAgreements() as $agreements) {
-        $companyColl->load($agreements->getData('company_client'));
-    }
-    $store[] = array_merge($companyOwner->getData()->toArray(), array(
-        'company_clients' => $companyColl->toArray()
-    ));
-}
-
-$storeJson = Zend_Json::encode($store);
+$companyColl = new HM_Model_Billing_Company_Collection();
+$companyColl->addToCollection($companies);
+$companiesStore = Zend_Json::encode($companyColl->toArray());
 ?>
 <?php
 $jScript = <<<JS
@@ -51,23 +41,43 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, D
             }
         });
 
-        (function(){
-            var storeTest = new storeMemory({
-                data: [
-                    {id: 1, name: "one", prime: false},
-                    {id: 2, name: "two", even: true, prime: true},
-                    {id: 3, name: "three", prime: true},
-                    {id: 4, name: "four", even: true, prime: false},
-                    {id: 5, name: "five", prime: true}
-                ]
+        dojo.subscribe('getCompaniesOwners', function(deferred){
+            deferred.then(function(response){
+                // Построить DOM
+                var html = '';
+                array.forEach(response.companiesOwnersStore.data, function(item){
+                    html += Handlebars.compile(dojo.byId("company-owner-item").innerHTML)(item);
+                });
+                domHtml.set('contentCompanies', html);
+            }).then(function(){
+                // Поставить обработчики
+                query('.toggle').forEach(function(item){
+                    var handle = on(item, 'click', function(event){
+                        handle.remove();
+                        // Построить вторичное дерево Компаний-Контрагентов
+                        Layout.load({
+                            url:    Layout.baseUrl('api/1/company/12/get-clients')
+                        }).then(function(response){
+
+                        })
+                    });
+                });
             });
+        });
+
+        (function(){
+            var deferred = new Deferred();
+            dojo.publish('getCompaniesOwners', deferred);
+            deferred.resolve({
+                companiesOwnersStore: new storeMemory({
+                    idProperty: 'id',
+                    data: $companiesStore
+                })
+            });
+        })();
 
 
-        })(
-
-        );
-
-        dojo.subscribe('getCompaniesClients', function(deferred){
+/*        dojo.subscribe('getCompaniesClients', function(deferred){
             deferred.then(function(response){
                 query('.toggle').forEach(function(item){
                     var handle = on(item, 'click', function(event){
@@ -84,7 +94,7 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, D
                             domClass.toggle(spanItem, "hidden");
                         });
 
-/*                        on(item, 'click', function(){
+                       on(item, 'click', function(){
                             if(domClass.contains(tbody, "hidden")){
                                 domClass.remove(tbody, "hidden");
                                 query(tbody)
@@ -94,12 +104,12 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, D
                             }
 
 
-                        });*/
+                        });
                     });
                 });
             });
 
-        });
+        });*/
 
         coreDispatcher.register('getCompaniesClients', function(routeEvent){
             Layout.load({
@@ -149,8 +159,8 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, D
             });
         }, true);
 
-        coreDispatcher.startup();
-        router.go('getCompaniesClients');
+        //coreDispatcher.startup();
+        //router.go('getCompaniesClients');
 
     });
 });
@@ -158,8 +168,10 @@ coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, D
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
-<div id="contentCompanies">
-    <table class="table table-bordered" id="company-owner-16">
+<div id="contentCompanies"></div>
+
+<script id="company-owner-item" type="text/x-handlebars-template">
+    <table class="table table-bordered" id="company-owner-{{id}}">
         <colgroup>
             <col width="50"/>
             <col width="650"/>
@@ -185,7 +197,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </tr>
         </tbody>
     </table>
-</div>
+</script>
 
 <script id="company-client-item" type="text/x-handlebars-template">
     <tr>

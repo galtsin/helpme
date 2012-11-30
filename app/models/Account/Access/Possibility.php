@@ -25,27 +25,17 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
      */
     private $_objects = array();
 
-
-    /**
-     * Инициализация
-     */
-    protected function _init()
-    {
-        $this->addResource(new App_Core_Resource_DbApi(), App_Core_Resource_DbApi::RESOURCE_NAMESPACE);
-        $this->addResource(HM_Model_Account_Access::getInstance(), HM_Model_Account_Access::RESOURCE_NAMESPACE);
-    }
-
     /**
      * @param int $id
      * @return HM_Model_Account_Access_Possibility|null
      */
     public static function load($id)
     {
-        if(isset($id)) {
-
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('possibility_get_identity', array(
-                    'id_possibility' => (int)$id
+                    'id_possibility' => $id
                 )
             );
 
@@ -113,45 +103,13 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
         return $this;
     }
 
-
-    /**
-     * TODO: в доработке
-     * Установить пользователя
-     * @param $user
-     * @return HM_Model_Account_Access_Possibility
-     */
-    public function _setUser($user)
-    {
-        if(is_int($user)) {
-            $entity = HM_Model_Account_User::load($user);
-        } else {
-            $entity = $user;
-        }
-        if ($entity instanceof HM_Model_Account_User) {
-            $this->_setDataInstance('user', $entity);
-        }
-
-        return $this;
-    }
-
-    /**
-     * TODO: в доработке
-     * Получить экземпляр пользователя
-     * @return HM_Model_Account_User|null
-     */
-    public function _getUser()
-    {
-        return $this->_getDataInstance('user');
-    }
-
-
     /**
      * Добавить
      * @return int
      */
     protected function _insert()
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('possibility_add', array(
                 'id_user'       => $this->getData('user')->getData('id'),
                 'id_role'       => $this->getData('role')->getId(),
@@ -172,7 +130,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
     protected function _update()
     {
         if($this->getData()->isDirty()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('possibility_update_identity', array(
                     'id_possibility'    => (int)$this->getData('id'),
                     'id_user'           => $this->getData('user')->getData('id'),
@@ -196,7 +154,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
     protected function _remove()
     {
         if($this->isIdentity()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('possibility_del', array(
                     'id_possibility' => $this->getData('id')
                 )
@@ -221,7 +179,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
     {
 
         if($this->isIdentity()) {
-            $access = $this->getResource(HM_Model_Account_Access::RESOURCE_NAMESPACE);
+            $access = HM_Model_Account_Access::getInstance();
             $objects = array();
             if($access instanceof HM_Model_Account_Access){
                 if(null === $typeIdentifier) {
@@ -230,7 +188,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
                     }
                 } else {
                     if(!array_key_exists($access->getType($typeIdentifier)->get('code'), $this->_objects)){
-                        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+                        $result = App::getResource('FnApi')
                             ->execute('possibility_get_objects', array(
                                 'id_possibility'    => $this->getData('id'),
                                 'id_object_type'    => $access->getType($typeIdentifier)->getId()
@@ -297,7 +255,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
      */
     private function _insertObject(App_Core_Model_Store_Data $object)
     {
-        $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+        $result = App::getResource('FnApi')
             ->execute('possibility_add_object', array(
                 'id_possibility'    => $this->getData('id'),
                 'id_object_type'    => $object->get('type')->getId(),
@@ -323,7 +281,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
     private function _removeObject(App_Core_Model_Store_Data $object)
     {
         if($this->isIdentity()) {
-            $result = $this->getResource(App_Core_Resource_DbApi::RESOURCE_NAMESPACE)
+            $result = App::getResource('FnApi')
                 ->execute('possibility_del_object', array(
                     'id_possibility'    => $this->getData('id'),
                     'id_object_type'    => $object->get('type')->getId(),

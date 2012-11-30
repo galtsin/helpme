@@ -26,10 +26,11 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('level_get_identity', array(
-                    'id_level' => (int)$id
+                    'id_level' => $id
                 )
             );
 
@@ -119,10 +120,8 @@ class HM_Model_Counseling_Structure_Level extends App_Core_Model_Store_Entity
     {
         if($this->isIdentity()){
             $group = new HM_Model_Counseling_Structure_Group();
-            foreach($options as $key => $value) {
-                $group->setData($key, $value);
-            }
-            $group->setData('level', $this->getData('id'));
+            $group->setData($options);
+            $group->getData()->set('level', $this->getData('id'));
             if($group->save()) {
                 return $group;
             } else {

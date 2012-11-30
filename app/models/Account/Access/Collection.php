@@ -209,7 +209,7 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
 
     /**
      * Переопределяем родительский метод
-     * Пометить генерируемые из коллекции объекты на привилегии чтения/записи
+     * Выставляем объектам коллекци соответствующие привилегии чтения/записи
      * @return array
      */
     public function getObjectsIterator()

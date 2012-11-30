@@ -91,12 +91,10 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $front = $this->getResource('frontController');
         // Плагин подключения слоев для Модулей
         $front->registerPlugin(new App_Zend_Controller_Plugin_Layout());
-        // Плагин REST-Сервиса
-        $front->registerPlugin(new App_Zend_Controller_Plugin_Query());
         // Плагин доступа к страницам
-        $front->registerPlugin(new App_Zend_Controller_Plugin_Access());
-        //
-        //$front->registerPlugin(new App_Zend_Controller_Plugin_Page());
+        //$front->registerPlugin(new App_Zend_Controller_Plugin_Access());
+        // Плагин QUERY-Сервиса
+        $front->registerPlugin(new App_Zend_Controller_Plugin_Query());
     }
 
     /**
@@ -106,7 +104,9 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
     {
         // http://framework.zend.com/manual/1.12/en/zend.controller.actionhelpers.html
         //Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Access());
+        // Помощник Доступа
         Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Access());
+        // Помощник Переадресации
         Zend_Controller_Action_HelperBroker::addHelper(new App_Zend_Controller_Action_Helper_Referer());
 
     }

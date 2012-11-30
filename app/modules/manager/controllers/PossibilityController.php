@@ -348,6 +348,8 @@ class Manager_PossibilityController extends App_Zend_Controller_Action
         if($admin instanceof HM_Model_Account_User) {
             if($request->isPost()) {
                 $possibilityParams = $request->getPost('possibility');
+
+
                 if(empty($possibilityParams['user'])) {
                     // Восстанавливаем
                     $userColl->addEqualFilter('email', $possibilityParams['account'])->getCollection();

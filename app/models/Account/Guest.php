@@ -15,11 +15,11 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
-
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('account_get_identity_guest', array(
-                    'id_guest' => (int)$id
+                    'id_guest' => $id
                 )
             );
 

@@ -20,10 +20,11 @@ class HM_Model_Counseling_Structure_Group extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('group_get_identity', array(
-                    'id_group' => (int)$id
+                    'id_group' => $id
                 )
             );
 

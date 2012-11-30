@@ -1,3 +1,6 @@
+/**
+ * Переписать Deferred с Dojo >= 1.8
+ */
 dojo.provide("core.Layout");
 require([
     "dojo/_base/lang",

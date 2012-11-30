@@ -206,6 +206,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
                         ->set('label', $row['o_label'])
                         ->set('is_enabled', $row['o_is_enabled'])
                         ->set('uri', $row['o_uri'])
+                        ->set('type', $row['o_op_type'])
                         ->setDirty(false);
                     $this->_operations[] = $operation;
                 }

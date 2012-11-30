@@ -15,10 +15,11 @@ class HM_Model_Account_User extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('user_identity', array(
-                    'id' => (int)$id
+                    'id' => $id
                 )
             );
 

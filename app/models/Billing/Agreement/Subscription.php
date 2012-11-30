@@ -67,6 +67,7 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
                     $this->getData()
                         ->set('users', array_merge($this->getData('users'), array($user->getData()->getId())));
                     $this->setProperty('users', array_merge($this->getProperty('users'), array($user)));
+                    // TODO: рганизовать подписку события
                     return $user->getData()->getId();
                 }
             }

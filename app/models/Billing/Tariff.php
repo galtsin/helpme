@@ -14,10 +14,11 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('tarif_get_identity', array(
-                    'id_tariff' => (int)$id
+                    'id_tariff' => $id
                 )
             );
 
@@ -120,7 +121,6 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Store_Entity
             );
             $row = $result->fetchRow();
             if($row['o_id_tarif'] !== -1) {
-                $this->getData()->setDirty(false);
                 return $this->getData('id');
             }
         }

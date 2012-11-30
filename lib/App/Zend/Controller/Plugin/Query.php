@@ -24,7 +24,22 @@ class App_Zend_Controller_Plugin_Query extends Zend_Controller_Plugin_Abstract
                     'controller'    => 'query',
                     'action'        => 'query'
                 )
-            )
+            ),
+            'api_default' => new Zend_Controller_Router_Route_Regex(
+                'api/(\d+)/([a-z]+)/(?:(?:(\d+)(?:/([a-z\-]+))?|([a-z\-]+)))(?:/.*)*',
+                array(
+                    'module'        => 'service',
+                    'controller'    => 'rest',
+                    'action'        => 'dispatch'
+                ),
+                array(
+                    1   => 'version',
+                    2   => 'prefix',
+                    3   => 'id',
+                    4   => 'method',
+                    5   => 'method'
+                )
+            ),
         );
 
         $router->addRoutes($routes);

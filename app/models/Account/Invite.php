@@ -15,10 +15,11 @@ class HM_Model_Account_Invite extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('account_get_identity_invite', array(
-                    'id_invite' => (int)$id
+                    'id_invite' => $id
                 )
             );
 

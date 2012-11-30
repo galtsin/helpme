@@ -157,6 +157,8 @@ abstract class App_Core_Model_CollectionAbstract
             if(!in_array($entry, $this->getIdsIterator())) {
                 $this->_idsCollection[] = $entry;
             }
+            // Проверять тип добавляемой в коллекцию сущности!!!
+            // TODO: $entry instanceof $this->getModelRestore
         } elseif ($entry instanceof App_Core_Model_Store_Entity) {
             if(!array_key_exists($entry->getData()->getId(), $this->getObjectsIterator()) && !in_array($entry->getData()->getId(), $this->getIdsIterator())) {
                 $this->_idsCollection[] = $entry->getData()->getId();

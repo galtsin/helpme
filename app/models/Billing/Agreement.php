@@ -14,10 +14,11 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Store_Entity
      */
     public static function load($id)
     {
-        if(isset($id)) {
+        $id = intval($id);
+        if($id == 0 || !empty($id)) {
             $result = App::getResource('FnApi')
                 ->execute('agreement_get_identity', array(
-                    'id_agreement' => (int)$id
+                    'id_agreement' => $id
                 )
             );
 

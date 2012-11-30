@@ -58,11 +58,10 @@ class Default_IndexController extends App_Zend_Controller_Action
                     $possibility->setPrivileges($line);
                 }*/
 
+        $this->_helper->viewRenderer->setNoRender(true);
+        $this->_helper->layout->disableLayout();
 
-
-        Zend_Debug::dump(HM_Model_Account_User::load(4)->getRoles());
-        $access = HM_Model_Account_Access::getInstance()->isUserInheritedRole(HM_Model_Account_User::load(4), 'JR_ADM_AGREEMENT', 19);
-        Zend_Debug::dump($access);
+        Zend_Debug::dump($this->getRequest()->getParams());
     }
 
 }
