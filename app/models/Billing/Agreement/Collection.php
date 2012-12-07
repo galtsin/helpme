@@ -14,8 +14,8 @@ class HM_Model_Billing_Agreement_Collection extends App_Core_Model_Collection_Fi
     protected function _init()
     {
         $this->setModelRestore('HM_Model_Billing_Agreement');
-        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyOwner');
-        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyClient');
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyOwner'); // owner
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyClient'); // client
     }
 
     /**

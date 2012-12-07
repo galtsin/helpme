@@ -9,6 +9,15 @@
  */
 class Api_AgreementController extends Service_RestController
 {
+    public function getAction()
+    {
+        $agreement = HM_Model_Billing_Agreement::load($this->_getParam('id'));
+        if($agreement instanceof HM_Model_Billing_Agreement){
+            $this->setAjaxData($agreement->getData()->toArray());
+            $this->setAjaxStatus('ok');
+        }
+    }
+
     /**
      * Подписать Пользователя
      * @param user

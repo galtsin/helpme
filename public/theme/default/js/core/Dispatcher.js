@@ -25,10 +25,13 @@ define([
          * @param fn
          * Callback-функция, вызываемая при запросе роутера
          * @param useRouter
-         * Метка на использование роутера
-         * true - использовать/false - еиспользовать
+         * Флаг на использование роутера
+         * true - использовать/false - неиспользовать
+         * @param useCache
+         * Флаг на использование КЭШа
+         * true - использовать/false - неиспользовать
          */
-        register: function(/*String*/route, fn, /*Bool*/useRouter) {
+        register: function(/*String*/route, fn, /*Bool*/useRouter, /**/useCache) {
             if(route.length > 0){
                 var action = {
                     route: route,
@@ -47,6 +50,12 @@ define([
                     action.action = route;
                 }
                 this._store.add(action);
+
+                if(useCache) {
+                    var useCache = {
+
+                    }
+                }
             }
         },
         /**

@@ -197,8 +197,17 @@ require([
         /**
          * Получить полный URL-адрес с привязкой к протоколу и доменному имени
          * @param url
+         * @param obj
+         * Если в url используются статические переменные, то подставляются параметры из объекта obj
+         * domain/api/:name ({name: igor})
          */
-        baseUrl: function(/* String */url) {
+        baseUrl: function(/* String */url, obj) {
+            obj = obj || {};
+            for(var param in obj){
+                if(obj.hasOwnProperty(param)){
+                    url = url.replace(':' + param, obj[param]);
+                }
+            }
             return window.location.protocol + '//' + window.location.host + '/' + url;
         }
     });

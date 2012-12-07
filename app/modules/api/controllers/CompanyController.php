@@ -9,7 +9,7 @@
 class Api_CompanyController extends Service_RestController
 {
     /**
-     * Cписок контрагентов компании
+     * Cписок контрагентов компании, с которыми заключен договор
      */
     public function getClientsAction()
     {
@@ -26,15 +26,37 @@ class Api_CompanyController extends Service_RestController
 
     /**
      * Список договоров компании
+     * В методе используются фильтры
+     * filters[client] Получить договора с компанией-клиентом
      */
     public function getAgreementsAction()
     {
         $company = HM_Model_Billing_Company::load($this->_getParam('id'));
         if($company instanceof HM_Model_Billing_Company){
             $agreementColl = new HM_Model_Billing_Agreement_Collection();
-            $agreementColl->addToCollection($company->getOwnerAgreements());
+
+            // Фильтры
+            $filters = $this->_getParam('filters');
+            if(!empty($filters) && count($filters) > 0) {
+                foreach($filters as $filter => $value) {
+                    switch(trim($filter)) {
+                        case 'client':
+                            $agreements = $company->getOwnerAgreements();
+                            foreach($agreements as $agreement){
+                                if($agreement->getData('company_client') == $value) {
+                                    $agreementColl->addToCollection($agreement);
+                                }
+                            }
+                        break;
+                    }
+                }
+            } else {
+                $agreementColl->addToCollection($company->getOwnerAgreements());
+            }
+
             $this->setAjaxData($agreementColl->toArray());
             $this->setAjaxStatus('ok');
         }
     }
+
 }
