@@ -8,7 +8,7 @@ require([], function(){
         constructor: function(node){
             this._node = node;
         },
-        send: function(args){
+        send: function(args, msg){
             if(null !== args && "object" == typeof args) {
                 var that = this;
                 this._node.innerHTML = this._getMessage(args.code);

@@ -93,7 +93,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $front->registerPlugin(new App_Zend_Controller_Plugin_Layout());
         // Плагин доступа к страницам
         //$front->registerPlugin(new App_Zend_Controller_Plugin_Access());
-        // Плагин QUERY-Сервиса
+        // @deprecated Плагин QUERY-Сервиса
         $front->registerPlugin(new App_Zend_Controller_Plugin_Query());
     }
 

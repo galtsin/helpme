@@ -6,10 +6,16 @@ require([
     core.layout.Messenger = function(){};
     dojo.declare("core.layout.Messenger", null, {
         _statuses: {
-            PROCESS_OK:         'Операция выполнена успешно',
-            PROCESS_FAILED:     'Операция не выполнена',
-            SERVER_DISCONNECT:  'Не удалось получить ответ от сервера',
-            SERVER_ERROR:       'Ошибка на сервере'
+            PROCESS_LOAD:           'Загрузка данных',
+            PROCESS_SEND:           'Отправка данных',
+            PROCESSING:             'Обработка данных',
+            PROCESS_STATE_OK:       '',
+            PROCESS_STATE_FAILED:   '',
+            PROCESS_STATE_WAITING:  '',
+            PROCESS_OK:             'Операция выполнена успешно',
+            PROCESS_FAILED:         'Операция не выполнена',
+            SERVER_DISCONNECT:      'Не удалось получить ответ от сервера',
+            SERVER_ERROR:           'Ошибка на сервере'
         },
         /**
          * Инициализация модуля
@@ -76,7 +82,7 @@ require([
             if(!this._statuses.hasOwnProperty(status)) {
                 throw new Error('Статус сообщения неопределен');
             }
-            this._init.node.innerHTML = '<span id="messenger-text">' + this._statuses[status] + '</span>';
+            this._init.node.innerHTML = '<p><span id="messenger-text">' + this._statuses[status] + '</span></p>';
             return this._init.node;
         }
     });

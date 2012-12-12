@@ -4,6 +4,7 @@
  * @author: GaltsinAK
  */
 /**
+ * TODO: Route
  * Плагин организации Query-запросов к сервису
  */
 class App_Zend_Controller_Plugin_Query extends Zend_Controller_Plugin_Abstract

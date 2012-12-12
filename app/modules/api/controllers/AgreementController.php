@@ -9,12 +9,13 @@
  */
 class Api_AgreementController extends Service_RestController
 {
+
     public function getAction()
     {
         $agreement = HM_Model_Billing_Agreement::load($this->_getParam('id'));
         if($agreement instanceof HM_Model_Billing_Agreement){
             $this->setAjaxData($agreement->getData()->toArray());
-            $this->setAjaxStatus('ok');
+            $this->setAjaxStatus(self::STATUS_OK);
         }
     }
 
@@ -30,7 +31,7 @@ class Api_AgreementController extends Service_RestController
             if($user instanceof HM_Model_Account_User) {
                 if($agreement->getSubscription()->addUser($user) == $user->getData()->getId()){
                     $this->setAjaxResult($user->getData()->getId());
-                    $this->setAjaxStatus('ok');
+                    $this->setAjaxStatus(self::STATUS_OK);
                 }
             }
         }
@@ -48,7 +49,7 @@ class Api_AgreementController extends Service_RestController
             if($user instanceof HM_Model_Account_User) {
                 if($agreement->getSubscription()->removeUser($user) == $user->getData()->getId()){
                     $this->setAjaxResult($user->getData()->getId());
-                    $this->setAjaxStatus('ok');
+                    $this->setAjaxStatus(self::STATUS_OK);
                 }
             }
         }
@@ -66,7 +67,7 @@ class Api_AgreementController extends Service_RestController
             if($guest instanceof HM_Model_Account_Guest && $guest->isIdentity()) {
                 if($agreement->getSubscription()->addGuest($guest) == $guest->getData()->getId()){
                     $this->setAjaxResult($guest->getData()->getId());
-                    $this->setAjaxStatus('ok');
+                    $this->setAjaxStatus(self::STATUS_OK);
                 }
             }
         }
@@ -84,7 +85,7 @@ class Api_AgreementController extends Service_RestController
             if($guest instanceof HM_Model_Account_Guest) {
                 if($agreement->getSubscription()->removeGuest($guest) == $guest->getData()->getId()){
                     $this->setAjaxResult($guest->getData()->getId());
-                    $this->setAjaxStatus('ok');
+                    $this->setAjaxStatus(self::STATUS_OK);
                 }
             }
         }
@@ -100,7 +101,7 @@ class Api_AgreementController extends Service_RestController
             $userColl = new HM_Model_Account_User_Collection();
             $userColl->addToCollection($agreement->getSubscription()->getUsers());
             $this->setAjaxData($userColl->toArray());
-            $this->setAjaxStatus('ok');
+            $this->setAjaxStatus(self::STATUS_OK);
         }
     }
 
@@ -114,7 +115,7 @@ class Api_AgreementController extends Service_RestController
             $guestColl = new HM_Model_Account_Guest_Collection();
             $guestColl->addToCollection($agreement->getSubscription()->getGuests());
             $this->setAjaxData($guestColl->toArray());
-            $this->setAjaxStatus('ok');
+            $this->setAjaxStatus(self::STATUS_OK);
         }
     }
 }

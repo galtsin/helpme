@@ -58,10 +58,18 @@ class Default_IndexController extends App_Zend_Controller_Action
                     $possibility->setPrivileges($line);
                 }*/
 
+        //$this->_helper->viewRenderer->setNoRender(true);
+        //$this->_helper->layout->disableLayout();
+
+    }
+
+    public function ajaxAction()
+    {
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout->disableLayout();
-
-        Zend_Debug::dump($this->getRequest()->getParams());
+        sleep(5);
+        //echo Zend_Json::encode(array(1,2));
+        echo "Hello";
     }
 
 }

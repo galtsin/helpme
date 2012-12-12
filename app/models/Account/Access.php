@@ -282,6 +282,7 @@ class HM_Model_Account_Access extends App_Core_Model_ModelAbstract
             }
         }
         throw new Exception("Type the identifier '" . $typeIdentifier . "' is not found (Тип с идентификатором '" . (string)$typeIdentifier . "' не найден)");
+        // return $this->getType(self::EMPTY_TYPE);
     }
 
     /**

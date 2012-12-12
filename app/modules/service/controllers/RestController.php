@@ -2,10 +2,9 @@
 /**
  * Product: HELPME
  * @author: Galtsinak
- * @version: 30.11.12
  */
 /**
- * ru:
+ *
  */
 class Service_RestController extends Zend_Rest_Controller
 {
@@ -45,8 +44,24 @@ class Service_RestController extends Zend_Rest_Controller
     private $_error = array();
 
     /**
-     * Инициализируем
+     * Назначить модель-коллекцию для запроса компаний
+     * @var null|string App_Core_Model_Collection_Filter
      */
+    protected $_modelCollection = null;
+
+    /**
+     * Тип данных для экземпляров объектов
+     * @var null|string
+     */
+    protected $_type = null;
+
+    /**
+     * Инициализируем
+     * Чтобы POST-данные распозновались сервером и попадаль в $_POST необходимо указывать в заголовках
+     * Content-Type: application/x-www-form-urlencoded;
+     * В противном случае данные необходимо будет парсить вручную из объекта getRawBody();
+     */
+
     public function init()
     {
         $this->getHelper('ContextSwitch')
@@ -54,12 +69,11 @@ class Service_RestController extends Zend_Rest_Controller
             ->initContext('json');
 
         // TODO:
-        // Чтобы POST-данные распозновались сервером и попадаль в $_POST необходимо указывать в заголовках
-        //Content-Type: application/x-www-form-urlencoded;
+
     }
 
     /**
-     * Отдать ответ
+     * Отдать ответ в соответствующем виде
      */
     public function postDispatch()
     {
@@ -74,6 +88,88 @@ class Service_RestController extends Zend_Rest_Controller
                 'error'     => $this->_error
             )
         );
+    }
+
+    /**
+     * Выполнить диспетчеризацию запроса
+     */
+    public function dispatchAction()
+    {
+        $method = $this->_getParam('method');
+        $prefix = $this->_getParam('prefix');
+        $request = $this->getRequest();
+
+        if(empty($method)){
+            $method = strtolower($this->getRequest()->getMethod());
+        }
+
+        $currentOperation = HM_Model_Account_Access::getInstance()
+            ->getOperation('api' . '/' . $prefix . '/' . $method);
+
+/*        if($this->_handleAccess($currentOperation, $this->_type)){
+            $this->_forward($method, $prefix, 'api');
+        } else {
+            $error = new ArrayObject(array(), ArrayObject::ARRAY_AS_PROPS);
+            $error->request = clone $request;
+            $error->exception = new HM_Model_Account_Access_Exception('Access to the resource is denied', 403);
+            $error->type = App_Zend_Controller_Plugin_Access::EXCEPTION_ACCESS_DENIED;
+            $errorHandlerPlugin = Zend_Controller_Front::getInstance()->getPlugin('Zend_Controller_Plugin_ErrorHandler');
+
+            $request->setParam('error_handler', $error)
+                ->setModuleName($errorHandlerPlugin->getErrorHandlerModule())
+                ->setControllerName($errorHandlerPlugin->getErrorHandlerController())
+                ->setActionName($errorHandlerPlugin->getErrorHandlerAction())
+                ->setDispatched(false);
+        }*/
+        $this->_forward($method, $prefix, 'api');
+
+    }
+
+    /**
+     * 1. Получаем список ролей, разрешенных для текущей операции
+     * 2. Определить роли пользователя, которые проходят под ограничение ролей на шаге 1
+     * 3.1 Если мы имеем дело с экземпляром конкретного объекта, то выбираем по разрешенным на шаге 2 ролям компании,
+     *  и по каждой из них изпользуя связку (user + разрешенная роль + компания + тип объекта) получаем доступные экземпляры объектов
+     * 3.2 Проверем входит ли идентификатор запрошенного экземпляра объекта в полученные на шаге 3.1
+     * TODO: Возможно шаги 1 и 2 в случае, если мы используем плагин App_Zend_Controller_Plugin_Access
+     * @param App_Core_Model_Store_Data $operation
+     * @param $type
+     * @return bool
+     */
+    private function _handleAccess(App_Core_Model_Store_Data $operation, $type)
+    {
+        $access = HM_Model_Account_Access::getInstance();
+        $account = HM_Model_Account_Auth::getInstance()->getAccount();
+        $user = HM_Model_Account_User::load($account['user']);
+
+        $result = App::getResource('FnApi')
+            ->execute('possibility_get_roles_by_operation', array(
+                'id_operation' => $operation->getId()
+            )
+        );
+
+        if($result->rowCount() > 0) {
+            foreach($result->fetchAll() as $row) {
+                $operationRoleIdentifier = $access->getRole((int)$row['o_id_role'])->get('code');
+                $possibilities = $user->getPossibilities();
+                foreach($possibilities as $possibility){
+                    $userRoleIdentifier = $access->getRole($possibility->getData('role'))->get('code');
+                    if($access->getAcl()->inheritsRole($userRoleIdentifier, $operationRoleIdentifier) || $userRoleIdentifier === $operationRoleIdentifier) {
+                        if($this->_getParam('id') && null !== $type){
+                            // Проверка для экземпляра объекта
+                            // TODO: источник возможных задержек при большом количестве данных
+                            if($possibility->_has($type, $this->_getParam('id'))) {
+                                return true;
+                            }
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -116,42 +212,66 @@ class Service_RestController extends Zend_Rest_Controller
     }
 
     /**
-     * Обработать запрос и передать конечному получателю
+     * Получить информацию о сущности
+     * Метод является заглушкой для получения экземпляра объекта get
      */
-    public function dispatchAction()
-    {
-        $method = $this->_getParam('method');
-        $prefix = $this->_getParam('prefix');
-
-        if(empty($method)){
-            $method = strtolower($this->getRequest()->getMethod());
-        }
-
-        $this->_forward($method, $prefix, 'api');
-    }
-
     public function indexAction()
     {
-        echo "get";
+        $this->_forward('get');
     }
 
+    /**
+     * Использование коллекций и фильтров для получения данных
+     * App_Core_Model_CollectionAbstract
+     */
+    public function queryAction()
+    {
+        $modelCollection = new $this->_modelCollection();
+        if(null !== $modelCollection && $modelCollection instanceof App_Core_Model_Collection_Filter){
+            $filters = $this->getRequest()->getParam('filters');
+            if(!empty($filters) && count($filters) > 0) {
+                foreach($filters as $filterType => $filter) {
+                    $method = 'add' . ucfirst(trim($filterType)) . 'Filter';
+                    if(method_exists($modelCollection, $method)) {
+                        foreach($filter as $name => $values) {
+                            foreach($values as $value) {
+                                if(!empty($value)) {
+                                    $modelCollection->{$method}($name, trim($value));
+                                }
+                            }
+                        }
+                    }
+                }
+                $this->setAjaxData($modelCollection->getCollection()->toArray());
+            }
+        }
+    }
+
+    /**
+     * Изменение данных экземпляра объекта
+     */
     public function postAction()
     {
-        echo "post";
     }
 
+    /**
+     * Добавление экземпляра объекта
+     */
     public function putAction()
     {
-        echo "put";
     }
 
+    /**
+     * Удаление экземпляра объекта
+     */
     public function deleteAction()
     {
-        echo "delete";
     }
 
+    /**
+     * Получить экземпляр объекта
+     */
     public function getAction()
     {
-        echo "get";
     }
 }

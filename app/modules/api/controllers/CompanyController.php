@@ -9,6 +9,15 @@
 class Api_CompanyController extends Service_RestController
 {
     /**
+     * Инициализируем модель
+     */
+    public function init()
+    {
+        parent::init();
+        $this->_modelCollection = 'HM_Model_Billing_Company_Collection';
+    }
+
+    /**
      * Cписок контрагентов компании, с которыми заключен договор
      */
     public function getClientsAction()
@@ -20,7 +29,7 @@ class Api_CompanyController extends Service_RestController
                 $companyColl->load($agreements->getData('company_client'));
             }
             $this->setAjaxData($companyColl->toArray());
-            $this->setAjaxStatus('ok');
+            $this->setAjaxStatus(self::STATUS_OK);
         }
     }
 
@@ -55,8 +64,7 @@ class Api_CompanyController extends Service_RestController
             }
 
             $this->setAjaxData($agreementColl->toArray());
-            $this->setAjaxStatus('ok');
+            $this->setAjaxStatus(self::STATUS_OK);
         }
     }
-
 }

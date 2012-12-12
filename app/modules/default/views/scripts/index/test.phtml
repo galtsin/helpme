@@ -3,47 +3,79 @@ $json = $this->json;
 ?>
 <?php
 $jScript = <<<JS
-require(["core/Layout", "dojo/_base/lang", "core/helper/Validation"]);
-dojo.ready(function(){
-var template = Handlebars.compile(dojo.byId("entry-template").innerHTML);
-//console.log(template({title: "Alan", body: "Johnson", people: ['sdfdsf', 'dfsdfsdf']}));
-/*var processing = core.layout.Processing({node: dojo.byId('loader')});
-processing.show('SEND');*/
+require([
+    "core/Ajax",
+    "dojo/_base/lang",
+    "dojo/Deferred",
+    "dojo/request/xhr",
+    "core/layout/Msg",
+    "app/widgets/SearchCompany"
+], function(Ajax, lang, Deferred, xhr, Msg, SC){
+    dojo.ready(function(){
+
+        var sc = new SC();
+        sc.show();
+
+/*        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
+            handleAs: 'text'
+        });
+
+        t.then(function(response){
+            console.log(response);
+        }, function(){
+            alert('2');
+        });*/
+            //console.log(t);
 
 
 
-var Layout = new core.Layout({
-    timeout: 3000,
-    messenger: {
-        node: dojo.byId('messenger')
-    },
-    processing: {
-        node: dojo.byId('loader')
-    }
-});
-console.log(Layout.baseUrl('test'));
-console.log(window.location);
+        //process.cancel();
+        //process.reject('PROCESS_STATE_WAITING');
+        //process.resolve('fffff');
 
-//protocol + host
-
-console.log(dojo.window.get('location'));
-require(["dojo/router", "dojo/_base/lang"], function(router, lang){
-  router.register("something/:id", function(evt){
-    // Will fire when the hash matches
-    // evt.params.id will contain what is passed in :id
-  });
-
-  // Startup must be called in order to "activate" the router
-  router.startup();
-  router.go('something/14');
-});
-
-var valid = new core.helper.Validation(dojo.byId('testform'));
-valid.setMessages({});
-valid.checkRequired();
-valid.display();
+/*        var deferred = xhr('http://192.168.1.51/default/index/ajax', {
+            method: 'post',
+            handleAs: 'text',
+            timeout: 3000
+        });*/
 
 
+
+
+        var deferred = new Deferred(function(){
+            alert('Cancel');
+        });
+
+/*        setTimeout(function(){
+          deferred.resolve("success");
+        }, 400);*/
+
+/*        setTimeout(function(){
+          //deferred.reject("ooops");
+        }, 1000);
+
+        setTimeout(function(){
+          deferred.cancel("process");
+        }, 900);*/
+
+        //deferred.progress(update);
+
+        deferred.then(function(value){
+            // Do something when the process completes
+            alert(value);
+            var f = new Deferred();
+            setTimeout(function(){
+                f.resolve("success2");
+            }, 1000);
+            return f.promise;
+        }, function(err){
+            // Do something when the process errors out
+            alert(err + 'Error');
+        }).then(function(value){
+            alert(value);
+        })
+
+    });
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')

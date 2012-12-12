@@ -301,6 +301,7 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
     }
 
     /**
+     * Проверка на доступность объекта
      * @param App_Core_Model_Store_Data $object
      * @return bool
      */
@@ -308,6 +309,16 @@ class HM_Model_Account_Access_Possibility extends App_Core_Model_Store_Entity
     {
         foreach($this->getObjects($object->get('type')->get('code')) as $_object) {
             if($_object->getId() === $object->getId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function _has($type, $id)
+    {
+        foreach($this->getObjects($type) as $_object) {
+            if($_object->getId() === $id) {
                 return true;
             }
         }

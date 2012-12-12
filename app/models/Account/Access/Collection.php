@@ -197,7 +197,6 @@ class HM_Model_Account_Access_Collection extends App_Core_Model_Collection_Filte
      */
     private function _checkRestrictionByCompany(HM_Model_Account_Access_Possibility $possibility)
     {
-
         if(null !== $this->_restrictionByCompany) {
             if($this->_restrictionByCompany == $possibility->getData('company')->getData('id')) {
                 return true;
