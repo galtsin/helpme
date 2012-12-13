@@ -2,44 +2,13 @@ define([
     "dojo/_base/declare",
     "dojo/dom",
     "dojo/dom-construct",
+    "dojo/dom-class",
     "dojo/keys",
     "dojo/on",
     "dojo/Deferred",
     "dojo/_base/lang",
-    "dojo/_base/fx",
-    "dojo/dom-style",
-    "dojo/window",
-    "dojo/_base/window"
-], function(declare, dom, domConstruct, keys, on, Deferred, lang, fx, domStyle, win, winBase){
-
-    var Overlay = declare(null, {
-        domNode: null,
-        constructor: function(){
-            this.domNode = domConstruct.create('div');
-            domStyle.set(this.domNode, {
-                'position':     'absolute',
-                'top':          0,
-                'opacity':      0.7,
-                'background':   '#ffffff',
-                'display':      'block',
-                'z-index':      9000,
-                'visibility':   'visible'
-            });
-        },
-        show: function(){
-            this._resize();
-            domConstruct.place(this.domNode, winBase.body(), 'last');
-        },
-        _resize: function(){
-            domStyle.set(this.domNode, {
-                'width':      win.getBox().w + 'px',
-                'height':     win.getBox().h + 'px'
-            });
-        },
-        hide: function(){
-            domConstruct.destroy(this.domNode);
-        }
-    });
+    "dojo/_base/fx"
+], function(declare, dom, domConstruct, domClass, keys, on, Deferred, lang, fx){
 
     var Messenger = declare(null, {
         statuses: {
@@ -54,12 +23,10 @@ define([
             SERVER_ERROR:           'Ошибка на сервере'
         },
         domNode:    null,   //
-        timeout:    15000,   // Время автоновного завершения отображения сообщения
+        timeout:    15000,   // Время автоновного завершения процесса и вывод сообщения об ошибке
         duration:   3000,    // Продолжительность сообщения
-        overlay:    null,
         constructor: function(options){
             lang.mixin(this, options);
-            this.overlay = new Overlay();
         },
         /**
          * Отправка сообщения
@@ -119,20 +86,11 @@ define([
             var messenger = this;
             var deferred = new Deferred();
 
-            // Прерывание процесса пользователем
-            on(window, "keypress", function(event){
-                if(event.keyCode == keys.ESCAPE) {
-                    deferred.cancel('PROCESS_STATE_ABORTED');
-                }
-            });
-
             if(callback) callback(this);
 
-            messenger.overlay.show();
             deferred.promise.always(function(status){
                 clearTimeout(timeout);
                 messenger.send(status);
-                messenger.overlay.hide();
             });
 
             // Завершение процесса по истечении времени ожидания
@@ -141,7 +99,7 @@ define([
                 deferred.reject('PROCESS_STATE_TIMEOUT');
             }, this.timeout);
 
-            // Инициализация процесса удачного завершения процесса должна быть инициализирована извне
+            // Инициализация процесса resolve должна быть инициализирована извне
             return deferred;
         }
     });

@@ -4,28 +4,50 @@ $json = $this->json;
 <?php
 $jScript = <<<JS
 require([
+    "dojo/query",
     "core/Ajax",
     "dojo/_base/lang",
     "dojo/Deferred",
     "dojo/request/xhr",
     "core/layout/Msg",
-    "app/widgets/SearchCompany"
-], function(Ajax, lang, Deferred, xhr, Msg, SC){
+    "app/widgets/SearchCompany",
+    "core/layout/Overlay"
+], function(query, Ajax, lang, Deferred, xhr, Msg, SC, Overlay){
     dojo.ready(function(){
 
         var sc = new SC();
         sc.show();
 
-/*        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
-            handleAs: 'text'
+/*        var o = new Overlay({
+            domNode: 'header'
         });
 
-        t.then(function(response){
-            console.log(response);
-        }, function(){
-            alert('2');
-        });*/
-            //console.log(t);
+        o.show();
+        setTimeout(function(){
+            o.hide();
+        }, 1000);
+
+                    setTimeout(function(){
+                o.show();
+            }, 3000);*/
+
+
+/*
+        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
+            handleAs: 'text',
+            overlay: new Overlay({
+                domNode: query('.container')[0]
+            }),
+            timeout: 1000
+        });
+
+        t.then(function(r){
+        console.log(r);
+        }, function(e){
+            console.log(e.response);
+        });
+*/
+
 
 
 
@@ -51,29 +73,22 @@ require([
         }, 400);*/
 
 /*        setTimeout(function(){
-          //deferred.reject("ooops");
-        }, 1000);
+          deferred.reject("ooops");
+        }, 900);
 
         setTimeout(function(){
           deferred.cancel("process");
-        }, 900);*/
+        }, 2000);
 
         //deferred.progress(update);
 
         deferred.then(function(value){
             // Do something when the process completes
             alert(value);
-            var f = new Deferred();
-            setTimeout(function(){
-                f.resolve("success2");
-            }, 1000);
-            return f.promise;
         }, function(err){
             // Do something when the process errors out
             alert(err + 'Error');
-        }).then(function(value){
-            alert(value);
-        })
+        });*/
 
     });
 });

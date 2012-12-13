@@ -2,22 +2,23 @@ define([
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/request/xhr",
+    "dojo/on",
+    "dojo/keys",
     "dojo/Deferred",
     "core/layout/Msg",
-    "core/layout/Messenger",
-    "core/layout/Processing"
-], function(declare, lang, xhr, Deferred, Msg, Messenger, Processing){
+    "dojo/aspect"
+], function(declare, lang, xhr, on, keys, Deferred, Msg, aspect){
 
     var Ajax = declare(null, {
         // Время задержки. Служит для визуального отображения Процесса
         delay: 500,
         // Время ожидания ответа
         timeout: 15000,
-        //
+        // Мессенджер
         Messenger: null,
         constructor: function(){
             this.Messenger = new Msg({
-                domNode: 'messenger'
+                domNode:        'messenger'
             });
         },
         send: function(url, options){
@@ -45,15 +46,33 @@ define([
         _request: function(url, options){
 
             options.timeout = this.timeout;
+
             var Ajax = this;
             var processDeferred = this.Messenger.process(function(){
+                if(options.overlay){
+                    options.overlay.show();
+                }
                 var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
                 var handler = Ajax.Messenger.send(status);
-                clearTimeout(handler);
+                clearTimeout(handler); // TODO: зачем?
             });
 
-            // Или можно создать дополнительный объект Deferred
-            return xhr(url, options).then(function(response){
+            // Прерывание процесса пользователем
+/*            on(window, "keypress", function(event){
+                 if(event.keyCode == keys.ESCAPE) {
+                     processDeferred.cancel('PROCESS_STATE_ABORTED');
+                 }
+             });*/
+
+            if(options.overlay){
+                // Отключить оверлей
+                processDeferred.promise.always(function(){
+                    options.overlay.hide();
+                });
+            }
+
+            var request =  xhr(url, options);
+            request.then(function(response){
                 if(response && 'object' == typeof response) {
                     if(response.result) {
                         switch (response.status.toLowerCase()) {
@@ -70,12 +89,12 @@ define([
                 } else {
                     processDeferred.resolve('PROCESS_STATE_OK');
                 }
-                return response;
             }, function(error){
-                // Ошибка сервера
+                //error.response;
                 processDeferred.reject('SERVER_ERROR');
-                return error;
             });
+
+            return request;
         }
     });
 
