@@ -18,35 +18,30 @@ require([
         var sc = new SC();
         sc.show();
 
+        setTimeout(function(){
+            sc.show();
+        }, 5000);
+
 /*        var o = new Overlay({
-            domNode: 'header'
+            domNode: 'lt'
         });
 
         o.show();
         setTimeout(function(){
-            o.hide();
+            //o.hide();
         }, 1000);
 
                     setTimeout(function(){
-                o.show();
+                //o.show();
             }, 3000);*/
 
 
-/*
-        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
+/*        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
             handleAs: 'text',
             overlay: new Overlay({
                 domNode: query('.container')[0]
-            }),
-            timeout: 1000
-        });
-
-        t.then(function(r){
-        console.log(r);
-        }, function(e){
-            console.log(e.response);
-        });
-*/
+            })
+        });*/
 
 
 
@@ -74,27 +69,30 @@ require([
 
 /*        setTimeout(function(){
           deferred.reject("ooops");
-        }, 900);
+        }, 900);*/
 
-        setTimeout(function(){
+/*        setTimeout(function(){
           deferred.cancel("process");
-        }, 2000);
+        }, 2000);*/
 
         //deferred.progress(update);
 
         deferred.then(function(value){
             // Do something when the process completes
             alert(value);
+
         }, function(err){
             // Do something when the process errors out
             alert(err + 'Error');
-        });*/
+            console.log(deferred.isCanceled());
+        });
 
     });
 });
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
+<div id="lt" style="width: auto; height: auto; background: green"></div>
 <div style="text-align: center; margin: 20px 0 0; padding: 100px 0; background: #f3f3f3;">
     <img src="<?php echo $this->baseUrl('theme/default/images/hm.jpg')?>"/>
 </div>

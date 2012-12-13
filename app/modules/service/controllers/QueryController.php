@@ -14,7 +14,6 @@ class Service_QueryController extends App_Zend_Controller_Action
      */
     private $_collections;
 
-
     /**
      * Инициализация
      */

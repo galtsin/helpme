@@ -141,12 +141,13 @@ body {
 }
 
 .loader {
-    /*position: absolute;*/
     position: absolute;
+    width: 31px;
+    height: 31px;
     z-index: 9999;
     left:0;
     top: 0;
-    background: #fff url("../images/ajax-loader.gif") center center no-repeat;
+    background: #008000 url("../images/ajax-loader.gif") center center no-repeat;
     opacity: 0.6;
     filter: alpha(Opacity=60);
     visibility: visible;

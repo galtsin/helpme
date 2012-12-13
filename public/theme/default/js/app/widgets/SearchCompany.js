@@ -8,33 +8,59 @@ define([
     "dojo/query",
     "core/layout/Overlay",
     "core/Ajax",
-    "dojo/dom-style"
-], function(declare, DialogBox, dom, domConstruct, array, lang, query, Overlay, Ajax, domStyle){
+    "dojo/dom-style",
+    "dojo/aspect",
+    "dojo/on"
+], function(declare, DialogBox, dom, domConstruct, array, lang, query, Overlay, Ajax, domStyle, aspect, on){
+
     var SearchCompany = declare([DialogBox], {
-        onShow: function(){
-            // Url загрузка
-            // Создать DIV
-            var container = domConstruct.create('div');
-            domStyle.set(container, {
-                width: '250px',
-                height: '100px',
-                background: '#fff'
-            });
-            this.set('content', container);
-            var v = new Overlay({
-               domNode: this.containerNode
-            });
+        Overlay: null,
+        constructor: function(){
             var that = this;
-            Ajax.load('http://192.168.1.51/default/index/ajax', {
-                handleAs: 'text',
-                overlay: v
-            }).then(function(response){
-                that.set('content', response);
+            var onShowHandler = aspect.after(this, 'onShow', function(){
+                that.Overlay = new Overlay({
+                    domNode: this.containerNode
+                 });
+                // Взависимости от результата получения данных - текущая обработка
+                // будет повторяться или нет
+                this._getContent(onShowHandler);
             });
+        },
+        _getContent: function(onShowHandler){
+            var that = this;
+
+            // Отразить заглушку на время загрузки данных
+            domStyle.set(this.Overlay.overlayNode, {
+                width: "200px",
+                height: "100px"
+            });
+
+            var request = Ajax.load('http://192.168.1.51/manager/billing/search-company', {
+                handleAs: 'html',
+                overlay: this.Overlay
+            });
+
+            request.then(function(response){
+                setTimeout(function(){
+                    that.set('content', response);
+                    onShowHandler.remove();
+                }, that.Overlay.delay);
+            },function(){
+                setTimeout(function(){
+                    that.set('content', 'Неудалось загрузить контент');
+                }, that.Overlay.delay);
+            });
+
+            // Событие по закрытию диалога во время загрузки контента
+            var onHideHandler = aspect.after(this, 'hide', function(){
+                onHideHandler.remove();
+                if(!request.isFulfilled()){
+                    request.cancel();
+                    Ajax.Messenger.send('PROCESS_STATE_ABORTED');
+                }
+            })
         }
     });
-
-
 
     return SearchCompany;
 });

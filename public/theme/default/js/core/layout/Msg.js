@@ -16,7 +16,7 @@ define([
             PROCESS_SEND:           'Отправка данных',
             PROCESS_STATE_OK:       'Выполнено',
             PROCESS_STATE_FAILED:   'Ошибка',
-            PROCESS_STATE_WAITING:  'Обработка',
+            PROCESS_STATE_WAITING:  'Идет обработка',
             PROCESS_STATE_ABORTED:  'Операция прервана',
             PROCESS_STATE_TIMEOUT:  'Превышено время ожидания',
             SERVER_DISCONNECT:      'Не удалось получить ответ от сервера',

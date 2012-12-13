@@ -10,9 +10,7 @@ define([
 ], function(declare, lang, xhr, on, keys, Deferred, Msg, aspect){
 
     var Ajax = declare(null, {
-        // Время задержки. Служит для визуального отображения Процесса
-        delay: 500,
-        // Время ожидания ответа
+        // Время ожидания ответа. Изменная для глобального пространства
         timeout: 15000,
         // Мессенджер
         Messenger: null,
@@ -22,32 +20,45 @@ define([
             });
         },
         send: function(url, options){
-            var requestOptions = {
+            // undefined
+            var undefinedOptions = {
                 data:           {},
                 method:         'POST',
                 handleAs:       'json',
                 processing:     true,
                 preventCache:   false
             };
-            lang.mixin(requestOptions, options || {});
-            return this._request(url, requestOptions);
+            lang.mixin(undefinedOptions, options || {});
+            return this._request(url, undefinedOptions);
         },
         load: function(url, options){
-            var requestOptions = {
+            // undefined
+            var undefinedOptions = {
                 query:          {},
                 method:         'GET',
                 handleAs:       'json',
                 processing:     true,
                 preventCache:   true
             };
-            lang.mixin(requestOptions, options);
-            return this._request(url, requestOptions);
+            lang.mixin(undefinedOptions, options);
+            return this._request(url, undefinedOptions);
         },
         _request: function(url, options){
 
-            options.timeout = this.timeout;
-
             var Ajax = this;
+
+            lang.mixin(options, {
+                timeout: this.timeout
+            });
+
+            switch(options.handleAs.toLowerCase()){
+                case 'json':
+                    url += '/format/json';
+                    break;
+                default:
+                    url += '/format/html';
+            }
+
             var processDeferred = this.Messenger.process(function(){
                 if(options.overlay){
                     options.overlay.show();
@@ -74,24 +85,22 @@ define([
             var request =  xhr(url, options);
             request.then(function(response){
                 if(response && 'object' == typeof response) {
-                    if(response.result) {
-                        switch (response.status.toLowerCase()) {
-                            case 'ok':
-                                // Запустить цепочку успешного получения данных
-                                processDeferred.resolve('PROCESS_STATE_OK');
-                                break;
-                            case 'error':
-                                // ЗАпустить цепочку неудачного получения данных
-                                processDeferred.reject('PROCESS_STATE_FAILED');
-                                break;
-                        }
+                    switch (response.status.toLowerCase()) {
+                        case 'ok':
+                            // Запустить цепочку успешного получения данных
+                            processDeferred.resolve('PROCESS_STATE_OK');
+                            break;
+                        case 'error':
+                            // ЗАпустить цепочку неудачного получения данных
+                            processDeferred.reject('PROCESS_STATE_FAILED');
+                            break;
                     }
                 } else {
                     processDeferred.resolve('PROCESS_STATE_OK');
                 }
             }, function(error){
                 //error.response;
-                processDeferred.reject('SERVER_ERROR');
+                processDeferred.reject('PROCESS_STATE_FAILED');
             });
 
             return request;
