@@ -25,7 +25,7 @@ define([
                 data:           {},
                 method:         'POST',
                 handleAs:       'json',
-                processing:     true,
+                processing:     true, // Подробное отображение всех этапов процесса
                 preventCache:   false
             };
             lang.mixin(undefinedOptions, options || {});
@@ -56,45 +56,30 @@ define([
                     url += '/format/html';
             }
 
-            var processDeferred = this.Messenger.process(function(){
+            var processDeferred = this.Messenger.process(function(timeout){
+                clearTimeout(timeout); // Удалить счетчик автозавершения процесса
                 if(options.overlay) options.overlay.show();
             });
 
-            var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
-            var handler = this.Messenger.send(status);
-            handler.show();
-            clearTimeout(handler.clearTimeout);
+            processDeferred.promise.always(function(){
+                if(options.overlay) options.overlay.hide();
+            });
+
+
+/*            var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
+            if(true === options.processing){
+                var handler = this.Messenger.send(status);
+                handler.show();
+                clearTimeout(handler.clearTimeout);
+            }
 
             // Удалить Сообщение и Оверлей
             processDeferred.promise.always(function(){
                 if(options.overlay) options.overlay.hide();
-                setTimeout(function(){
-                    handler.remove();
-                }, 700);
-            });
-
-/*            // Версия с равномерным исчезновением сообщания о Загрузке или Передачи данных
-            handler.changeState = function(){};
-            var test = false;
-            setTimeout(function(){
-                // Событие отработало
-                test = true;
-                handler.changeState();
-                setTimeout(function(){
-                    //handler.remove();
-                }, Ajax.Messenger.timeout - (Ajax.Messenger.duration + Ajax.Messenger.fadeDuration));
-            }, Ajax.Messenger.duration + Ajax.Messenger.fadeDuration);
-            handler.show();
-
-            processDeferred.promise.always(function(){
-                if(options.overlay) options.overlay.hide();
-                if(test == true){
-                    handler.remove();
-                } else {
-                    aspect.after(handler, 'changeState', function(){
-                        //alert('change');
+                if(true === options.processing){
+                    setTimeout(function(){
                         handler.remove();
-                    });
+                    }, 700);
                 }
             });*/
 
@@ -108,6 +93,7 @@ define([
             var request =  xhr(url, options);
             request.then(function(response){
                 if(response && 'object' == typeof response) {
+                    // Состояния приложения и внутренних операций
                     switch (response.status.toLowerCase()) {
                         case 'ok':
                             // Запустить цепочку успешного получения данных
@@ -123,7 +109,23 @@ define([
                 }
             }, function(error){
                 //error.response;
-                processDeferred.reject('PROCESS_STATE_FAILED');
+                // Состояние операции
+                switch(error.response.xhr.status){
+                    case 0:
+                        processDeferred.reject('PROCESS_STATE_ABORTED');
+                        break;
+                    case 500:
+                        processDeferred.reject('SERVER_ERROR');
+                        break;
+                    case 404:
+                        processDeferred.reject('SERVER_NOT_FOUND');
+                        break;
+                    case 403:
+                        processDeferred.reject('SERVER_FORBIDDEN');
+                        break;
+                    default:
+                        processDeferred.reject('PROCESS_STATE_FAILED');
+                }
             });
 
             return request;

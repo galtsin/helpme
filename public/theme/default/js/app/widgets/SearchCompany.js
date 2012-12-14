@@ -42,7 +42,8 @@ define([
 
             var request = Ajax.load('http://192.168.1.51/manager/billing/search-company', {
                 handleAs: 'html',
-                overlay: this.Overlay
+                overlay: this.Overlay,
+                processing: false
             });
 
             request.then(function(response){
@@ -61,7 +62,7 @@ define([
                 onHideHandler.remove();
                 if(!request.isFulfilled()){
                     request.cancel();
-                    Ajax.Messenger.send('PROCESS_STATE_ABORTED');
+                    //Ajax.Messenger.send('PROCESS_STATE_ABORTED');
                 }
             })
         }

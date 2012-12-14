@@ -23,11 +23,13 @@ define([
             PROCESS_STATE_ABORTED:  'Операция прервана',
             PROCESS_STATE_TIMEOUT:  'Превышено время ожидания',
             SERVER_DISCONNECT:      'Не удалось получить ответ от сервера',
-            SERVER_ERROR:           'Ошибка на сервере'
+            SERVER_FORBIDDEN:       'Доступ запрещен',
+            SERVER_ERROR:           'Ошибка на сервере',
+            SERVER_NOT_FOUND:       'Ресурс не найден'
         },
         domNode:    null,   //
         timeout:    15000,   // Время автоновного завершения процесса и вывод сообщения об ошибке
-        duration:   3000,    // Продолжительность показа сообщения
+        duration:   2000,    // Продолжительность показа сообщения
         fadeDuration: 700, // Время угасания/проявления сообщения
         constructor: function(options){
             lang.mixin(this, options);
@@ -54,7 +56,7 @@ define([
             var handler = {
                 // Автозапуск удаления
                 clearTimeout: setTimeout(function(){
-                    handler.remove();
+                    //handler.remove();
                 }, this.duration + _Messenger.fadeDuration),
                 // Скрыть сообщение
                 hide: function(){
@@ -78,7 +80,7 @@ define([
                         delete handler.hide;
                     });
                 },
-                // ContentPane instance
+                // Сообщение ContentPane instance
                 message: message
             };
 
@@ -103,12 +105,18 @@ define([
         process: function(callback){
             var timeout;
             var deferred = new Deferred();
-
-            if(callback) callback(this);
-
             var _Messenger = this;
-            deferred.promise.always(function(status){
+
+            // TODO: Отображать все сообщения
+/*            deferred.promise.always(function(status){
                 clearTimeout(timeout);
+                _Messenger.send(status).show();
+            });*/
+
+            // TODO: Отображать только сообщения об ошибках. ЗАменить на предыдущий блок
+            deferred.promise.then(function(){
+                clearTimeout(timeout);
+            }, function(status){
                 _Messenger.send(status).show();
             });
 
@@ -117,6 +125,8 @@ define([
                 // Если было уже инициировано Ошибка или Успешный ответ, то данные дальше не перейдут
                 deferred.reject('PROCESS_STATE_TIMEOUT');
             }, this.timeout);
+
+            if(callback) callback(timeout);
 
             // Инициализация процесса resolve должна быть инициализирована извне
             return deferred;
