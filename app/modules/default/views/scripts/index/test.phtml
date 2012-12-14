@@ -11,16 +11,41 @@ require([
     "dojo/request/xhr",
     "core/layout/Msg",
     "app/widgets/SearchCompany",
-    "core/layout/Overlay"
-], function(query, Ajax, lang, Deferred, xhr, Msg, SC, Overlay){
+    "core/layout/Overlay",
+    "dijit/layout/ContentPane",
+    "dojo/aspect"
+], function(query, Ajax, lang, Deferred, xhr, Msg, SC, Overlay, ContentPane, aspect){
     dojo.ready(function(){
 
-        var sc = new SC();
+        var cp = new ContentPane({
+
+        });
+
+        cp.set('content', '<p>Hello World</p>');
+        cp.set('id', 'hello');
+        cp.placeAt('lt');
+        //domStyle.set(registry.byId("myThinger").domNode, "display", "none");
+        console.log(cp);
+
+/*        var Messenger = new Msg({
+            domNode: 'messenger'
+        });
+        var handler = Messenger.send('PROCESS_LOAD');
+        handler.show();
+        setTimeout(function(){
+            var handler2 = Messenger.send('PROCESS_STATE_ABORTED');
+            handler2.show();
+                        var handler3 = Messenger.send('PROCESS_STATE_ABORTED');
+            handler3.show();
+        }, 1000);*/
+
+
+/*        var sc = new SC();
         sc.show();
 
         setTimeout(function(){
-            sc.show();
-        }, 5000);
+            //sc.show();
+        }, 5000);*/
 
 /*        var o = new Overlay({
             domNode: 'lt'
@@ -36,12 +61,12 @@ require([
             }, 3000);*/
 
 
-/*        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
+        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
             handleAs: 'text',
             overlay: new Overlay({
                 domNode: query('.container')[0]
             })
-        });*/
+        });
 
 
 

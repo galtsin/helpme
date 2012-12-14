@@ -26,6 +26,11 @@ define([
                 this._getContent(onShowHandler);
             });
         },
+        /**
+         * Загрузить контент с сервера
+         * @param onShowHandler
+         * @private
+         */
         _getContent: function(onShowHandler){
             var that = this;
 

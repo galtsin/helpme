@@ -44,9 +44,6 @@ define([
             return this._request(url, undefinedOptions);
         },
         _request: function(url, options){
-
-            var Ajax = this;
-
             lang.mixin(options, {
                 timeout: this.timeout
             });
@@ -60,13 +57,46 @@ define([
             }
 
             var processDeferred = this.Messenger.process(function(){
-                if(options.overlay){
-                    options.overlay.show();
-                }
-                var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
-                var handler = Ajax.Messenger.send(status);
-                clearTimeout(handler); // TODO: зачем?
+                if(options.overlay) options.overlay.show();
             });
+
+            var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
+            var handler = this.Messenger.send(status);
+            handler.show();
+            clearTimeout(handler.clearTimeout);
+
+            // Удалить Сообщение и Оверлей
+            processDeferred.promise.always(function(){
+                if(options.overlay) options.overlay.hide();
+                setTimeout(function(){
+                    handler.remove();
+                }, 700);
+            });
+
+/*            // Версия с равномерным исчезновением сообщания о Загрузке или Передачи данных
+            handler.changeState = function(){};
+            var test = false;
+            setTimeout(function(){
+                // Событие отработало
+                test = true;
+                handler.changeState();
+                setTimeout(function(){
+                    //handler.remove();
+                }, Ajax.Messenger.timeout - (Ajax.Messenger.duration + Ajax.Messenger.fadeDuration));
+            }, Ajax.Messenger.duration + Ajax.Messenger.fadeDuration);
+            handler.show();
+
+            processDeferred.promise.always(function(){
+                if(options.overlay) options.overlay.hide();
+                if(test == true){
+                    handler.remove();
+                } else {
+                    aspect.after(handler, 'changeState', function(){
+                        //alert('change');
+                        handler.remove();
+                    });
+                }
+            });*/
 
             // Прерывание процесса пользователем
 /*            on(window, "keypress", function(event){
@@ -74,13 +104,6 @@ define([
                      processDeferred.cancel('PROCESS_STATE_ABORTED');
                  }
              });*/
-
-            if(options.overlay){
-                // Отключить оверлей
-                processDeferred.promise.always(function(){
-                    options.overlay.hide();
-                });
-            }
 
             var request =  xhr(url, options);
             request.then(function(response){

@@ -44,9 +44,10 @@ require([
     "dijit/Dialog",
     "core/Dispatcher",
     "dojo/Deferred",
-    "core/widgets/SearchCompanyDialog"
+    "core/widgets/SearchCompanyDialog",
+    "dijit/layout/ContentPane"
 ], function(declare, Stateful, dom, domHtml, domClass, domConstruct, domAttr, domForm, array, dateLocale, on, lang, query, hash, router, storeMemory, storeObservable, storeCache,
-aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, Deferred, coreSearchCompanyDialog){
+aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, Deferred, coreSearchCompanyDialog, ContentPane){
     dojo.ready(function(){
 
         var Layout = new coreLayout({
@@ -96,6 +97,24 @@ aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialo
         var agreementsStore = new storeObservable(new storeMemory());
 
         var contentNode = dom.byId('contentCompanies');
+
+
+        var cp = new ContentPane({
+            id: 'getOwners'
+        });
+
+        cp.postMixInProperties = function(){
+            var node = domConstruct.create('div');
+            array.forEach(companiesOwnersStore.data, function(item){
+                new ownerWidget(node, item);
+            });
+            this.set('content', node);
+        };
+
+
+
+
+
 
         // Компания владелец
         var ownerWidget = function(refNode, ownerItem){
@@ -355,6 +374,7 @@ aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialo
         })();
 
         //router.go('getCompaniesClients');
+
     });
 });
 

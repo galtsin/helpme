@@ -2,13 +2,16 @@ define([
     "dojo/_base/declare",
     "dojo/dom",
     "dojo/dom-construct",
+    "dojo/dom-style",
     "dojo/dom-class",
     "dojo/keys",
     "dojo/on",
+    "dojo/aspect",
     "dojo/Deferred",
     "dojo/_base/lang",
-    "dojo/_base/fx"
-], function(declare, dom, domConstruct, domClass, keys, on, Deferred, lang, fx){
+    "dojo/_base/fx",
+    "dijit/layout/ContentPane"
+], function(declare, dom, domConstruct, domStyle, domClass, keys, on, aspect, Deferred, lang, fx, ContentPane){
 
     var Messenger = declare(null, {
         statuses: {
@@ -24,7 +27,8 @@ define([
         },
         domNode:    null,   //
         timeout:    15000,   // Время автоновного завершения процесса и вывод сообщения об ошибке
-        duration:   3000,    // Продолжительность сообщения
+        duration:   3000,    // Продолжительность показа сообщения
+        fadeDuration: 700, // Время угасания/проявления сообщения
         constructor: function(options){
             lang.mixin(this, options);
         },
@@ -35,47 +39,62 @@ define([
          * @return {*|Number}
          */
         send: function(status, msg){
-            setTimeout(function(){
+            var container = domConstruct.create('div');
+            domStyle.set(container, {
+                opacity: 0
+            });
+            domConstruct.place(container, this.domNode, 'first');
+            var message = new ContentPane({
+                content: this.fullText(status, msg),
+                style: {padding: '0px', margin: '0px'}
+            }, container);
+            message.startup();
 
-            }, 800);
-            domConstruct.place(this._fullText(status, msg), this.domNode, 'first');
-            fx.fadeIn({
-                node:       this.domNode,
-                duration:   600
-            }).play();
+            var _Messenger = this;
+            var handler = {
+                // Автозапуск удаления
+                clearTimeout: setTimeout(function(){
+                    handler.remove();
+                }, this.duration + _Messenger.fadeDuration),
+                // Скрыть сообщение
+                hide: function(){
+                    return fx.fadeOut({
+                        node:       container,
+                        duration:   _Messenger.fadeDuration
+                    }).play();
+                },
+                // Показать сообщение
+                show: function(){
+                    return  fx.fadeIn({
+                        node:       container,
+                        duration:   _Messenger.fadeDuration
+                    }).play();
+                },
+                // Удалить сообщение
+                remove: function(){
+                    aspect.after(handler.hide(), "onEnd", function(){
+                        handler.message.destroy();
+                        delete handler.show;
+                        delete handler.hide;
+                    });
+                },
+                // ContentPane instance
+                message: message
+            };
 
-            var messenger = this;
-            // Автоматическая очистка сообщений
-            return setTimeout(function(){
-                messenger.clear();
-            }, this.duration);
-        },
-        /**
-         * Очистить сообщение
-         */
-        clear: function(){
-            fx.fadeOut({
-                node:       this.domNode,
-                duration:   600
-            }).play();
-
-            var messenger = this;
-            setTimeout(function(){
-                domConstruct.empty(messenger.domNode);
-            }, 600 + 400);
+            return handler;
         },
         /**
          * Заполнить текст сообщения
          * @param status
          * @param msg
          * @return {String}
-         * @private
          */
-        _fullText: function(status, msg){
+        fullText: function(status, msg){
             var html = '<p>' +
-                '<span class="status">' + this.statuses[status] + '</span>';
+                '<span class="status">= ' + this.statuses[status] + ' =</span>';
             if(msg) {
-                html += '<span class="text">' + msg + '</span>';
+                html += '<span class="message">' + msg + '</span>';
             }
             html += '</p>';
             return html;
@@ -83,14 +102,14 @@ define([
         // Синхронный процесс
         process: function(callback){
             var timeout;
-            var messenger = this;
             var deferred = new Deferred();
 
             if(callback) callback(this);
 
+            var _Messenger = this;
             deferred.promise.always(function(status){
                 clearTimeout(timeout);
-                messenger.send(status);
+                _Messenger.send(status).show();
             });
 
             // Завершение процесса по истечении времени ожидания
