@@ -13,8 +13,10 @@ require([
     "app/widgets/SearchCompany",
     "core/layout/Overlay",
     "dijit/layout/ContentPane",
-    "dojo/aspect"
-], function(query, Ajax, lang, Deferred, xhr, Msg, SC, Overlay, ContentPane, aspect){
+    "dojo/aspect",
+    "dojo/store/JsonRest",
+    "dojo/io-query"
+], function(query, Ajax, lang, Deferred, xhr, Msg, SC, Overlay, ContentPane, aspect, JsonRest, ioQuery){
     dojo.ready(function(){
 
         var cp = new ContentPane({
@@ -112,6 +114,41 @@ require([
             console.log(deferred.isCanceled());
         });
 
+
+        var rest = new JsonRest({
+            target: "/api/1/company/"
+        });
+
+        var query = ioQuery.objectToQuery({
+            'filters[equal][inn][]': 15
+        });
+
+        rest.query('query' + "?" + query, {
+            'filters[equal][company][inn][]': 'f',
+            start: 10,
+            count: 10,
+            sort: [
+              { attribute: "baz", descending: true }
+            ]
+        });
+
+
+/*var userMemoryStore = new dojo.store.Memory();
+var userJsonRestStore = new dojo.store.JsonRest({target: "/users/"});
+var userStore = new dojo.store.Cache(userJsonRestStore, userMemoryStore);*/
+
+        //'action=company/15/agreement';
+        function trace(path){
+            var obj = {}, parts = path.match(/#?(\w+)=?(.+)*/i);
+            obj.action = parts[1];
+            var params = parts[2].split('/');
+            for(var i = 0, l = params.length; i < l; i ++){
+                obj[params[i]] = params[i+1];
+                i += 1;
+            }
+            return obj;
+        }
+
     });
 });
 JS;
@@ -137,3 +174,4 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         </div>
     </div>
 </script>
+<a data-action="company/15/"

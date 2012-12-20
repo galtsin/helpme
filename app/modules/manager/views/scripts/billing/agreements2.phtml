@@ -26,6 +26,8 @@ require([
     "dojo/dom-construct",
     "dojo/dom-attr",
     "dojo/dom-form",
+    "dojo/json",
+    "dojo/string",
     "dojo/_base/array",
     "dojo/date/locale",
     "dojo/on",
@@ -44,10 +46,20 @@ require([
     "dijit/Dialog",
     "core/Dispatcher",
     "dojo/Deferred",
+    "core/Ajax",
+    "core/layout/Overlay",
     "core/widgets/SearchCompanyDialog",
-    "dijit/layout/ContentPane"
-], function(declare, Stateful, dom, domHtml, domClass, domConstruct, domAttr, domForm, array, dateLocale, on, lang, query, hash, router, storeMemory, storeObservable, storeCache,
-aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, Deferred, coreSearchCompanyDialog, ContentPane){
+    "dijit/registry",
+    "dijit/popup",
+    "dijit/layout/ContentPane",
+    "dijit/_WidgetBase",
+    "dijit/_Container",
+    "dijit/_TemplatedMixin",
+    "dijit/TooltipDialog",
+    "dojo/text!app/modules/manager/billing/template/test.html"
+], function(declare, Stateful, dom, domHtml, domClass, domConstruct, domAttr, domForm, JSON, string, array, dateLocale, on, lang, query, hash, router, storeMemory, storeObservable, storeCache,
+aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialog, coreDispatcher, Deferred, Ajax, Overlay, coreSearchCompanyDialog, dijitRegistry, dijitPopup, ContentPane, _WidgetBase, _Container, _TemplatedMixin,
+TooltipDialog, text){
     dojo.ready(function(){
 
         var Layout = new coreLayout({
@@ -99,21 +111,229 @@ aspect, coreLayout, coreValidation, coreHelperForm, coreHelperCommon, dijitDialo
         var contentNode = dom.byId('contentCompanies');
 
 
-        var cp = new ContentPane({
+/*        var cp = new ContentPane({
             id: 'getOwners'
-        });
+        }).placeAt('contentCompanies');
+        cp.set('content', (function(){
+            new _render;
+        })());*/
 
-        cp.postMixInProperties = function(){
+
+/*        cp.postMixInProperties = function(){
             var node = domConstruct.create('div');
             array.forEach(companiesOwnersStore.data, function(item){
                 new ownerWidget(node, item);
             });
             this.set('content', node);
-        };
+        };*/
+
+        function enumerable(dataA, dataB) {
+            var expectDataA = [];
+            var intersectDataAB = [];
+            var distinctDataB = [];
+            var i = true;
+
+            array.forEach(dataA, function(itemA, indexA){
+                expectDataA.push(itemA.id);
+                array.forEach(dataB, function(itemB, indexB){
+                    if(i) distinctDataB.push(itemB.id);
+                    if(itemA.id === itemB.id){
+                        intersectDataAB.push(itemA.id);
+                        expectDataA.pop();
+                        distinctDataB.splice(distinctDataB.indexOf(itemA.id), 1);
+                    }
+                });
+                i = false;
+            });
+
+            return {
+                expect: expectDataA,
+                intersect: intersectDataAB,
+                distinct: distinctDataB
+            }
+        }
+
+/*        console.log(enumerable(
+            [{id: 7}, {id: 0}],
+            [{id: 18}, {id: 0}]
+        ));*/
 
 
+        var companyOwnerNode = declare("companyOwnerNode", [_WidgetBase, _Container, _TemplatedMixin], {
+            templateString: dom.byId('company-owner-node-template').innerHTML,
+            companyOwner: null,
+            companyClientsStore: null,
+            widgetsInTemplate: true,
+            containerNode: null,
+            postMixInProperties: function(){
+                if(!this.id) this.id = this.declaredClass + '_' + this.companyOwner.id;
+                this.companyClientsStore = new storeMemory();
+            },
+            buildRendering: function(){
+                this.inherited(arguments);
+                this.containerNode = this.get('companyClientsNode');
+            },
+            postCreate: function(){
+                this._overlayAjax = new Overlay({
+                    domNode: this.domNode
+                });
+                var _dijit = this;
+                var handler = on(this.get('uncoverCompanyClientsNodes'), 'click', function(event){
+                    _dijit._getCompanyClientsData().then(function(response){
+                        array.forEach(response.data, function(item){
+                            _dijit.insertCompanyClientNode(item);
+                        });
+                    }).then(function(){
+                        on(event.target, 'click', function(event){
+                            _dijit.toggleUncoverCompanyClientsNodes(event);
+                        });
+                        setTimeout(function(){
+                           _dijit.toggleUncoverCompanyClientsNodes(event);
+                        }, _dijit._overlayAjax.delay);
+                        handler.remove();
+                    });
+                });
+            },
+            removeCompanyClientNode: function(itemId){
+                // TODO: Диджит физически не удаляется
+                this.removeChild(dijitRegistry.byId(this._getCompanyClientId(itemId)));
+                this.companyClientsStore.remove(itemId);
+            },
+            _getCompanyClientId: function(itemId){
+                return 'companyClientNode_' + this.companyOwner.id + '_' + itemId;
+            },
+            insertCompanyClientNode: function(item, options){
+                this.companyClientsStore.add(item);
+                if(dijitRegistry.byId(this._getCompanyClientId(item.id))) this.addChild(this._getCompanyClientId(item.id));
+                else this.addChild(new companyClientNode({companyClient: item, id: this._getCompanyClientId(item.id), options: options}));
+            },
+            toggleUncoverCompanyClientsNodes: function(event){
+                query('span', event.target).forEach(function(spanNode){
+                    domClass.toggle(spanNode, "hidden");
+                });
+                domClass.toggle(this.get('companyClientsNode'), "hidden");
+            },
+            _getCompanyClientsData: function(){
+                return Ajax.load(
+                    'http://192.168.1.51/api/1/company/' + this.get('companyOwner').id + '/get-clients' , {
+                    overlay: this._overlayAjax
+                });
+            },
+            companyClientsFilterById: function(event, g){
+                console.log(event);
+                console.log(g);
+                //var props = JSON.parse('{' + event.target.getAttribute('data-dojo-props') + '}', true);
+                //console.log( event.target.getAttribute('data-dojo-props'));
+                var content = string.substitute(dom.byId('company-client-filter-template').innerHTML, {field: 'id'});
+                var contentDom = domConstruct.toDom(content);
+                var _dijit = this;
+                on(query('form', contentDom)[0]['send'], 'click', function(event){
+                    _dijit.companyClientsFilterSend(event.target.form, 'id');
+                });
+                this._companyClientsFilter(
+                    event.target,
+                    'companyClientFilterById_' + this.companyOwner.id,
+                    contentDom
+                );
+            },
+            companyClientsFilterByInnKpp: function(event){
+                var content = string.substitute(dom.byId('company-client-filter-template').innerHTML, {field: 'inn'});
+                var contentDom = domConstruct.toDom(content);
+                var _dijit = this;
+                on(query('form', contentDom)[0]['send'], 'click', function(event){
+                    _dijit.companyClientsFilterSend(event.target.form, 'inn');
+                });
+                this._companyClientsFilter(
+                    event.target,
+                    'companyClientFilterByInn_' + this.companyOwner.id,
+                    contentDom
+                );
+            },
+            _companyClientsFilterPrepare: function(){
+                var field = 'inn';
+                var content = string.substitute(dom.byId('company-client-filter-template').innerHTML, {field: field});
+                var contentDom = domConstruct.toDom(content);
+                var _dijit = this;
+                on(query('form', contentDom)[0]['send'], 'click', function(event){
+                    _dijit.companyClientsFilterSend(event.target.form, field);
+                });
+                this._companyClientsFilter(
+                    event.target,
+                    'companyClientFilterBy' + field.charAt(0).toUpperCase() + field.substr(1) +  '_' + this.companyOwner.id,
+                    contentDom
+                );
+            },
+            _companyClientsFilter: function(node, dijitId, content){
+                var tooltipDialog;
+                if(!dijitRegistry.byId(dijitId)) {
+                    tooltipDialog = new TooltipDialog({
+                        id: dijitId,
+                        content: content
+                    });
+                } else tooltipDialog = dijitRegistry.byId(dijitId);
+
+                dijitPopup.open({
+                    popup: tooltipDialog,
+                    around: node
+                });
+
+                tooltipDialog.focus();
+                tooltipDialog.onBlur = function(){
+                    dijitPopup.close(tooltipDialog);
+                };
+                // Перестроить ноды с учетом текущей фильтрации
+            },
+            companyClientsFilterSend: function(form, field){
+                var _dijit = this;
+                Ajax.load(
+                    'http://192.168.1.51/api/1/company/query' , {
+                    query: (function(){
+                        var query = domForm.toObject(form);
+                        delete query['send'];
+                        delete query['field'];
+                        return query;
+                    })(),
+                    overlay: this._overlayAjax
+                }).then(function(response){
+
+                    var t = enumerable(_dijit.companyClientsStore.data, response.data);
+                    _dijit.companyClientsStore.query().forEach(function(item){
+                        if(array.indexOf(t.intersect, item.id) > -1) dijitRegistry.byId(_dijit._getCompanyClientId(item.id)).show();
+                        else dijitRegistry.byId(_dijit._getCompanyClientId(item.id)).hide()
+                    });
+
+                    array.forEach(response.data, function(item){
+                        if(array.indexOf(t.distinct, item.id) > -1) _dijit.insertCompanyClientNode(item, {type: 'empty'})
+                    });
+
+                });
+            }
+        });
 
 
+        var companyClientNode = declare("companyClientNode", [_WidgetBase, _TemplatedMixin], {
+            companyClient: null,
+            options: null,
+            templateString: dom.byId('company-client-node-template').innerHTML,
+            postMixInProperties: function(){
+                if(!this.id) this.id = this.declaredClass + '_' + this.companyClient.id;
+                if(this.options && this.options.type == 'empty')
+                this.templateString = dom.byId('company-client-node-empty-template').innerHTML;
+            },
+            hide: function(){
+                domClass.add(this.domNode, "hidden");
+            },
+            show: function(){
+                domClass.remove(this.domNode, "hidden");
+            }
+        });
+
+        var gs = [];
+        array.forEach(companiesOwnersStore.data, function(item){
+            var g = new companyOwnerNode({companyOwner: item});
+            g.placeAt('contentCompanies', 'last');
+            gs.push(g);
+        });
 
 
         // Компания владелец
@@ -482,4 +702,66 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <td>{{dateExpires data.date_end}}</td>
         <td>просмотр</td>
     </tr>
+</script>
+
+<script id="company-client-filter-template" type="text">
+    <form>
+        <input type="text" name="filters[equal][${field}][]"/>
+        <input type="hidden" name="field" value="${field}"/>
+        <button type="button" name="send">найти</button>
+    </form>
+</script>
+
+<script id="company-client-node-template" type="text">
+    <tr data-dojo-attach-point="companyClientNode_${companyClient.id}">
+        <td>${companyClient.id}</td>
+        <td>${companyClient.data.name}</td>
+        <td>${companyClient.data.inn}</td>
+        <td>${companyClient.data.kpp}</td>
+        <td><a data-dojo-attach-event="">см. договора</a></td>
+    </tr>
+</script>
+
+<script id="company-client-node-empty-template" type="text">
+    <tr data-dojo-attach-point="companyClientNode_${companyClient.id}">
+        <td>${companyClient.id}</td>
+        <td>${companyClient.data.name}</td>
+        <td>${companyClient.data.inn}</td>
+        <td>${companyClient.data.kpp}</td>
+        <td><a data-dojo-attach-event="">новый договор</a></td>
+    </tr>
+</script>
+
+<script id="company-owner-node-template" type="text">
+    <table class="table table-bordered" data-dojo-attach-point="companyOwnerNode_${companyOwner.id}">
+        <colgroup>
+            <col width="50"/>
+            <col width="450"/>
+            <col width="150"/>
+            <col width="150"/>
+            <col/>
+        </colgroup>
+        <thead>
+            <tr>
+                <td colspan="5">
+                    ${companyOwner.data.name}
+                </td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <button type="button" data-dojo-attach-point="uncoverCompanyClientsNodes"><span class="toggle-show">&darr; развернуть</span><span class="hidden toggle-hide">&uarr; свернуть</span></button>
+            </tr>
+        </tfoot>
+        <tbody class="hidden" data-dojo-attach-point="companyClientsNode">
+            <tr>
+                <th><a data-dojo-attach-event="onclick: companyClientsFilterById" data-dojo-args="value">#ID</a></th>
+                <th>Контрагент (tooltip)</th>
+                <th><a data-dojo-attach-event="onclick: companyClientsFilterByInnKpp" data-dojo-props="field: inn">ИНН</a></th>
+                <th>КПП</th>
+                <th>Опции</th>
+            </tr>
+        </tbody>
+    </table>
 </script>

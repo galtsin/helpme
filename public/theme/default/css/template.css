@@ -139,7 +139,7 @@ body {
     margin: 28% auto 0;
     padding: 25px 0px;
 }
-
+/* Actual */
 .loader {
     position: absolute;
     width: 31px;
@@ -147,7 +147,8 @@ body {
     z-index: 9999;
     left:0;
     top: 0;
-    background: #008000 url("../images/ajax-loader.gif") center center no-repeat;
+    /*background: #008000 url("../images/ajax-loader.gif") center center no-repeat;*/
+    background: #ffffff url("../images/ajax-loader.gif") center center no-repeat;
     opacity: 0.6;
     filter: alpha(Opacity=60);
     display: block;

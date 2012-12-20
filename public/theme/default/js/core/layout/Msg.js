@@ -17,11 +17,12 @@ define([
         statuses: {
             PROCESS_LOAD:           'Загрузка данных',
             PROCESS_SEND:           'Отправка данных',
-            PROCESS_STATE_OK:       'Выполнено',
+            PROCESS_STATE_OK:       'Операция выполнена',
             PROCESS_STATE_FAILED:   'Ошибка',
             PROCESS_STATE_WAITING:  'Идет обработка',
             PROCESS_STATE_ABORTED:  'Операция прервана',
             PROCESS_STATE_TIMEOUT:  'Превышено время ожидания',
+            REST_STATE_OK:          '',
             SERVER_DISCONNECT:      'Не удалось получить ответ от сервера',
             SERVER_FORBIDDEN:       'Доступ запрещен',
             SERVER_ERROR:           'Ошибка на сервере',
@@ -53,10 +54,12 @@ define([
             message.startup();
 
             var _Messenger = this;
+
+            // Обработчик
             var handler = {
                 // Автозапуск удаления
                 clearTimeout: setTimeout(function(){
-                    //handler.remove();
+                    handler.remove();
                 }, this.duration + _Messenger.fadeDuration),
                 // Скрыть сообщение
                 hide: function(){
@@ -75,7 +78,7 @@ define([
                 // Удалить сообщение
                 remove: function(){
                     aspect.after(handler.hide(), "onEnd", function(){
-                        handler.message.destroy();
+                        handler.message.destroy(); // Уничтожить диджит
                         delete handler.show;
                         delete handler.hide;
                     });
@@ -93,11 +96,8 @@ define([
          * @return {String}
          */
         fullText: function(status, msg){
-            var html = '<p>' +
-                '<span class="status">= ' + this.statuses[status] + ' =</span>';
-            if(msg) {
-                html += '<span class="message">' + msg + '</span>';
-            }
+            var html = '<p><span class="status">= ' + this.statuses[status] + ' =</span>';
+            if(msg) html += '<span class="message">' + msg + '</span>';
             html += '</p>';
             return html;
         },
@@ -107,7 +107,7 @@ define([
             var deferred = new Deferred();
             var _Messenger = this;
 
-            // TODO: Отображать все сообщения
+            // TODO: Отображать все сообщения (ошибки и статусы процессов)
 /*            deferred.promise.always(function(status){
                 clearTimeout(timeout);
                 _Messenger.send(status).show();
@@ -126,6 +126,7 @@ define([
                 deferred.reject('PROCESS_STATE_TIMEOUT');
             }, this.timeout);
 
+            // Возможность отменить Автозавершение процессы
             if(callback) callback(timeout);
 
             // Инициализация процесса resolve должна быть инициализирована извне

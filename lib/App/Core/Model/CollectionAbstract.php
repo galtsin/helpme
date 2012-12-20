@@ -85,7 +85,7 @@ abstract class App_Core_Model_CollectionAbstract
      */
     public function load($id)
     {
-        if(array_key_exists((int)$id, $this->_objectsCollection)) {
+        if(array_key_exists((int)$id, $this->_objectsCollection)) { // TODO: еобходимо ли приводить к integer?
             return $this->_objectsCollection[$id];
         } else {
             $object = forward_static_call_array(array($this->getModelRestore(), 'load'), array($id));

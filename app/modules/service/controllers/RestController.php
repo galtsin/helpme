@@ -10,6 +10,12 @@ class Service_RestController extends Zend_Rest_Controller
 {
     /**
      * Статус доступности ответа
+     * Выдавать соответствующие коды и дублировать их в status переменной
+     * http://dojotoolkit.org/reference-guide/1.8/quickstart/rest.html#id18
+     * 200: (Ok) GET
+     * 201: (Created) POST
+     * 202: (Accepted) PUT
+     * 204: (No Content) DELETE
      * @var string
      */
     private $_status = 'error';
@@ -95,16 +101,16 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function dispatchAction()
     {
-        $method = $this->_getParam('method');
-        $prefix = $this->_getParam('prefix');
+        $operation = $this->_getParam('operation');
+        $entity = $this->_getParam('entity');
         $request = $this->getRequest();
 
-        if(empty($method)){
-            $method = strtolower($this->getRequest()->getMethod());
+        if(empty($operation)){
+            $operation = strtolower($this->getRequest()->getMethod());
         }
 
         $currentOperation = HM_Model_Account_Access::getInstance()
-            ->getOperation('api' . '/' . $prefix . '/' . $method);
+            ->getOperation('api' . '/' . $entity . '/' . $operation);
 
 /*        if($this->_handleAccess($currentOperation, $this->_type)){
             $this->_forward($method, $prefix, 'api');
@@ -121,7 +127,7 @@ class Service_RestController extends Zend_Rest_Controller
                 ->setActionName($errorHandlerPlugin->getErrorHandlerAction())
                 ->setDispatched(false);
         }*/
-        $this->_forward($method, $prefix, 'api');
+        $this->_forward($operation, $entity, 'api');
 
     }
 
@@ -223,6 +229,7 @@ class Service_RestController extends Zend_Rest_Controller
     /**
      * Использование коллекций и фильтров для получения данных
      * App_Core_Model_CollectionAbstract
+     * TODO: Использовать Content-Range: для передачи страниц страницы
      */
     public function queryAction()
     {
@@ -235,37 +242,40 @@ class Service_RestController extends Zend_Rest_Controller
                     if(method_exists($modelCollection, $method)) {
                         foreach($filter as $name => $values) {
                             foreach($values as $value) {
-                                if(!empty($value)) {
-                                    $modelCollection->{$method}($name, trim($value));
-                                }
+                                $modelCollection->{$method}($name, trim($value));
                             }
                         }
                     }
                 }
                 $this->setAjaxData($modelCollection->getCollection()->toArray());
             }
+            $this->setAjaxStatus(self::STATUS_OK);
         }
-    }
-
-    /**
-     * Изменение данных экземпляра объекта
-     */
-    public function postAction()
-    {
     }
 
     /**
      * Добавление экземпляра объекта
      */
+    public function postAction()
+    {
+        $this->getResponse()->setHttpResponseCode(201);
+    }
+
+    /**
+     * Обновление данных экземпляра объекта
+     */
     public function putAction()
     {
+        $this->getResponse()->setHttpResponseCode(202);
     }
 
     /**
      * Удаление экземпляра объекта
+     * http://dojotoolkit.org/reference-guide/1.8/quickstart/rest.html#id18
      */
     public function deleteAction()
     {
+        $this->getResponse()->setHttpResponseCode(204);
     }
 
     /**
@@ -273,5 +283,6 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function getAction()
     {
+
     }
 }

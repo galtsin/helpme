@@ -47,10 +47,10 @@ final class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abs
                 ),
                 array(
                     1   => 'version',
-                    2   => 'prefix',
+                    2   => 'entity',
                     3   => 'id',
-                    4   => 'method',
-                    5   => 'method'
+                    4   => 'operation',
+                    5   => 'operation'
                 )
             ),
         );
@@ -87,8 +87,8 @@ final class App_Zend_Controller_Plugin_Access extends Zend_Controller_Plugin_Abs
             // Если испольхуется REST архитектура
             if($uri == 'service/rest/dispatch'){
                 $uriParts = array('api');
-                $uriParts[] = $request->getParam('prefix');
-                $uriParts[] = array_key_exists('method', $request->getParams()) ? $request->getParam('method') : strtolower($request->getMethod());
+                $uriParts[] = $request->getParam('entity');
+                $uriParts[] = array_key_exists('operation', $request->getParams()) ? $request->getParam('operation') : strtolower($request->getMethod());
                 $uri = implode('/', $uriParts);
             }
 

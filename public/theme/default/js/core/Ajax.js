@@ -2,15 +2,17 @@ define([
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/request/xhr",
+    "dojo/request",
+    "dojo/request/notify",
     "dojo/on",
     "dojo/keys",
     "dojo/Deferred",
     "core/layout/Msg",
     "dojo/aspect"
-], function(declare, lang, xhr, on, keys, Deferred, Msg, aspect){
+], function(declare, lang, xhr, request2, notify, on, keys, Deferred, Msg, aspect){
 
     var Ajax = declare(null, {
-        // Время ожидания ответа. Изменная для глобального пространства
+        // Время ожидания ответа. Глобальная переменная
         timeout: 15000,
         // Мессенджер
         Messenger: null,
@@ -65,7 +67,7 @@ define([
                 if(options.overlay) options.overlay.hide();
             });
 
-
+            // Отобразить процессы загрузки и отправки данных
 /*            var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
             if(true === options.processing){
                 var handler = this.Messenger.send(status);
@@ -90,8 +92,18 @@ define([
                  }
              });*/
 
+
+/*            request.response.then(function(response){
+             console.log(response);
+             });*/
             var request =  xhr(url, options);
-            request.then(function(response){
+/*            request.response.then(function(response){
+                switch(response.status){
+                }
+            }, function(error){
+              // console.log(er.response);
+            });*/
+            request.then(function(response, g){
                 if(response && 'object' == typeof response) {
                     // Состояния приложения и внутренних операций
                     switch (response.status.toLowerCase()) {

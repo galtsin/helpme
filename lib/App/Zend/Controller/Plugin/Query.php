@@ -6,6 +6,7 @@
 /**
  * TODO: Route
  * Плагин организации Query-запросов к сервису
+ * @deprecated
  */
 class App_Zend_Controller_Plugin_Query extends Zend_Controller_Plugin_Abstract
 {
@@ -35,10 +36,10 @@ class App_Zend_Controller_Plugin_Query extends Zend_Controller_Plugin_Abstract
                 ),
                 array(
                     1   => 'version',
-                    2   => 'prefix',
+                    2   => 'entity',
                     3   => 'id',
-                    4   => 'method',
-                    5   => 'method'
+                    4   => 'operation',
+                    5   => 'operation'
                 )
             ),
         );

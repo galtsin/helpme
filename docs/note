@@ -1,0 +1,6 @@
+Использование URI Hash тегов
+Действия и Маршруты роутера
+http://domain.com/action/path#event=param1/value1/param2/value2
+(\w+)=?(.*)
+
+Для DOM-данных использовать dijitContentPane

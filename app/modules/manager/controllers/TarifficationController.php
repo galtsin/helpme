@@ -101,22 +101,24 @@ class Manager_TarifficationController extends App_Zend_Controller_Action
             if($request->isPost()){
                 if(array_key_exists('tariff', $request->getPost())) {
                     // Предпроверка данных
-                    $validate = new App_Zend_Controller_Action_Helper_Validate('tariff');
-                    $filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
-                    $filterInput->setData($request->getPost('tariff'));
+                    //$validate = new App_Zend_Controller_Action_Helper_Validate('tariff');
+                    //$filterInput = new Zend_Filter_Input($validate->getFilters(), $validate->getValidators());
+                    //$filterInput->setData($request->getPost('tariff'));
 
-                    if($filterInput->isValid()){
+                    //if($filterInput->isValid()){
                         $tariff = new HM_Model_Billing_Tariff();
                         $tariff->getData()
-                            ->set('line', $line->getData('id'))
-                            ->set('name', $filterInput->getEscaped('name'));
+                            ->set('line', $line->getData('id'));
+                            //->set('name', $filterInput->getEscaped('name'));
+                        $tariffParams = $request->getPost('tariff');
+                        $tariff->getData()->set('name', $tariffParams['name']);
                         if($tariff->save()) {
                             $this->setAjaxResult($tariff->getData('id'));
                             $this->setAjaxStatus('ok');
                         }
-                    } else {
-                        $this->addAjaxError($filterInput->getMessages(), 'tariff');
-                    }
+                    //} else {
+                    //    $this->addAjaxError($filterInput->getMessages(), 'tariff');
+                    //}
                 }
             } else {
                 // Какие то параметры для вывода в шаблоне

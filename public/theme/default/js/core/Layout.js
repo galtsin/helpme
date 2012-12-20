@@ -209,6 +209,9 @@ require([
                 }
             }
             return window.location.protocol + '//' + window.location.host + '/' + url;
+        },
+        clearWithCaching: function(domNode){
+
         }
     });
 });

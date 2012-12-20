@@ -29,7 +29,7 @@ class HM_Model_Billing_Tariff extends App_Core_Model_Store_Entity
                     ->set('id', $id)
                     ->set('name', $row['o_name'])
                     ->set('consultation_enabled', (bool)$row['o_consultation_enabled'])
-                    ->set('consultation_unlimited', (bool)$row['o_consultation_enabled'])
+                    ->set('consultation_unlimited', (bool)$row['o_consultation_unlimited'])
                     ->set('auto_prolongate', (bool)$row['o_auto_prolongate'])
                     ->set('message_enabled', (bool)$row['o_message_enabled'])
                     ->set('message_unlimited', (bool)$row['o_message_unlimited'])
