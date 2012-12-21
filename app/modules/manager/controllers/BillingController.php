@@ -162,6 +162,20 @@ class Manager_BillingController extends App_Zend_Controller_Action
     }
 
     /**
+     * Добавить новый договор
+     */
+    public function createAgreementAction()
+    {
+        $request = $this->getRequest();
+        $companyClient = HM_Model_Billing_Company::load($request->getParam('company_client'));
+        $companyOwner = HM_Model_Billing_Company::load($request->getParam('company_owner'));
+        $this->setAjaxStatus('ok');
+        $this->view->assign('companyClient', $companyClient);
+        $this->view->assign('companyOwner', $companyOwner);
+
+    }
+
+    /**
      * Получить список договоров контрагента
      */
     public function getCompanyClientAgreementsAction()

@@ -1,0 +1,68 @@
+<?php
+$companyOwner = $this->companyOwner;
+$companyClient = $this->companyClient;
+$lineColl = new HM_Model_Counseling_Structure_Line_Collection();
+$lineColl->addEqualFilter('company', $companyOwner->getData()->getId())->getCollection();
+?>
+<form id="add-agreement">
+    <table class="table table-bordered">
+        <tfoot>
+        <tr>
+            <td>
+                <input type="hidden" name="agreement[company_owner]" value="<?=$companyOwner->getData('id')?>">
+                <input type="hidden" name="agreement[company_client]" value="<?=$companyClient->getData('id')?>">
+                <button type="button" name="send">Сохранить</button>
+            </td>
+        </tr>
+        </tfoot>
+        <tbody>
+        <tr>
+            <td>
+                <label for="add-agreement-invoice">Выбрать счет</label>
+                <select name="agreement[invoice]" id="add-agreement-invoice">
+                    <?php if(count($companyClient->getInvoices()) > 0): ?>
+                    <?php foreach($companyClient->getInvoices() as $invoice): ?>
+                        <option value="<?=$invoice?>"># <?=$invoice?></option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                    <option value="">Создать счет</option>
+                    <?php endif; ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="add-agreement-tariff">Выбрать Тариф</label>
+                <select name="agreement[tariff]" id="add-agreement-tariff">
+                    <?php foreach($lineColl->getObjectsIterator() as $line):?>
+                    <option disabled="true">- <?=$line->getData('name')?> -</option>
+                    <?php foreach($line->getTariffs() as $tariff): ?>
+                        <option value="<?=$tariff->getData('id')?>"><?=$tariff->getData('name')?></option>
+                        <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="add-agreement-date-end">Дата окончания (ДД/ММ/ГГ)</label>
+                <select name="agreement[date_end][day]" style="width: 50px">
+                    <?php for($i = 1; $i <= 31; $i ++):?>
+                    <option value="<?=$i?>"><?=str_pad($i, 2, '0', STR_PAD_LEFT)?></option>
+                    <?php endfor; ?>
+                </select>
+                <select name="agreement[date_end][month]" style="width: 50px">
+                    <?php for($i = 1; $i <= 12; $i ++):?>
+                    <option value="<?=$i?>"><?=str_pad($i, 2, '0', STR_PAD_LEFT)?></option>
+                    <?php endfor; ?>
+                </select>
+                <select name="agreement[date_end][year]" style="width: 100px">
+                    <?php for($i = (int)date('Y'); $i <= (int)date('Y') + 5; $i ++):?>
+                    <option value="<?=$i?>"><?=$i?></option>
+                    <?php endfor; ?>
+                </select>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>

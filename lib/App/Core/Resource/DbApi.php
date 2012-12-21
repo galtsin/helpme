@@ -61,13 +61,15 @@ class App_Core_Resource_DbApi extends App_Core_Resource_Abstract
      * Выполнить функцию
      * @param string $functionName
      * @param array|null $params
+     * @param int $limit
+     * @param int $offset
      * @return App_Core_Resource_DbApi_Result
      * @throws App_Core_Resource_Exception
      */
-    public function execute($functionName, array $params = null)
+    public function execute($functionName, array $params = null, $limit = null, $offset = null)
     {
         try {
-            $sql = $this->_prepareFunction($functionName);
+            $sql = $this->_prepareFunction($functionName, $limit, $offset);
             $stmt = $this->_dbConnect->prepare($sql);
 
             // У функции присутствуют параметры
@@ -93,16 +95,24 @@ class App_Core_Resource_DbApi extends App_Core_Resource_Abstract
     /**
      * Создание основного SQL запроса
      * @param string $functionName
+     * @param int $limit
+     * @param int $offset
      * @return string
      * @throws App_Core_Resource_Exception
      */
-    protected function _prepareFunction($functionName)
+    protected function _prepareFunction($functionName, $limit = null, $offset = null)
     {
         if(is_null($this->_functions->get((string)$functionName))) {
             throw new App_Core_Resource_Exception('Function ' . $functionName . ' don`t exists (Функция ' . $functionName . ' не найдена)');
         }
 
         $sql = "SELECT * FROM ";
+        if(null !== $limit){
+            $sql .= "LIMIT " . (int)$limit . " ";
+        }
+        if(null !== $offset){
+            $sql .= "OFFSET " . (int)$offset . " ";
+        }
         $sql .= Zend_Registry::get('configs')->resources->db->general->scheme . "." . $functionName;
         $sql .= $this->_prepareFunctionParams($this->_functions->get($functionName)) . ';';
 

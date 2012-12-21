@@ -68,8 +68,8 @@ class Default_IndexController extends App_Zend_Controller_Action
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout->disableLayout();
         sleep(1);
-        $company = HM_Model_Billing_Company::load(12);
-        $this->setAjaxData(array($company->getData()->toArray()));
+        //$company = HM_Model_Billing_Company::load(12);
+        //$this->setAjaxData(array($company->getData()->toArray()));
         //$this->getResponse()->setHttpResponseCode(403);
         //echo Zend_Json::encode(array(1,2));
     }

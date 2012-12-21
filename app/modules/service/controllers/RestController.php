@@ -4,7 +4,7 @@
  * @author: Galtsinak
  */
 /**
- *
+ * TODO: Перенести назначение статусов, данных и результатов в общий Action
  */
 class Service_RestController extends Zend_Rest_Controller
 {
