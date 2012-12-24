@@ -24,7 +24,7 @@ define([
             if(!this.domNode) throw new Error('Не выбран узел родительский узел');
 
             this.overlayNode = domConstruct.create('div');
-            domStyle.set(this.overlayNode, {position: 'relative', width: 'auto', height: 'auto'});
+            domStyle.set(this.overlayNode, {position: 'relative', width: 'auto'});
 
             var overlayLoading = domConstruct.create('div');
             domClass.add(overlayLoading, 'loader');

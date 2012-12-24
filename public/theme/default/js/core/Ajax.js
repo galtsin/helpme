@@ -141,6 +141,15 @@ define([
             });
 
             return request;
+        },
+        url: function(url, args){
+            args = args || {};
+/*            for(var param in args){
+                if(obj.hasOwnProperty(param)){
+                    url = url.replace(':' + param, obj[param]);
+                }
+            }*/
+            return window.location.protocol + '//' + window.location.host + '/' + url;
         }
     });
 

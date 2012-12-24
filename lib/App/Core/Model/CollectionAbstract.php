@@ -52,6 +52,27 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
+     * Установить лимит выводимых элементов
+     */
+    public function setLimit($limit)
+    {
+
+    }
+
+    /**
+     * Сделать смещение элементов
+     */
+    public function setOffset($offset)
+    {
+
+    }
+
+    public function setSort()
+    {
+
+    }
+
+    /**
      * Загрузка коллекции идентификаторов сущностей
      * При каждом обращении происходит перезагрузка коллекции
      * @return App_Core_Model_CollectionAbstract

@@ -68,7 +68,7 @@ class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
         if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
                 $agreementsColl = new HM_Model_Billing_Agreement_Collection();
-                $agreementsColl->addEqualFilter('companyOwner', $this->getData()->getId())
+                $agreementsColl->addEqualFilter('company_owner', $this->getData()->getId())
                     ->getCollection();
                 $this->setProperty($property, $agreementsColl->getObjectsIterator());
                 $this->getData()->set($property, $agreementsColl->getIdsIterator());
@@ -88,7 +88,7 @@ class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
         if(null == $this->getProperty($property)) {
             if($this->isIdentity()) {
                 $agreementsColl = new HM_Model_Billing_Agreement_Collection();
-                $agreementsColl->addEqualFilter('companyClient', $this->getData('id'))
+                $agreementsColl->addEqualFilter('company_client', $this->getData('id'))
                     ->getCollection();
                 $this->setProperty($property, $agreementsColl->getObjectsIterator());
                 $this->getData()->set($property, $agreementsColl->getIdsIterator());

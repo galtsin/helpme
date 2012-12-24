@@ -61,13 +61,26 @@ class Default_IndexController extends App_Zend_Controller_Action
         //$this->_helper->viewRenderer->setNoRender(true);
         //$this->_helper->layout->disableLayout();
 
+        $agreement = new HM_Model_Billing_Agreement_Collection();
+        $agreement->addEqualFilter('company_owner', 12)->getCollection();
+        Zend_Debug::dump($agreement->getDataIterator());
+
+    }
+
+    protected function _normalizationFilterName($name)
+    {
+        $parts = explode('_', $name);
+        foreach($parts as &$part){
+            $part = ucfirst(strtolower($part));
+        }
+        return implode('', $parts);
     }
 
     public function ajaxAction()
     {
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout->disableLayout();
-        sleep(1);
+        sleep(0);
         //$company = HM_Model_Billing_Company::load(12);
         //$this->setAjaxData(array($company->getData()->toArray()));
         //$this->getResponse()->setHttpResponseCode(403);

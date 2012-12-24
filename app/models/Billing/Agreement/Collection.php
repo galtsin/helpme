@@ -14,8 +14,8 @@ class HM_Model_Billing_Agreement_Collection extends App_Core_Model_Collection_Fi
     protected function _init()
     {
         $this->setModelRestore('HM_Model_Billing_Agreement');
-        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyOwner'); // owner
-        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'companyClient'); // client
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'company_owner'); // owner
+        $this->_addFilterName(App_Core_Model_Collection_Filter::EQUAL_FILTER, 'company_client'); // client
     }
 
     /**
@@ -26,8 +26,8 @@ class HM_Model_Billing_Agreement_Collection extends App_Core_Model_Collection_Fi
     {
         $ids = array();
 
-        if(count($this->getEqualFilterValues('companyOwner')) > 0) {
-            foreach($this->getEqualFilterValues('companyOwner') as $company) {
+        if(count($this->getEqualFilterValues('company_owner')) > 0) {
+            foreach($this->getEqualFilterValues('company_owner') as $company) {
                 $result = App::getResource('FnApi')
                     ->execute('agreements_by_company_owner_line', array(
                         'id_company' => $company
@@ -52,8 +52,8 @@ class HM_Model_Billing_Agreement_Collection extends App_Core_Model_Collection_Fi
     {
         $ids = array();
 
-        if(count($this->getEqualFilterValues('companyClient')) > 0) {
-            foreach($this->getEqualFilterValues('companyClient') as $company) {
+        if(count($this->getEqualFilterValues('company_client')) > 0) {
+            foreach($this->getEqualFilterValues('company_client') as $company) {
                 $result = App::getResource('FnApi')
                     ->execute('agreements_by_company_client', array(
                         'id_company' => $company

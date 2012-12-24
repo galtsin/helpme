@@ -58,7 +58,7 @@ class App_Core_Model_Collection_Filter extends App_Core_Model_CollectionAbstract
     {
         // Добавление Фильтра по значению
         if(array_key_exists($type, $this->_filterTypes)
-            && method_exists($this, "_do" . ucfirst($name) . ucfirst($type) . "FilterCollection")
+            && method_exists($this, "_do" . $this->_normalizationFilterName($name) . ucfirst($type) . "FilterCollection")
         ) {
             $filter = "_" . $type . "Filters";
             if(!array_key_exists($name, $this->{$filter})) {
@@ -124,11 +124,11 @@ class App_Core_Model_Collection_Filter extends App_Core_Model_CollectionAbstract
         $idsA = array();
 
         // Загружаем результат работы фильтров
-        foreach(array_keys($this->_filterTypes) as $key) {
-            foreach(array_keys($this->{"_" . $key . "Filters"}) as $filterName) {
-                $method = "_do" . ucfirst($filterName) . ucfirst($key) . "FilterCollection";
+        foreach(array_keys($this->_filterTypes) as $filterType) {
+            foreach(array_keys($this->{"_" . $filterType . "Filters"}) as $filterName) {
+                $method = "_do" . $this->_normalizationFilterName($filterName) . ucfirst($filterType) . "FilterCollection";
                 // Используем только фильтры, задействованными в коллекции (у которых есть значения)
-                if(method_exists($this, $method) && count($this->{"_" . $key . "Filters"}[$filterName]) > 0) {
+                if(method_exists($this, $method) && count($this->{"_" . $filterType . "Filters"}[$filterName]) > 0) {
                     $result = $this->{$method}();
                     if(count($result) == 0 && false === $this->_excludingEmpty) {
                         return array();
@@ -138,6 +138,20 @@ class App_Core_Model_Collection_Filter extends App_Core_Model_CollectionAbstract
             }
         }
         return $idsA;
+    }
+
+    /**
+     * Норамализация названия пользовательских фильтров
+     * @param $name
+     * @return string
+     */
+    protected function _normalizationFilterName($name)
+    {
+        $parts = explode('_', $name);
+        foreach($parts as &$part){
+            $part = ucfirst($part); // strtolowwer
+        }
+        return implode('', $parts);
     }
 
     /**

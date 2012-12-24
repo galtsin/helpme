@@ -9,6 +9,14 @@
  */
 class Api_AgreementController extends Service_RestController
 {
+    /**
+     * Инициализируем модель
+     */
+    public function init()
+    {
+        parent::init();
+        $this->_modelCollection = 'HM_Model_Billing_Agreement_Collection';
+    }
 
     public function getAction()
     {
