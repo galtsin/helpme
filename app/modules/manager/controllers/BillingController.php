@@ -8,6 +8,18 @@
  */
 class Manager_BillingController extends App_Zend_Controller_Action
 {
+    public function agreementAction()
+    {
+        $request = $this->getRequest();
+        if(HM_Model_Billing_Agreement::load($request->getParam('id'))){
+
+            $this->view->assign(array(
+                    'agreement' => ''
+                )
+            );
+        }
+    }
+
     public function agreementsAction()
     {
         // Получить текущего пользователя

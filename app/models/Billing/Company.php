@@ -157,4 +157,37 @@ class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
 
         return parent::_insert();
     }
+
+    /**
+     * Получить баланс по счету
+     * ID счета = ID баланса
+     * @param int $invoice
+     * @return App_Core_Model_Store_Data|null
+     */
+    public function getInvoiceBalance($invoice)
+    {
+        $balance = null;
+        if($this->isIdentity()) {
+            if(in_array($invoice, $this->getInvoices())){
+                $result = App::getResource('FnApi')
+                    ->execute('company_get_invoice_balance', array(
+                        'id_invoice' => (int)$invoice
+                    )
+                );
+
+                if($result->rowCount() > 0) {
+                    $row = $result->fetchRow();
+                    $balance = new App_Core_Model_Store_Data();
+                    $balance->set('id', $invoice)
+                        ->set('messages_count', $row['o_messages_count'])
+                        ->set('sum_time', $row['o_sum_time'])
+                        ->set('sum_money', $row['o_sum_money'])
+                        ->setDirty(false);
+                }
+            }
+        }
+
+        return $balance;
+
+    }
 }

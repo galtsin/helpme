@@ -115,6 +115,9 @@
     <company_get_invoices>
         <id_company type="integer"/>
     </company_get_invoices>
+    <company_get_invoice_balance>
+        <id_invoice type="integer"/>
+    </company_get_invoice_balance>
     <agreement_get_agreements_by_guest>
         <id_guest type="integer"/>
     </agreement_get_agreements_by_guest>

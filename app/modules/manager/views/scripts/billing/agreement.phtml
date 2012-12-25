@@ -1,0 +1,137 @@
+<?php
+$company = HM_Model_Billing_Company::load(12);
+Zend_Debug::dump($company->getInvoiceBalance(35));
+?>
+<table class="table table-bordered">
+    <colgroup>
+        <col width="200">
+        <col>
+    </colgroup>
+    <thead>
+    <tr>
+        <th>Информация по Договору 115</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>Номер счета:</th>
+        <td>#1</td>
+    </tr>
+    <tr>
+        <th>Срок действия:</th>
+        <td>
+            12.21.2012                    &mdash;
+            01.01.2012                </td>
+    </tr>
+    <tr>
+        <th>ЛК/Тариф:</th>
+        <td>
+            3D NEWS / 3D TARIF                </td>
+    </tr>
+    <tr>
+        <th>Компания-партнер:</th>
+        <td>
+            3D NEWS (00000000016 / 000000016)
+        </td>
+    </tr>
+    <tr>
+        <th>Компания-контрагент:</th>
+        <td>
+            3D NEWS (00000000016 / 000000016)
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<table class="table table-bordered">
+    <colgroup>
+        <col width="200">
+        <col>
+    </colgroup>
+    <thead>
+        <tr>
+            <th colspan="3">Баланс по договору</th>
+        </tr>
+        <tr>
+            <th>Время (сек.)</th>
+            <th>Сообщений</th>
+            <th>Сумма (руб.)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>30</td>
+            <td>30</td>
+            <td>30</td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="contentAgreement"><form id="edit-agreement-subscribers">
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="50">
+            <col width="50">
+            <col width="200">
+            <col width="200">
+            <col>
+        </colgroup>
+        <thead>
+        <tr>
+            <th colspan="5">Активные подписчики</th>
+        </tr>
+        <tr>
+            <th>#ID</th>
+            <th>#</th>
+            <th>Логин</th>
+            <th>Email</th>
+            <th>Ф.И.О</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="5">
+                <input type="hidden" value="115" name="agreement">
+                <button data-action="addSubscriber/115" name="add" type="button">Добавить</button>
+                <button name="remove" type="button">Удалить</button>
+            </td>
+        </tr>
+        </tfoot>
+        <tbody>
+        </tbody>
+    </table>
+</form>
+
+    <form id="edit-agreement-subscription-guests">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="50">
+                <col width="50">
+                <col width="300">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th colspan="4">Приглашенные подписчики</th>
+            </tr>
+            <tr>
+                <th>#ID</th>
+                <th>#</th>
+                <th>Email</th>
+                <th>Ф.И.О</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <td colspan="5">
+                    <input type="hidden" value="115" name="agreement">
+                    <button name="remove" type="button">Удалить приглашения</button>
+                    <button name="resend" type="button">Отправить приглашения повторно</button>
+                </td>
+            </tr>
+            </tfoot>
+            <tbody>
+            </tbody>
+        </table>
+    </form>
+</div>
