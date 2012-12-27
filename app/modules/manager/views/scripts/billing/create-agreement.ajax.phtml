@@ -4,14 +4,14 @@ $companyClient = $this->companyClient;
 $lineColl = new HM_Model_Counseling_Structure_Line_Collection();
 $lineColl->addEqualFilter('company', $companyOwner->getData()->getId())->getCollection();
 ?>
-<form id="add-agreement">
+<form id="form-create-agreement">
     <table class="table table-bordered">
         <tfoot>
         <tr>
             <td>
                 <input type="hidden" name="agreement[company_owner]" value="<?=$companyOwner->getData('id')?>">
                 <input type="hidden" name="agreement[company_client]" value="<?=$companyClient->getData('id')?>">
-                <button type="button" name="send">Сохранить</button>
+                <button type="submit" name="send">Сохранить</button>
             </td>
         </tr>
         </tfoot>

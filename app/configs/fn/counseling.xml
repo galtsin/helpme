@@ -70,4 +70,5 @@
         <id_level type="integer"/>
         <name type="string"/>
     </level_update_identity>
+    <line_get_lines/>
 </functions>

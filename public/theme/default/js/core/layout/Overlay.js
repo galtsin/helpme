@@ -59,6 +59,9 @@ define([
             setTimeout(function(){
                 domConstruct.destroy(Overlay.overlayNode);
             }, this.delay);
+        },
+        setDefaultSize: function(){
+
         }
     });
 

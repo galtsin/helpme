@@ -14,7 +14,7 @@ class Manager_BillingController extends App_Zend_Controller_Action
         if(HM_Model_Billing_Agreement::load($request->getParam('id'))){
 
             $this->view->assign(array(
-                    'agreement' => ''
+                    'agreement' => HM_Model_Billing_Agreement::load($request->getParam('id'))
                 )
             );
         }
@@ -179,12 +179,35 @@ class Manager_BillingController extends App_Zend_Controller_Action
     public function createAgreementAction()
     {
         $request = $this->getRequest();
-        $companyClient = HM_Model_Billing_Company::load($request->getParam('company_client'));
-        $companyOwner = HM_Model_Billing_Company::load($request->getParam('company_owner'));
-        $this->setAjaxStatus('ok');
-        $this->view->assign('companyClient', $companyClient);
-        $this->view->assign('companyOwner', $companyOwner);
+        if($request->isPost()) {
+            $agreementParams = $request->getPost('agreement');
+            $agreement = new HM_Model_Billing_Agreement();
+            $agreement->getData()
+                ->set('tariff', $agreementParams['tariff'])
+                ->set('date_end', $agreementParams['date_end']['day'] . '.' . $agreementParams['date_end']['month'] . '.' . $agreementParams['date_end']['year']);
+            if(empty($agreementParams['invoice'])) {
+                $companyClient = HM_Model_Billing_Company::load($request->getParam('company_client'));
+                $invoice = $companyClient->addInvoice();
+                if($invoice > 0) {
+                    $agreement->getData()
+                        ->set('invoice', $invoice);
+                }
+            } else {
+                $agreement->getData()
+                    ->set('invoice', $agreementParams['invoice']);
+            }
 
+            if($agreement->save()) {
+                $this->setAjaxResult($agreement->getData()->getId());
+                $this->setAjaxStatus('ok');
+            }
+
+        } else {
+            $companyClient = HM_Model_Billing_Company::load($request->getParam('company_client'));
+            $companyOwner = HM_Model_Billing_Company::load($request->getParam('company_owner'));
+            $this->view->assign('companyClient', $companyClient);
+            $this->view->assign('companyOwner', $companyOwner);
+        }
     }
 
     /**

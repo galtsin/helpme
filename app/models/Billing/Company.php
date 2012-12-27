@@ -179,9 +179,9 @@ class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
                     $row = $result->fetchRow();
                     $balance = new App_Core_Model_Store_Data();
                     $balance->set('id', $invoice)
-                        ->set('messages_count', $row['o_messages_count'])
-                        ->set('sum_time', $row['o_sum_time'])
-                        ->set('sum_money', $row['o_sum_money'])
+                        ->set('messages_count', (int)$row['o_messages_count'])
+                        ->set('sum_time', (int)$row['o_sum_time'])
+                        ->set('sum_money', (float)$row['o_sum_money'])
                         ->setDirty(false);
                 }
             }

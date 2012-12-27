@@ -283,6 +283,11 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function getAction()
     {
-
+        $modelCollection = new $this->_modelCollection();
+        if(null !== $modelCollection && $modelCollection instanceof App_Core_Model_Collection_Filter){
+            $modelCollection->load($this->_getParam('id'));
+            $this->setAjaxData($modelCollection->getCollection()->toArray());
+            $this->setAjaxStatus(self::STATUS_OK);
+        }
     }
 }

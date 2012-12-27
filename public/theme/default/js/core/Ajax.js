@@ -50,12 +50,15 @@ define([
                 timeout: this.timeout
             });
 
+            if(url.indexOf('?') > -1) url += '&';
+            else url += '?';
+
             switch(options.handleAs.toLowerCase()){
                 case 'json':
-                    url += '/format/json';
+                    url += 'format=json';
                     break;
                 default:
-                    url += '/format/html';
+                    url += 'format=html';
             }
 
             var processDeferred = this.Messenger.process(function(timeout){

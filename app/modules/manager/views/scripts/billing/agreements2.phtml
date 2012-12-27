@@ -69,34 +69,6 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
     dojo.ready(function(){
 
-        var Layout = new coreLayout({
-            messenger: {
-                node: dom.byId('messenger')
-            },
-            processing: {
-                node: dom.byId('loader')
-            }
-        });
-
-        function splitToObject(str, delimiter){
-            if(!delimiter) {
-                delimiter = '/';
-            }
-            var obj = {};
-            var ar = str.split(delimiter);
-            array.forEach(ar, function(item, i){
-                if(i % 2 == 0) {
-                   obj[item] = ar[i + 1];
-                }
-            });
-            return obj;
-        }
-
-        var routeCache = new storeMemory({
-            idProperty: 'route'
-        });
-
-        var routeStoreCache = new storeCache(routeCache, new storeMemory({idProperty: 'route'}));
 
         var linesStore = new storeMemory({
             idProperty: 'id',
@@ -113,12 +85,8 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             data: $companiesStore
         });
 
-        var agreementsStore = new storeObservable(new storeMemory());
-
 
 // ============================================================================
-
-        var contentNode = dom.byId('contentCompanies');
 
         var contentPane = new ContentPane({
             id: 'content',
@@ -128,60 +96,40 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                     dijit.removeChild(dijit);
                 });
             }
-        }, contentNode);
-
-
-        router.register('get-companies', function(event){
-            contentPane.clear();
-            var container;
-            if(!dijitRegistry.byId(event.newPath)){
-                container = new ContentPane({
-                    id: event.newPath,
-                    style: {padding: 0, margin: 0, overflow: "hidden"}
-                });
-                array.forEach(companiesOwnersStore.data, function(item){
-                    var companyContainer = new CompanyContainer({'company_owner': item.id});
-                    container.addChild(companyContainer.getCompanyClientsListWidget({data: item}));
-                    console.log(companyContainer);
-                });
-                container.startup();
-            } else {
-                container = dijitRegistry.byId(event.newPath);
-            }
-            contentPane.addChild(container);
-        });
-
-        // Роутер договоров
-        router.register('get-agreements=:company_owner/:company_client', function(event){
-            contentPane.clear();
-            var container;
-            if(!dijitRegistry.byId(event.newPath)){
-                container = new ContentPane({
-                    id: event.newPath,
-                    style: {padding: 0, margin: 0, overflow: "hidden"}
-                });
-                var agCont = new AgreementContainer();
-                container.addChild(agCont.getListWidget({data: event.params}));
-                container.startup();
-            } else {
-                container = dijitRegistry.byId(event.newPath);
-            }
-            contentPane.addChild(container);
-        });
-
+        }, 'contentCompanies');
 
         // Контейнер компаний
-        var CompanyContainer = declare("CompanyContainer", null, {
-            getCompanyClientWidget: function(options){
-                var Widget = declare("CompanyContainerList", [_WidgetBase, _Container, _TemplatedMixin], {
-                    templateString: dom.byId('company-client-detail-node-template').innerHTML
+        var CompanyContainer = {
+            companiesStore: {},
+            getCompanyAboutWidget: function(options){
+                var Widget = declare("CompanyContainerList", [_WidgetBase, _TemplatedMixin], {
+                    templateString: dom.byId('company-about-node-template').innerHTML,
+                    data: null,
+                    overlay: null,
+                    postCreate: function(){
+                        if(!this.overlay) this.overlay = new Overlay({domNode: this.domNode, delay: 0});
+                    },
+                    fillTemplate: function(item){
+                        this.get('nameNode').innerHTML = item.data['name'];
+                        this.get('innKppNode').innerHTML = item.data['inn'] + ' / ' + item.data['kpp'];
+                    },
+                    findCompany: function(callback){
+                        var response = Ajax.load(
+                            Ajax.url('api/1/company/' + this.data.id), {
+                            overlay: this.overlay
+                        });
+                        response.then(function(response){
+                            callback(response.data[0]);
+                        });
+                        return response;
+                    }
                 });
                 return new Widget(options || {});
             },
+            // Виджет со списом контрагентов
             getCompanyClientsListWidget: function(options){
                 var Widget = declare("CompanyContainerList", [_WidgetBase, _Container, _TemplatedMixin], {
                     templateString: dom.byId('company-owner-node-template').innerHTML,
-                    companyOwner: null,
                     companyClientsStore: null,
                     containerNode: null,
                     data: null,
@@ -334,8 +282,11 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                 if(!this.id) this.id = this._getWidgetId();
                             },
                             _setDataAttr: function(){
-                                if(this.isNew) this.get('companyClientOptionsNode').innerHTML = '<a data-dojo-attach-point="createAgreementNode">+ новый договор</a>';
-                                else this.get('companyClientOptionsNode').innerHTML = '<a data-dojo-attach-point="getAgreementsListNode">см. договора</a>';
+                                if(this.isNew) {
+                                    this.get('companyClientOptionsNode').innerHTML = '<a data-dojo-attach-point="createAgreementNode">+ новый договор</a>';
+                                } else {
+                                    this.get('companyClientOptionsNode').innerHTML = '<a data-dojo-attach-point="getAgreementsListNode">см. договора</a>';
+                                }
                             },
                             _getWidgetId: function(){
                                 return this.declaredClass + '_' + this.data.id;
@@ -346,8 +297,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                     switch(domAttr.get(item, 'data-dojo-attach-point')){
                                         case "createAgreementNode":
                                             on(item, 'click', function(){
-                                                var agreementContainer  = new AgreementContainer();
-                                                agreementContainer.getCreateWidget({
+                                                AgreementContainer.getAgreementCreateWidget({
                                                     data: {
                                                         'company_owner': _widget.getParent().data.id,
                                                         'company_client': _widget.data.id
@@ -381,13 +331,14 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
                 return new Widget(options || {});
             }
-        });
+        };
 
         // Контейнер договоров
-        var AgreementContainer = declare("AgreementContainer", null, {
-            getCreateWidget: function(options){
-                var Widget = declare("AgreementContainerCreateWidget", [dijitDialog], {
+        var AgreementContainer = {
+            getAgreementCreateWidget: function(options){
+                var Widget = declare("AgreementCreateWidget", [dijitDialog], {
                     data: null,
+                    title: 'Новый договор',
                     buildRendering: function(){
                         this.inherited(arguments);
                         var that = this;
@@ -397,27 +348,37 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                              });
                             // Взависимости от результата получения данных - текущая обработка
                             // будет повторяться или нет
-                            this._getContent(onShowHandler);
+                            this._getContent(onShowHandler, function(){
+                                domStyle.set(that.Overlay.overlayNode, {
+                                    width: "auto",
+                                    height: "auto"
+                                });
+                                on(dom.byId('form-create-agreement'), 'submit', function(event){
+                                    event.preventDefault();
+                                    var request = Ajax.send('http://192.168.1.51/manager/billing/create-agreement', {
+                                        overlay: that.Overlay,
+                                        query: domForm.toObject(event.target)
+                                    });
+                                });
+                            });
                         });
                     },
-                    _getContent: function(onShowHandler){
+                    _getContent: function(onShowHandler, callback){
                         var that = this;
-
                         // Отразить заглушку на время загрузки данных
                         domStyle.set(this.Overlay.overlayNode, {
                             width: "200px",
                             height: "100px"
                         });
-
                         var request = Ajax.load('http://192.168.1.51/manager/billing/create-agreement', {
                             handleAs: 'html',
                             overlay: this.Overlay,
                             query: that.data
                         });
-
                         request.then(function(response){
                             setTimeout(function(){
                                 that.set('content', response);
+                                if(callback) callback(response);
                                 onShowHandler.remove();
                             }, that.Overlay.delay);
                         },function(){
@@ -425,50 +386,48 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                 that.set('content', 'Неудалось загрузить контент');
                             }, that.Overlay.delay);
                         });
-
                         // Событие по закрытию диалога во время загрузки контента
                         var onHideHandler = aspect.after(this, 'hide', function(){
                             onHideHandler.remove();
+                            that.destroy();
                             if(!request.isFulfilled()){
                                 request.cancel();
                                 //Ajax.Messenger.send('PROCESS_STATE_ABORTED');
                             }
-                        })
+                        });
+
+                        return request;
                     }
                 });
 
                 return new Widget(options || {});
             },
-            getListWidget: function(options){
-                var _Container = this;
-                var Widget = declare("AgreementContainerListWidget", [_WidgetBase, ContentPane, _TemplatedMixin], {
-                    templateString: dom.byId('agreements-container-template').innerHTML,
+            // Построить список договоров
+            getAgreementsListWidget: function(options){
+                var _AgreementContainer = this;
+                var Widget = declare("AgreementsListWidget", [_WidgetBase, ContentPane, _TemplatedMixin], {
+                    templateString: null,
                     agreementsStore: null,
                     data: null, // company_owner, company_client
                     style: {padding: 0, margin: 0, overflow: "hidden"},
+                    overlay: null,
                     postMixInProperties: function(){
                         this.agreementsStore = new storeMemory();
-                        if(!this.id) this._setWidgetId();
+                        this.templateString = dom.byId('agreements-container-template').innerHTML;
+                        if(!this.id) this.id = this._getWidgetId();
                     },
-                    _setWidgetId: function(){
-                        this.id = this.declaredClass + '_' + this.data['company_owner'] + '_' + this.data['company_client'];
+                    _getWidgetId: function(){
+                        return this.declaredClass + '_' + this.data['company_owner'] + '_' + this.data['company_client'];
                     },
                     buildRendering: function(){
                         this.inherited(arguments);
                         this.containerNode = this.get('listNode');
                     },
                     postCreate: function(){
-                        this._overlayAjax = new Overlay({
-                            domNode: this.domNode
-                        });
-                        var _dijit = this;
-                        this.fetchAgreements(function(items){
-                            array.forEach(items, function(item){
-                                _dijit.insertChildNode(item);
-                            });
-                        });
+                        var _widget = this;
+                        if(!this.overlay) this.overlay = new Overlay({domNode: this.domNode});
                         on(this.get('createWidgetNode'), 'click', function(event){
-                            var dialog = _Container.getCreateWidget({data: _dijit.data});
+                            var dialog = _AgreementContainer.getAgreementCreateWidget({data: _widget.data});
                             dialog.show();
                         });
                     },
@@ -484,7 +443,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                 'filters[equal][company_owner][]': _widget.data['company_owner'],
                                 'filters[equal][company_client][]': _widget.data['company_client']
                             },
-                            overlay: this._overlayAjax
+                            overlay: this.overlay
                         });
                         request.then(function(response){
                             callback(response.data);
@@ -492,7 +451,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                         return request;
                     },
                     createChildNode: function(options){
-                        var Node = declare("AgreementContainerListNode", [_WidgetBase, _Contained, _TemplatedMixin], {
+                        var Node = declare("AgreementsListWidgetNode", [_WidgetBase, _Contained, _TemplatedMixin], {
                             templateString: dom.byId('agreement-node-template').innerHTML,
                             data: null,
                             _setDataAttr: function(){
@@ -519,12 +478,69 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
                 return new Widget(options || {});
             }
+        };
+
+        router.register('get-companies', function(event){
+            contentPane.clear();
+            if(!dijitRegistry.byId(event.newPath)){
+                var container = new ContentPane({
+                    id: event.newPath,
+                    style: {padding: 0, margin: 0, overflow: "hidden"}
+                });
+                array.forEach(companiesOwnersStore.data, function(item){
+                    container.addChild(CompanyContainer.getCompanyClientsListWidget({data: item}));
+                });
+                contentPane.addChild(container);
+            } else {
+                contentPane.addChild(dijitRegistry.byId(event.newPath));
+            }
+
+        });
+
+        // Роутер договоров
+        router.register('get-agreements=:company_owner/:company_client', function(event){
+            contentPane.clear();
+            if(!dijitRegistry.byId(event.newPath)){
+                var container = new ContentPane({
+                    id: event.newPath,
+                    style: {padding: 0, margin: 0, overflow: "hidden"}
+                });
+
+                contentPane.addChild(container);
+                var OverlayContentPane = new Overlay({domNode: container.domNode});
+                domStyle.set(OverlayContentPane.overlayNode, "height", "500px");
+                OverlayContentPane.show();
+
+                var agreementsListWidget = AgreementContainer.getAgreementsListWidget({data: event.params});
+                var companyAboutWidget = CompanyContainer.getCompanyAboutWidget({data: {id: event.params['company_client']}});
+
+                (function(){
+                    var promise = companyAboutWidget.findCompany(function(item){
+                        companyAboutWidget.fillTemplate(item);
+                    });
+                    promise.always(function(){
+                        agreementsListWidget.fetchAgreements(function(items){
+                            array.forEach(items, function(item){
+                                agreementsListWidget.insertChildNode(item);
+                            });
+                            OverlayContentPane.hide();
+                            setTimeout(function(){
+                                domClass.remove(agreementsListWidget.containerNode, "hidden");
+                                container.addChild(companyAboutWidget);
+                                container.addChild(agreementsListWidget);
+                            }, OverlayContentPane.delay);
+                        });
+                    });
+
+                })();
+
+            } else {
+                contentPane.addChild(dijitRegistry.byId(event.newPath));
+            }
         });
 
         router.startup();
 // =====================================================================================================
-
-        //router.go('getCompaniesClients');
 
     });
 });
@@ -566,7 +582,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </td>
         </tr>
         </tfoot>
-        <tbody data-dojo-attach-point="listNode"></tbody>
+        <tbody data-dojo-attach-point="listNode" class="hidden"></tbody>
     </table>
 </div>
 </script>
@@ -615,7 +631,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 
 <script id="company-owner-node-template" type="text">
 <div>
-    <table class="table table-bordered" data-dojo-attach-point="companyOwnerNode_${companyOwner.id}">
+    <table class="table table-bordered" data-dojo-attach-point="companyOwnerNode_${data.id}">
         <colgroup>
             <col width="50"/>
             <col width="450"/>
@@ -651,20 +667,22 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 </div>
 </script>
 
-<div>
-    <table class="table table-bordered" id="agreements-container">
-        <colgroup>
-            <col/>
-        </colgroup>
-        <thead>
-            <tr>
-                <th>Компания ЛАд</th>
-            </tr>
-        </thead>
-        <tbody data-dojo-attach-point="listNode">
-            <tr>
-                <td>ИНН/КПП: 20134354534 / 445456</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<script id="company-about-node-template" type="text">
+    <div>
+        <table class="table table-bordered">
+            <colgroup>
+                <col/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th data-dojo-attach-point="nameNode">Наименование</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-dojo-attach-point="innKppNode">Инн/Кпп</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</script>

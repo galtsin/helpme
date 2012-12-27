@@ -1,6 +1,5 @@
 <?php
-$company = HM_Model_Billing_Company::load(12);
-Zend_Debug::dump($company->getInvoiceBalance(35));
+$agreement = $this->agreement;
 ?>
 <table class="table table-bordered">
     <colgroup>
@@ -9,37 +8,36 @@ Zend_Debug::dump($company->getInvoiceBalance(35));
     </colgroup>
     <thead>
     <tr>
-        <th>Информация по Договору 115</th>
+        <th>Информация по Договору #<?=$agreement->getData()->getId()?></th>
     </tr>
     </thead>
     <tbody>
-    <tr>
-        <th>Номер счета:</th>
-        <td>#1</td>
-    </tr>
-    <tr>
-        <th>Срок действия:</th>
-        <td>
-            12.21.2012                    &mdash;
-            01.01.2012                </td>
-    </tr>
-    <tr>
-        <th>ЛК/Тариф:</th>
-        <td>
-            3D NEWS / 3D TARIF                </td>
-    </tr>
-    <tr>
-        <th>Компания-партнер:</th>
-        <td>
-            3D NEWS (00000000016 / 000000016)
-        </td>
-    </tr>
-    <tr>
-        <th>Компания-контрагент:</th>
-        <td>
-            3D NEWS (00000000016 / 000000016)
-        </td>
-    </tr>
+        <tr>
+            <th>Срок действия:</th>
+            <td>
+                <?=date('d.m.Y', $agreement->getData('date_begin'))?> &mdash; <?=date('d.m.Y', $agreement->getData('date_end'))?>
+            </td>
+        </tr>
+        <tr>
+            <th>ЛК/Тариф:</th>
+            <td>
+                <?php $tariff = HM_Model_Billing_Tariff::load($agreement->getData('tariff'));?>
+                <?=$tariff->getLine()->getData('name')?> / <?=$tariff->getData('name')?></td>
+        </tr>
+        <tr>
+            <th>Компания-партнер:</th>
+            <td>
+                <?php $company = HM_Model_Billing_Company::load($agreement->getData('company_owner')); ?>
+                <?=$company->getData('name')?> (<?=$company->getData('inn')?> / <?=$company->getData('kpp')?>)
+            </td>
+        </tr>
+        <tr>
+            <th>Компания-контрагент:</th>
+            <td>
+                <?php $companyClient = HM_Model_Billing_Company::load($agreement->getData('company_client')); ?>
+                <?=$companyClient->getData('name')?> (<?=$companyClient->getData('inn')?> / <?=$companyClient->getData('kpp')?>)
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -54,15 +52,16 @@ Zend_Debug::dump($company->getInvoiceBalance(35));
         </tr>
         <tr>
             <th>Время (сек.)</th>
-            <th>Сообщений</th>
             <th>Сумма (руб.)</th>
+            <th>Сообщений</th>
         </tr>
     </thead>
     <tbody>
+        <?php $invoiceBalance = $companyClient->getInvoiceBalance($agreement->getData('invoice'));?>
         <tr>
-            <td>30</td>
-            <td>30</td>
-            <td>30</td>
+            <td><?=$invoiceBalance->get('sum_time')?></td>
+            <td><?=$invoiceBalance->get('sum_money')?></td>
+            <td><?=$invoiceBalance->get('messages_count')?></td>
         </tr>
     </tbody>
 </table>
