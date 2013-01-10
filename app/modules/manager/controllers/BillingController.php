@@ -12,7 +12,6 @@ class Manager_BillingController extends App_Zend_Controller_Action
     {
         $request = $this->getRequest();
         if(HM_Model_Billing_Agreement::load($request->getParam('id'))){
-
             $this->view->assign(array(
                     'agreement' => HM_Model_Billing_Agreement::load($request->getParam('id'))
                 )

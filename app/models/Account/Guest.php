@@ -74,7 +74,7 @@ class HM_Model_Account_Guest extends App_Core_Model_Store_Entity
                 $this->getData()
                     ->set('hash_activation', $row['o_hash_activation'])
                     ->set('date_created', strtotime($row['o_date_created']))
-                    ->setDirty(false);
+                    ->setDirty(false); // TODO: А надо ли?
 
                 return $guestId;
             }

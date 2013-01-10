@@ -1,7 +1,353 @@
 <?php
 $agreement = $this->agreement;
+if($agreement instanceof HM_Model_Billing_Agreement):
 ?>
-<table class="table table-bordered">
+<?php
+$agreementJson = Zend_Json::encode($agreement->getData()->toArray());
+$jScript = <<<JS
+require([
+    "dojo/_base/declare", // declare
+    "dojo/Stateful",
+    "dojo/dom",
+    "dojo/dom-style",
+    "dojo/html",
+    "dojo/dom-class",
+    "dojo/dom-construct",
+    "dojo/dom-attr",
+    "dojo/dom-form",
+    "dojo/json",
+    "dojo/string",
+    "dojo/_base/array",
+    "dojo/date/locale",
+    "dojo/on",
+    "dojo/_base/lang",
+    "dojo/query",
+    "dojo/hash",
+    "dojo/router",
+    "dojo/store/Memory",
+    "dojo/store/Observable",
+    "dojo/store/Cache",
+    "dojo/aspect",
+    "core/Layout",
+    "core/helper/Validation",
+    "core/helper/form",
+    "core/helper/common",
+    "core/helper/fn",
+    "dijit/Dialog",
+    "core/Dispatcher",
+    "dojo/Deferred",
+    "core/Ajax",
+    "core/layout/Overlay",
+    "core/widgets/SearchCompanyDialog",
+    "dijit/registry",
+    "dijit/popup",
+    "dijit/layout/ContentPane",
+    "dijit/_WidgetBase",
+    "dijit/_WidgetsInTemplateMixin",
+    "dijit/_Container",
+    "dijit/_Contained",
+    "dijit/_TemplatedMixin",
+    "dijit/TooltipDialog",
+    "dijit/layout/AccordionContainer",
+    "dojo/text!app/modules/manager/billing/template/test.html"
+], function(declare, Stateful, dom, domStyle, domHtml, domClass, domConstruct, domAttr, domForm, JSON, string, array, dateLocale,
+on, lang, query, hash, router, storeMemory, storeObservable, storeCache, aspect, coreLayout, coreValidation, coreHelperForm,
+coreHelperCommon, HelperFn, dijitDialog, coreDispatcher, Deferred, Ajax, Overlay, coreSearchCompanyDialog, dijitRegistry, dijitPopup,
+ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _TemplatedMixin, TooltipDialog, AccordionContainer, text){
+
+    dojo.ready(function(){
+
+/*        var aContainer = new AccordionContainer({style: {background: 'red'}}, "content");
+            aContainer.addChild(new ContentPane({
+            title: "Общая информация по договору",
+            content: dom.byId("_2_")
+        }));
+
+        aContainer.addChild(new ContentPane({
+            title:"Подписчики",
+            content:"Hi how are you?"
+        }));
+        aContainer.startup();*/
+
+        var contentPane = new ContentPane({
+            id: 'content',
+            style: {padding: 0, margin: 0,  overflow: "hidden"},
+            clear: function(){
+                array.forEach(contentPane.getChildren(), function(widget){
+                    contentPane.removeChild(widget);
+                });
+            }
+        }, 'content');
+
+/*        // Контейнер договоров
+        var AgreementContainer = {
+            getSubscribersWidget: function(options){
+                var Widget = declare("SubscribersWidget", [_WidgetBase], {
+                    data: null,
+                    postCreate: function(){
+                        var that = this;
+                        this.onLoaded().then(function(response){
+                            domConstruct.place(response, that.domNode, 'last');
+                        })
+                    },
+                    onLoaded: function(){
+                        var _widget = this;
+                        var request = Ajax.load('http://192.168.1.51/manager/billing/get-subscribers', {
+                            handleAs: 'html',
+                            query: _widget.data
+                        });
+                       return request;
+                    },
+                    preLoader: function(){
+                        // Изменение
+                        domStyle.set(this.domNode, {height: '', width: ''});
+                        return {
+                            ready: function(){},
+                            reset: function(){
+                                // Сброс прелоадера
+                            }
+                        }
+                    }
+                });
+                return new Widget(options || {});
+            }
+        };
+
+        contentPane.addChild(AgreementContainer.getSubscribersWidget({data: {agreement: 86}}));*/
+
+        var AgreementContainer = {
+            getSubscribersWidget: function(options){
+                var Widget = declare("subscribersWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
+                    templateString: dom.byId('subscription-users-container-template').innerHTML,
+                    subscriptionUsersStore: null,
+                    containerNode: null,
+                    data: null,
+                    buildRendering: function(){
+                        this.inherited(arguments);
+                        this.containerNode = this.get('subscribersNode');
+                    },
+                    postCreate: function(){
+                        this.subscriptionUsersStore = new storeMemory();
+                        var _widget = this;
+                        this.fetch(function(items){
+                            array.forEach(items, function(item){
+                                _widget.insertChildNode(item);
+                            });
+                        });
+                        on(this.get('addSubscriberNode'), 'click', function(){
+                            _widget.callAddSubscriberDialogWidget();
+                        });
+
+                        on(this.get('removeSubscriberNode'), 'click', function(event){
+                            //event.target.form
+                        });
+
+                    },
+                    createChildNode: function(data){
+                        return domConstruct.toDom(
+                            string.substitute(dom.byId('subscription-user-row-template').innerHTML, data)
+                        );
+                    },
+                    insertChildNode: function(data){
+                        this.subscriptionUsersStore.add(data);
+                        domConstruct.place(this.createChildNode(data), this.containerNode, 'last');
+
+                    },
+                    removeChildNode: function(id){
+                        this.subscriptionUsersStore.remove(id);
+                        domConstruct.destroy(this._getChildNodeFullName(id));
+                    },
+                    _getChildNodeFullName: function(id){
+                        return 'subscriptionUserNode_' + id;
+                    },
+                    fetch: function(callback){
+                        var responsePromise = Ajax.load(
+                            Ajax.url('api/1/agreement/' + this.data.id + '/get-subscription-users'), {
+                        });
+                        responsePromise.then(function(response){
+                            callback(response.data);
+                        });
+                        return responsePromise;
+                    },
+                    callAddSubscriberDialogWidget: function(options){
+                        var _widget = this;
+
+                        var dialog = new dijitDialog();
+                        var preloader = domConstruct.create('div', {style: {width: '200px', height: '100px'}, innerHTML: 'Загрузка данных'});
+                        dialog.set('content', preloader);
+                        var overlay = new Overlay({domNode: preloader}); overlay.show();
+                        dialog.show();
+                        overlay._resize();
+
+                        var responsePromise = Ajax.load(Ajax.url('manager/billing/add-subscriber'), {
+                            handleAs: 'html',
+                            query: {agreement: _widget.data.id}
+                        });
+                        responsePromise.then(function(response){
+                            dialog.set('content', response);
+                            domForm.toObject('search-subscriber')
+                        });
+
+                        function send(){
+                            var responsePromise = Ajax.send(Ajax.url('manager/billing/add-subscriber'), {
+                                query: {agreement: _widget.data.id}
+                            });
+                        }
+
+                        function search(){
+                           var responsePromise = Ajax.send(Ajax.url('api/1/user/query'), {
+                                query: {
+                                    'filters[equal][email][]': _widget.data['company_owner'],
+                                }
+                           });
+
+                        }
+
+                    }
+                });
+
+                return new Widget(options || {});
+            }
+
+        };
+
+        /* Виджет поиска Пользователя */
+        var SearchAccountWidget = declare("SearchUserWidget", [_WidgetBase, _TemplatedMixin], {
+            templateString: dom.byId('search-account-template').innerHTML,
+            postCreate: function(){
+                var _widget = this;
+                this.containerNode = this.get('searchAccountResultsContainerNode');
+                var searchForm = query('form', this.get('searchAccountContainerNode')).pop();
+                on(searchForm, 'submit', function(event){
+                    event.preventDefault();
+                    _widget._searchUser(event.target);
+                });
+                aspect.after(this, '_searchUser', function(deferred){
+                    deferred.then(function(response){
+                        if(response.data.length == 0){
+                            _widget._searchGuest(searchForm);
+                        }
+                    })
+                });
+                aspect.after(this, '_searchGuest', function(deferred){
+                    deferred.then(function(response){
+                        if(response.data.length == 0){
+                            _widget._registerGuest(searchForm);
+                        }
+                    })
+                });
+            },
+            _searchUser: function(form){
+                var _widget = this;
+                var responsePromise = Ajax.load(Ajax.url('api/1/user/query'), {
+                    handleAs: 'json',
+                    query: domForm.toObject(form)
+                });
+                responsePromise.then(function(response){
+                    if(response.data.length > 0){
+                        _widget._displayResults(
+                            string.substitute(dom.byId('search-account-user-result-template').innerHTML, response.data[0])
+                        );
+                        on(dom.byId('search-account-user-result-form')['select'], 'click', function(){
+                            _widget.onSelectUser(response.data[0]);
+                        });
+                    }
+                });
+                return responsePromise;
+            },
+            _searchGuest: function(form){
+                var _widget = this;
+                var responsePromise = Ajax.load(Ajax.url('api/1/guest/query'), {
+                    handleAs: 'json',
+                    query: domForm.toObject(form)
+                });
+                responsePromise.then(function(response){
+                    if(response.data.length > 0){
+                        _widget._displayResults(
+                            string.substitute(dom.byId('search-account-guest-result-template').innerHTML, response.data[0])
+                        );
+                        on(dom.byId('search-account-guest-result-form')['select'], 'click', function(){
+                            _widget.onSelectGuest(response.data[0]);
+                        });
+                    }
+                });
+                return responsePromise;
+            },
+            _registerGuest: function(form){
+                var _widget = this;
+                this._displayResults(string.substitute(dom.byId('search-account-guest-register-template').innerHTML, {email: form['filters[equal][email][]'].value}));
+                on(dom.byId('search-account-guest-register-form'), 'submit', function(event){
+                    event.preventDefault();
+                    var responsePromise = Ajax.send(Ajax.url('api/1/guest/post'), {
+                        handleAs: 'json',
+                        query: domForm.toObject(event.target)
+                    });
+                    responsePromise.then(function(response){
+                        if(response.result > -1){
+                            _widget._searchGuest(form);
+                        }
+                    })
+                })
+            },
+            _displayResults: function(content){
+                domConstruct.empty(this.containerNode);
+                domConstruct.place(content, this.containerNode, 'last');
+            },
+            onSelectUser: function(user){return user;},
+            onSelectGuest: function(guest){return guest;}
+        });
+
+        router.register("get-detail", function(event){
+            contentPane.clear();
+            if(!dijitRegistry.byId(event.newPath)){
+                var container = new ContentPane({
+                    id: event.newPath,
+                    style: {padding: 0, margin: 0, overflow: "hidden"},
+                    content: dom.byId('agreementDetail').innerHTML
+                });
+                contentPane.addChild(container);
+            } else {
+                contentPane.addChild(dijitRegistry.byId(event.newPath));
+            }
+        });
+
+        router.register("get-subscribers", function(event){
+            contentPane.clear();
+/*            var dialog = new dijitDialog();
+            dialog.addChild(new SearchUserWidget());
+            dialog.show();*/
+            if(!dijitRegistry.byId(event.newPath)){
+                contentPane.addChild(AgreementContainer.getSubscribersWidget({data: $agreementJson, id: event.newPath}));
+            } else {
+                contentPane.addChild(dijitRegistry.byId(event.newPath));
+            }
+        });
+
+        (function(){
+            on(dom.byId('detailNode'), 'click', function(){
+                router.go('get-detail');
+            });
+            on(dom.byId('subscribersNode'), 'click', function(){
+                router.go('get-subscribers');
+            });
+        })();
+
+        router.startup();
+
+    });
+});
+
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript')
+?>
+<p id="routerControls">
+    <button id="detailNode">Информация</button>
+    <button id="subscribersNode">Подписчики</button>
+</p>
+<div id="content"></div>
+<div class="hidden">
+<div id="agreementDetail">
+<table class="table table-bordered" id="_2_">
     <colgroup>
         <col width="200">
         <col>
@@ -65,57 +411,30 @@ $agreement = $this->agreement;
         </tr>
     </tbody>
 </table>
+</div>
+</div>
+<?php else: ?>
+<div class="alert alert-error">Договор не найден</div>
+<?php endif; ?>
 
-<div id="contentAgreement"><form id="edit-agreement-subscribers">
-    <table class="table table-bordered">
-        <colgroup>
-            <col width="50">
-            <col width="50">
-            <col width="200">
-            <col width="200">
-            <col>
-        </colgroup>
-        <thead>
-        <tr>
-            <th colspan="5">Активные подписчики</th>
-        </tr>
-        <tr>
-            <th>#ID</th>
-            <th>#</th>
-            <th>Логин</th>
-            <th>Email</th>
-            <th>Ф.И.О</th>
-        </tr>
-        </thead>
-        <tfoot>
-        <tr>
-            <td colspan="5">
-                <input type="hidden" value="115" name="agreement">
-                <button data-action="addSubscriber/115" name="add" type="button">Добавить</button>
-                <button name="remove" type="button">Удалить</button>
-            </td>
-        </tr>
-        </tfoot>
-        <tbody>
-        </tbody>
-    </table>
-</form>
-
-    <form id="edit-agreement-subscription-guests">
+<script id="subscription-users-container-template" type="text">
+    <form id="edit-agreement-subscribers">
         <table class="table table-bordered">
             <colgroup>
                 <col width="50">
                 <col width="50">
-                <col width="300">
+                <col width="200">
+                <col width="200">
                 <col>
             </colgroup>
             <thead>
             <tr>
-                <th colspan="4">Приглашенные подписчики</th>
+                <th colspan="5">Активные подписчики</th>
             </tr>
             <tr>
                 <th>#ID</th>
                 <th>#</th>
+                <th>Логин</th>
                 <th>Email</th>
                 <th>Ф.И.О</th>
             </tr>
@@ -123,14 +442,168 @@ $agreement = $this->agreement;
             <tfoot>
             <tr>
                 <td colspan="5">
-                    <input type="hidden" value="115" name="agreement">
-                    <button name="remove" type="button">Удалить приглашения</button>
-                    <button name="resend" type="button">Отправить приглашения повторно</button>
+                    <input type="hidden" value="14" name="agreement">
+                    <button data-dojo-attach-point="addSubscriberNode" name="add" type="button">Добавить</button>
+                    <button data-dojo-attach-point="removeSubscriberNode" name="remove" type="button">Удалить</button>
                 </td>
             </tr>
             </tfoot>
-            <tbody>
-            </tbody>
+            <tbody data-dojo-attach-point="subscribersNode"></tbody>
         </table>
     </form>
-</div>
+</script>
+
+<script id="subscription-user-row-template" type="text">
+    <tr id="subscriptionUserNode_${id}">
+        <td>${id}</td>
+        <td><input type="checkbox" value="${id}" name="users[]"></td>
+        <td>${data.login}</td>
+        <td>${data.email}</td>
+        <td>${data.last_name} ${data.first_name} ${data.middle_name}</td>
+    </tr>
+</script>
+
+
+<!-- Шаблоны поиска Пользователя -->
+<script id="search-account-template" type="text">
+    <div>
+        <div data-dojo-attach-point="searchAccountContainerNode">
+            <form id="search-account-form">
+                <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                        <td>
+                            <label>Введите Email учетной записи:</label>
+                            <input type="text" name="filters[equal][email][]" style="width: 400px">
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <button name="send" type="submit">Найти</button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </form>
+        </div>
+        <div data-dojo-attach-point="searchAccountResultsContainerNode"></div>
+    </div>
+</script>
+
+<script id="search-account-user-result-template" type="text">
+    <form id="search-account-user-result-form">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="50"/>
+                <col width="200"/>
+                <col width="200"/>
+                <col/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th colspan="4">Найдена учетная запись Пользователя</th>
+                </tr>
+                <tr>
+                    <th>#ID</th>
+                    <th>Email</th>
+                    <th>Логин</th>
+                    <th>Ф.И.О</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${id}</td>
+                    <td>${data.email}</td>
+                    <td>${data.login}</td>
+                    <td>${data.last_name} ${data.first_name} ${data.middle_name}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4">
+                        <button name="select" type="button">Выбрать</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</script>
+
+<script id="search-account-guest-result-template" type="text">
+    <form id="search-account-guest-result-form">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="50"/>
+                <col width="200"/>
+                <col/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th colspan="3">Найдена учетная запись Гостя</th>
+                </tr>
+                <tr>
+                    <th>#ID</th>
+                    <th>Email</th>
+                    <th>Ф.И.О</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${id}</td>
+                    <td>${data.email}</td>
+                    <td>${data.last_name} ${data.first_name} ${data.middle_name}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <button name="select" type="button">Выбрать</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</script>
+
+<script id="search-account-guest-register-template" type="text">
+    <form id="search-account-guest-register-form">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="30%">
+                <col width="30%">
+                <col>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <th colspan="3">
+                        На &laquo;<strong>${email}</strong>&raquo; будет добавлена новая учетная запись Гостя
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        <label>Фамилия:</label>
+                        <input type="text" value="" name="guest[last_name]">
+                    </td>
+                    <td>
+                        <label>Имя:</label>
+                        <input type="text" value="" name="guest[first_name]">
+                    </td>
+                    <td>
+                        <label>Отчество:</label>
+                        <input type="text" value="" name="guest[middle_name]">
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <input type="hidden" value="${email}" name="guest[email]">
+                        <button name="send" type="submit">Сохранить</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</script>

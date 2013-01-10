@@ -128,7 +128,6 @@ class Service_RestController extends Zend_Rest_Controller
                 ->setDispatched(false);
         }*/
         $this->_forward($operation, $entity, 'api');
-
     }
 
     /**
@@ -230,6 +229,7 @@ class Service_RestController extends Zend_Rest_Controller
      * Использование коллекций и фильтров для получения данных
      * App_Core_Model_CollectionAbstract
      * TODO: Использовать Content-Range: для передачи страниц страницы
+     * filters[equal][company_owner][]
      */
     public function queryAction()
     {
@@ -258,6 +258,7 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function postAction()
     {
+        //echo "post";
         $this->getResponse()->setHttpResponseCode(201);
     }
 
@@ -266,6 +267,7 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function putAction()
     {
+        //echo "put";
         $this->getResponse()->setHttpResponseCode(202);
     }
 

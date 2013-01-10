@@ -9,8 +9,7 @@ define([
     "dijit/_WidgetBase"
 ], function(declare, dom, domConstruct, domClass, domGeometry, lang, domStyle, _WidgetBase){
 
-    // TODO: ContentPane, resize()
-    var Overlay = declare("Overlay", [_WidgetBase], {
+    var Overlay = declare(null, {
         // Задержка перед удалением оверлея. Визуальное восприятие
         delay: 600,
         // Родительский DOM узел
@@ -33,7 +32,6 @@ define([
             domConstruct.place(overlayLoading, this.overlayNode, 'first');
 
         },
-
         /**
          * Отобразить Загрузчик
          */
@@ -47,14 +45,11 @@ define([
          */
         _resize: function(){
             var geometryDomNode = domGeometry.getContentBox(this.domNode);
-            //var computedStyle = domStyle.getComputedStyle(this.domNode);
-            //console.log(domGeometry.getContentBox(this.domNode, computedStyle));
-
             //if(geometryDomNode.h > domStyle.get(this.overlayNode.childNodes[0], 'height')){
-            domStyle.set(this.overlayNode.childNodes[0], 'height', geometryDomNode.h + 'px');
+                domStyle.set(this.overlayNode.childNodes[0], 'height', geometryDomNode.h + 'px');
             //}
             //if(geometryDomNode.w > domStyle.get(this.overlayNode.childNodes[0], 'width')){
-            domStyle.set(this.overlayNode.childNodes[0], 'width', geometryDomNode.w + 'px');
+                domStyle.set(this.overlayNode.childNodes[0], 'width', geometryDomNode.w + 'px');
             //}
         },
         /**
@@ -65,6 +60,9 @@ define([
             setTimeout(function(){
                 domConstruct.destroy(Overlay.overlayNode);
             }, this.delay);
+        },
+        setDefaultSize: function(){
+
         }
     });
 

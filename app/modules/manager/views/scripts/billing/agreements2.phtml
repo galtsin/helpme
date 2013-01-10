@@ -88,17 +88,18 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
 // ============================================================================
 
+        // Контент-контейнер
         var contentPane = new ContentPane({
             id: 'content',
             style: {padding: 0, margin: 0,  overflow: "hidden"},
             clear: function(){
-                array.forEach(contentPane.getChildren(), function(dijit){
-                    dijit.removeChild(dijit);
+                array.forEach(contentPane.getChildren(), function(widget){
+                    contentPane.removeChild(widget);
                 });
             }
-        }, 'contentCompanies');
+        }, 'content');
 
-        // Контейнер компаний
+        // Общий контейнер по виджетам типа "Компания"
         var CompanyContainer = {
             companiesStore: {},
             getCompanyAboutWidget: function(options){
@@ -185,7 +186,12 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                         if(dijitRegistry.byId(this._getChildNodeId(item.id))) {
                             this.addChild(this._getChildNodeId(item.id));
                         } else {
-                            this.addChild(this.createChildNode(lang.mixin({data: item, id: this._getChildNodeId(item.id)}, options)));
+                            this.addChild(this.createChildNode(
+                                lang.mixin({
+                                    data: lang.mixin(item, {'company_owner': this.data.id}),
+                                    id: this._getChildNodeId(item.id)
+                                }, options)
+                            ));
                         }
                     },
                     toggleHandler: function(node){
@@ -282,7 +288,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                 if(!this.id) this.id = this._getWidgetId();
                             },
                             _setDataAttr: function(){
-                                if(this.isNew) {
+                                if(true === this.isNew) {
                                     this.get('companyClientOptionsNode').innerHTML = '<a data-dojo-attach-point="createAgreementNode">+ новый договор</a>';
                                 } else {
                                     this.get('companyClientOptionsNode').innerHTML = '<a data-dojo-attach-point="getAgreementsListNode">см. договора</a>';
@@ -299,7 +305,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                             on(item, 'click', function(){
                                                 AgreementContainer.getAgreementCreateWidget({
                                                     data: {
-                                                        'company_owner': _widget.getParent().data.id,
+                                                        'company_owner': _widget.data['company_owner'],
                                                         'company_client': _widget.data.id
                                                     }
                                                 }).show();
@@ -309,7 +315,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                             on(item, 'click', function(){
                                                 router.go(
                                                     HelperFn.doPath('get-agreements=:company_owner/:company_client', {
-                                                        'company_owner': _widget.getParent().data.id,
+                                                        'company_owner': _widget.data['company_owner'],
                                                         'company_client': _widget.data.id
                                                     })
                                                 );
@@ -355,9 +361,15 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                                 });
                                 on(dom.byId('form-create-agreement'), 'submit', function(event){
                                     event.preventDefault();
+                                    console.log(event.target);
                                     var request = Ajax.send('http://192.168.1.51/manager/billing/create-agreement', {
                                         overlay: that.Overlay,
-                                        query: domForm.toObject(event.target)
+                                        data: domForm.toObject(event.target)
+                                    });
+                                    request.then(function(response){
+                                        if(response.result > -1){
+                                            that.hide();
+                                        }
                                     });
                                 });
                             });
@@ -494,7 +506,6 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             } else {
                 contentPane.addChild(dijitRegistry.byId(event.newPath));
             }
-
         });
 
         // Роутер договоров
@@ -548,8 +559,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
-<div id="contentCompanies"></div>
-
+<div id="content"></div>
 <script id="agreements-container-template" type="text">
 <div>
     <table class="table table-bordered" id="agreements-container">
@@ -642,7 +652,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <thead>
             <tr>
                 <th colspan="5">
-                    ${data.data.name}
+                    ${data.data.name} (${data.id})
                 </th>
             </tr>
         </thead>

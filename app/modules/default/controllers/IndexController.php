@@ -61,9 +61,10 @@ class Default_IndexController extends App_Zend_Controller_Action
         //$this->_helper->viewRenderer->setNoRender(true);
         //$this->_helper->layout->disableLayout();
 
-        $agreement = new HM_Model_Billing_Agreement_Collection();
-        $agreement->addEqualFilter('company_owner', 12)->getCollection();
-        Zend_Debug::dump($agreement->getDataIterator());
+        $guest = new HM_Model_Account_Guest();
+        $guest->getData()
+            ->set('email', 'testme@mail.ru');
+        $guest->save();
 
     }
 
