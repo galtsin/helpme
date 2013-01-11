@@ -45,6 +45,11 @@ define([
                 }
             });
             return obj;
+        },
+        // TODO: Доработка
+        // Привести имя типа get-users к виду getUsers
+        normalizeName: function(name){
+            var nameArray = name.split('-');
         }
     }
 });

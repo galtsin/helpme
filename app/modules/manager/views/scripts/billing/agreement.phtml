@@ -7,15 +7,12 @@ $agreementJson = Zend_Json::encode($agreement->getData()->toArray());
 $jScript = <<<JS
 require([
     "dojo/_base/declare", // declare
-    "dojo/Stateful",
     "dojo/dom",
     "dojo/dom-style",
     "dojo/html",
     "dojo/dom-class",
     "dojo/dom-construct",
-    "dojo/dom-attr",
     "dojo/dom-form",
-    "dojo/json",
     "dojo/string",
     "dojo/_base/array",
     "dojo/date/locale",
@@ -25,35 +22,22 @@ require([
     "dojo/hash",
     "dojo/router",
     "dojo/store/Memory",
-    "dojo/store/Observable",
-    "dojo/store/Cache",
     "dojo/aspect",
-    "core/Layout",
-    "core/helper/Validation",
-    "core/helper/form",
-    "core/helper/common",
     "core/helper/fn",
     "dijit/Dialog",
-    "core/Dispatcher",
-    "dojo/Deferred",
     "core/Ajax",
     "core/layout/Overlay",
-    "core/widgets/SearchCompanyDialog",
     "dijit/registry",
     "dijit/popup",
     "dijit/layout/ContentPane",
     "dijit/_WidgetBase",
-    "dijit/_WidgetsInTemplateMixin",
     "dijit/_Container",
     "dijit/_Contained",
     "dijit/_TemplatedMixin",
-    "dijit/TooltipDialog",
-    "dijit/layout/AccordionContainer",
     "dojo/text!app/modules/manager/billing/template/test.html"
-], function(declare, Stateful, dom, domStyle, domHtml, domClass, domConstruct, domAttr, domForm, JSON, string, array, dateLocale,
-on, lang, query, hash, router, storeMemory, storeObservable, storeCache, aspect, coreLayout, coreValidation, coreHelperForm,
-coreHelperCommon, HelperFn, dijitDialog, coreDispatcher, Deferred, Ajax, Overlay, coreSearchCompanyDialog, dijitRegistry, dijitPopup,
-ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _TemplatedMixin, TooltipDialog, AccordionContainer, text){
+], function(declare, dom, domStyle, domHtml, domClass, domConstruct, domForm, string, array, dateLocale, on, lang,
+query, hash, router, storeMemory, aspect, HelperFn, dijitDialog, Ajax, Overlay, dijitRegistry, dijitPopup, ContentPane,
+_WidgetBase, _Container, _Contained, _TemplatedMixin, text){
 
     dojo.ready(function(){
 
@@ -230,7 +214,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
         });
 
         /* Виджет поиска Пользователя */
-        var SearchAccountWidget = declare("SearchAccountWidget", [_WidgetBase, _TemplatedMixin], {
+        var SearchAccountWidget = declare("SearchAccountWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
             templateString: dom.byId('search-account-template').innerHTML,
             postCreate: function(){
                 var _widget = this;
