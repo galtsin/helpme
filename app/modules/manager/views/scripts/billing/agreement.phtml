@@ -34,10 +34,11 @@ require([
     "dijit/_Container",
     "dijit/_Contained",
     "dijit/_TemplatedMixin",
-    "dojo/text!app/modules/manager/billing/template/test.html"
+    "dojo/text!app/modules/manager/billing/template/test.html",
+    "core/layout/OverlayPane"
 ], function(declare, dom, domStyle, domHtml, domClass, domConstruct, domForm, string, array, dateLocale, on, lang,
 query, hash, router, storeMemory, aspect, HelperFn, dijitDialog, Ajax, Overlay, dijitRegistry, dijitPopup, ContentPane,
-_WidgetBase, _Container, _Contained, _TemplatedMixin, text){
+_WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
 
     dojo.ready(function(){
 
@@ -136,12 +137,12 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text){
         /* Пользователи подписки */
         var SubscriptionUsersWidget = declare("SubscriptionUsersWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
             templateString: dom.byId('subscription-users-template').innerHTML,
-            subscriptionUsersStore: null,
+            subscribersStore: null,
             containerNode: null,
             data: null,
             postCreate: function(){
                 this.containerNode = this.get('subscribersNode');
-                this.subscriptionUsersStore = new storeMemory();
+                this.subscribersStore = new storeMemory();
                 var _widget = this;
 
                 aspect.after(this, 'fetch', function(deferred){
@@ -172,14 +173,14 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text){
                 );
             },
             insertChildNode: function(data){
-                if(!this.subscriptionUsersStore.get(data.id)){
-                    this.subscriptionUsersStore.add(data);
+                if(!this.subscribersStore.get(data.id)){
+                    this.subscribersStore.add(data);
                     domConstruct.place(this.createChildNode(data), this.containerNode, 'last');
                 }
             },
             removeChildNode: function(id){
-                if(this.subscriptionUsersStore.get(id)){
-                    this.subscriptionUsersStore.remove(id);
+                if(this.subscribersStore.get(id)){
+                    this.subscribersStore.remove(id);
                     domConstruct.destroy(this._getChildNodeFullName(id));
                 }
             },
@@ -322,7 +323,11 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text){
 
                 var searchAccountWidget = new SearchAccountWidget();
                 var Dialogbox = new dijitDialog();
+                var Overlay = new OverlayPane({
+                    domNode: searchAccountWidget.get('overlayNode')
+                });
 
+                // Изменить размеры диалога после отображения результатов
                 aspect.after(searchAccountWidget, '_displayResults', function(){
                     Dialogbox.resize();
                 });
@@ -334,6 +339,21 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text){
                 var subscriptionGuestsWidget = new SubscriptionGuestsWidget({data: $agreementJson});
                 container.addChild(subscriptionGuestsWidget);
                 subscriptionGuestsWidget.fetch();
+
+                // Установить Оверлей Ajax-запросов внутри диалога на время его Отображения
+                aspect.before(Dialogbox, 'show', function(){
+                    var ajaxRequestBeforeHandler = aspect.before(Ajax, '_request', function(){
+                        Overlay.show();
+                    });
+                    var ajaxRequestAfterHandler = aspect.after(Ajax, '_request', function(deferred){
+                        Overlay.hide();
+                        return deferred;
+                    });
+                    aspect.after(Dialogbox, "hide", function(){
+                        ajaxRequestBeforeHandler.remove();
+                        ajaxRequestAfterHandler.remove();
+                    });
+                });
 
                 // Для Пользователей
                 on(subscriptionUsersWidget.get('addSubscriberNode'), 'click', function(){
@@ -372,14 +392,15 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text){
             if(hash().length == 0) router.go('get-detail');
         })();
 
-
-
     });
 });
 
 JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
+<div id="OP" style="width: 300px; height: 200px; background: blue; position: relative; display: none">
+
+</div>
 <p id="routerControls">
     <button id="detailNode">Информация</button>
     <button id="subscribersNode">Подписчики</button>
@@ -551,7 +572,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 
 <!-- Шаблоны поиска Пользователя -->
 <script id="search-account-template" type="text">
-    <div style="width: 650px">
+    <div data-dojo-attach-point="overlayNode" style="width: 650px; position: relative">
         <div data-dojo-attach-point="searchAccountContainerNode">
             <form data-dojo-attach-point="searchAccountFormNode" id="search-account-form">
                 <table class="table table-bordered">

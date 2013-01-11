@@ -13,7 +13,7 @@ class Service_RestController extends Zend_Rest_Controller
      * Выдавать соответствующие коды и дублировать их в status переменной
      * http://dojotoolkit.org/reference-guide/1.8/quickstart/rest.html#id18
      * 200: (Ok) GET
-     * 201: (Created) POST
+     * 201: (Created) POST + изменение состояния
      * 202: (Accepted) PUT
      * 204: (No Content) DELETE
      * @var string

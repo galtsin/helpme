@@ -5,6 +5,7 @@
  */
 /**
  * ru: Query-Сервис для получения коллекций данных
+ * @deprecated
  */
 class Service_QueryController extends App_Zend_Controller_Action
 {
