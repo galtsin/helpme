@@ -57,18 +57,6 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
     dojo.ready(function(){
 
-/*        var aContainer = new AccordionContainer({style: {background: 'red'}}, "content");
-            aContainer.addChild(new ContentPane({
-            title: "Общая информация по договору",
-            content: dom.byId("_2_")
-        }));
-
-        aContainer.addChild(new ContentPane({
-            title:"Подписчики",
-            content:"Hi how are you?"
-        }));
-        aContainer.startup();*/
-
         var contentPane = new ContentPane({
             id: 'content',
             style: {padding: 0, margin: 0,  overflow: "hidden"},
@@ -79,175 +67,202 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         }, 'content');
 
-/*        // Контейнер договоров
-        var AgreementContainer = {
-            getSubscribersWidget: function(options){
-                var Widget = declare("SubscribersWidget", [_WidgetBase], {
-                    data: null,
-                    postCreate: function(){
-                        var that = this;
-                        this.onLoaded().then(function(response){
-                            domConstruct.place(response, that.domNode, 'last');
+        var SubscriptionGuestsWidget = declare("SubscriptionGuestsWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
+            templateString: dom.byId('subscription-guest-template').innerHTML,
+            subscribersStore: null,
+            containerNode: null,
+            data: null,
+            postCreate: function(){
+                this.containerNode = this.get('subscribersNode');
+                this.subscribersStore = new storeMemory();
+                var _widget = this;
+
+                aspect.after(this, 'fetch', function(deferred){
+                    deferred.then(function(items){
+                        array.forEach(items, function(item){
+                            _widget.insertChildNode(item);
+                        });
+                    })
+                });
+
+                on(this.get('removeSubscriberNode'), 'click', function(event){
+                    var formObj = domForm.toObject(event.target.form);
+                    if(formObj['guests[]'] instanceof Array){
+                        array.forEach(formObj['guests[]'], function(id){
+                            var guest = id;
+                            setTimeout(function(){
+                                _widget.removeSubscriber(guest);
+                            }, 0);
                         })
-                    },
-                    onLoaded: function(){
-                        var _widget = this;
-                        var request = Ajax.load('http://192.168.1.51/manager/billing/get-subscribers', {
-                            handleAs: 'html',
-                            query: _widget.data
-                        });
-                       return request;
-                    },
-                    preLoader: function(){
-                        // Изменение
-                        domStyle.set(this.domNode, {height: '', width: ''});
-                        return {
-                            ready: function(){},
-                            reset: function(){
-                                // Сброс прелоадера
-                            }
-                        }
                     }
-                });
-                return new Widget(options || {});
-            }
-        };
-
-        contentPane.addChild(AgreementContainer.getSubscribersWidget({data: {agreement: 86}}));*/
-
-        var AgreementContainer = {
-            getSubscribersWidget: function(options){
-                var Widget = declare("subscribersWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
-                    templateString: dom.byId('subscription-users-container-template').innerHTML,
-                    subscriptionUsersStore: null,
-                    containerNode: null,
-                    data: null,
-                    buildRendering: function(){
-                        this.inherited(arguments);
-                        this.containerNode = this.get('subscribersNode');
-                    },
-                    postCreate: function(){
-                        this.subscriptionUsersStore = new storeMemory();
-                        var _widget = this;
-                        this.fetch(function(items){
-                            array.forEach(items, function(item){
-                                _widget.insertChildNode(item);
-                            });
-                        });
-                        on(this.get('addSubscriberNode'), 'click', function(){
-                            _widget.callAddSubscriberDialogWidget();
-                        });
-
-                        on(this.get('removeSubscriberNode'), 'click', function(event){
-                            //event.target.form
-                        });
-
-                    },
-                    createChildNode: function(data){
-                        return domConstruct.toDom(
-                            string.substitute(dom.byId('subscription-user-row-template').innerHTML, data)
-                        );
-                    },
-                    insertChildNode: function(data){
-                        this.subscriptionUsersStore.add(data);
-                        domConstruct.place(this.createChildNode(data), this.containerNode, 'last');
-
-                    },
-                    removeChildNode: function(id){
-                        this.subscriptionUsersStore.remove(id);
-                        domConstruct.destroy(this._getChildNodeFullName(id));
-                    },
-                    _getChildNodeFullName: function(id){
-                        return 'subscriptionUserNode_' + id;
-                    },
-                    fetch: function(callback){
-                        var responsePromise = Ajax.load(
-                            Ajax.url('api/1/agreement/' + this.data.id + '/get-subscription-users'), {
-                        });
-                        responsePromise.then(function(response){
-                            callback(response.data);
-                        });
-                        return responsePromise;
-                    },
-                    callAddSubscriberDialogWidget: function(options){
-                        var _widget = this;
-
-                        var dialog = new dijitDialog();
-                        var preloader = domConstruct.create('div', {style: {width: '200px', height: '100px'}, innerHTML: 'Загрузка данных'});
-                        dialog.set('content', preloader);
-                        var overlay = new Overlay({domNode: preloader}); overlay.show();
-                        dialog.show();
-                        overlay._resize();
-
-                        var responsePromise = Ajax.load(Ajax.url('manager/billing/add-subscriber'), {
-                            handleAs: 'html',
-                            query: {agreement: _widget.data.id}
-                        });
-                        responsePromise.then(function(response){
-                            dialog.set('content', response);
-                            domForm.toObject('search-subscriber')
-                        });
-
-                        function send(){
-                            var responsePromise = Ajax.send(Ajax.url('manager/billing/add-subscriber'), {
-                                query: {agreement: _widget.data.id}
-                            });
-                        }
-
-                        function search(){
-                           var responsePromise = Ajax.send(Ajax.url('api/1/user/query'), {
-                                query: {
-                                    'filters[equal][email][]': _widget.data['company_owner'],
-                                }
-                           });
-
-                        }
-
-                    }
+                    else if(typeof formObj['guests[]'] == "string"){_widget.removeSubscriber(formObj['guests[]']);}
                 });
 
-                return new Widget(options || {});
-            }
+            },
+            createChildNode: function(data){
+                return domConstruct.toDom(
+                    string.substitute(dom.byId('subscription-guest-row-template').innerHTML, data)
+                );
+            },
+            insertChildNode: function(data){
+                if(!this.subscribersStore.get(data.id)){
+                    this.subscribersStore.add(data);
+                    domConstruct.place(this.createChildNode(data), this.containerNode, 'last');
+                }
+            },
+            removeChildNode: function(id){
+                if(this.subscribersStore.get(id)){
+                    this.subscribersStore.remove(id);
+                    domConstruct.destroy(this._getChildNodeFullName(id));
+                }
+            },
+            _getChildNodeFullName: function(id){
+                return 'subscriptionGuestNode_' + id;
+            },
+            fetch: function(){
+                return Ajax.load(
+                    Ajax.url('api/1/agreement/' + this.data.id + '/get-subscription-guests'), {
+                }).then(function(response){return response.data;});
+            },
+            addSubscriber: function(guest){
+                var _widget = this;
+                return Ajax.send(
+                    Ajax.url('api/1/agreement/' + this.data.id + '/subscribe-guest'), {
+                    data: {guest: guest.id}
+                }).then(function(response){
+                    if(response.result == guest.id) _widget.insertChildNode(guest);
+                    return response.result;
+                });
+            },
+            removeSubscriber: function(id){
+                var _widget = this;
+                return Ajax.send(
+                    Ajax.url('api/1/agreement/' + this.data.id + '/unsubscribe-guest'), {
+                    data: {guest: id}
+                }).then(function(response){
+                    if(response.result == id) _widget.removeChildNode(id);
+                    return response.result;
+                });
+            },
+            resendSubscribe: function(){
 
-        };
+            }
+        });
+
+        /* Пользователи подписки */
+        var SubscriptionUsersWidget = declare("SubscriptionUsersWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
+            templateString: dom.byId('subscription-users-template').innerHTML,
+            subscriptionUsersStore: null,
+            containerNode: null,
+            data: null,
+            postCreate: function(){
+                this.containerNode = this.get('subscribersNode');
+                this.subscriptionUsersStore = new storeMemory();
+                var _widget = this;
+
+                aspect.after(this, 'fetch', function(deferred){
+                    deferred.then(function(items){
+                        array.forEach(items, function(item){
+                            _widget.insertChildNode(item);
+                        });
+                    })
+                });
+
+                on(this.get('removeSubscriberNode'), 'click', function(event){
+                    var formObj = domForm.toObject(event.target.form);
+                    if(formObj['users[]'] instanceof Array){
+                        array.forEach(formObj['users[]'], function(id){
+                            var user = id;
+                            setTimeout(function(){
+                                _widget.removeSubscriber(user);
+                            }, 0);
+                        })
+                    }
+                    else if(typeof formObj['users[]'] == "string"){_widget.removeSubscriber(formObj['users[]']);}
+                });
+
+            },
+            createChildNode: function(data){
+                return domConstruct.toDom(
+                    string.substitute(dom.byId('subscription-user-row-template').innerHTML, data)
+                );
+            },
+            insertChildNode: function(data){
+                if(!this.subscriptionUsersStore.get(data.id)){
+                    this.subscriptionUsersStore.add(data);
+                    domConstruct.place(this.createChildNode(data), this.containerNode, 'last');
+                }
+            },
+            removeChildNode: function(id){
+                if(this.subscriptionUsersStore.get(id)){
+                    this.subscriptionUsersStore.remove(id);
+                    domConstruct.destroy(this._getChildNodeFullName(id));
+                }
+            },
+            _getChildNodeFullName: function(id){
+                return 'subscriptionUserNode_' + id;
+            },
+            fetch: function(){
+                return Ajax.load(
+                    Ajax.url('api/1/agreement/' + this.data.id + '/get-subscription-users'), {
+                }).then(function(response){return response.data;});
+            },
+            addSubscriber: function(user){
+                var _widget = this;
+                return Ajax.send(
+                    Ajax.url('api/1/agreement/' + this.data.id + '/subscribe-user'), {
+                    data: {user: user.id}
+                }).then(function(response){
+                    if(response.result == user.id) _widget.insertChildNode(user);
+                    return response.result;
+                });
+            },
+            removeSubscriber: function(id){
+                var _widget = this;
+                return Ajax.send(
+                    Ajax.url('api/1/agreement/' + this.data.id + '/unsubscribe-user'), {
+                    data: {user: id}
+                }).then(function(response){
+                    if(response.result == id) _widget.removeChildNode(id);
+                    return response.result;
+                });
+            }
+        });
 
         /* Виджет поиска Пользователя */
-        var SearchAccountWidget = declare("SearchUserWidget", [_WidgetBase, _TemplatedMixin], {
+        var SearchAccountWidget = declare("SearchAccountWidget", [_WidgetBase, _TemplatedMixin], {
             templateString: dom.byId('search-account-template').innerHTML,
             postCreate: function(){
                 var _widget = this;
                 this.containerNode = this.get('searchAccountResultsContainerNode');
-                var searchForm = query('form', this.get('searchAccountContainerNode')).pop();
-                on(searchForm, 'submit', function(event){
+                on(this.get('searchAccountFormNode'), 'submit', function(event){
                     event.preventDefault();
-                    _widget._searchUser(event.target);
+                    if(event.target['filters[equal][email][]'].value.length > 6) _widget._searchUser(); // TODO: Регулярка на Email
                 });
                 aspect.after(this, '_searchUser', function(deferred){
                     deferred.then(function(response){
                         if(response.data.length == 0){
-                            _widget._searchGuest(searchForm);
+                            _widget._searchGuest();
                         }
                     })
                 });
                 aspect.after(this, '_searchGuest', function(deferred){
                     deferred.then(function(response){
                         if(response.data.length == 0){
-                            _widget._registerGuest(searchForm);
+                            _widget._registerGuest();
                         }
                     })
                 });
             },
-            _searchUser: function(form){
+            _searchUser: function(){
                 var _widget = this;
                 var responsePromise = Ajax.load(Ajax.url('api/1/user/query'), {
                     handleAs: 'json',
-                    query: domForm.toObject(form)
+                    query: domForm.toObject(this.get('searchAccountFormNode'))
                 });
                 responsePromise.then(function(response){
                     if(response.data.length > 0){
-                        _widget._displayResults(
-                            string.substitute(dom.byId('search-account-user-result-template').innerHTML, response.data[0])
-                        );
+                        _widget._displayResults(string.substitute(dom.byId('search-account-user-result-template').innerHTML, response.data[0]));
                         on(dom.byId('search-account-user-result-form')['select'], 'click', function(){
                             _widget.onSelectUser(response.data[0]);
                         });
@@ -255,17 +270,15 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                 });
                 return responsePromise;
             },
-            _searchGuest: function(form){
+            _searchGuest: function(){
                 var _widget = this;
                 var responsePromise = Ajax.load(Ajax.url('api/1/guest/query'), {
                     handleAs: 'json',
-                    query: domForm.toObject(form)
+                    query: domForm.toObject(this.get('searchAccountFormNode'))
                 });
                 responsePromise.then(function(response){
                     if(response.data.length > 0){
-                        _widget._displayResults(
-                            string.substitute(dom.byId('search-account-guest-result-template').innerHTML, response.data[0])
-                        );
+                        _widget._displayResults(string.substitute(dom.byId('search-account-guest-result-template').innerHTML, response.data[0]));
                         on(dom.byId('search-account-guest-result-form')['select'], 'click', function(){
                             _widget.onSelectGuest(response.data[0]);
                         });
@@ -273,9 +286,9 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                 });
                 return responsePromise;
             },
-            _registerGuest: function(form){
+            _registerGuest: function(){
                 var _widget = this;
-                this._displayResults(string.substitute(dom.byId('search-account-guest-register-template').innerHTML, {email: form['filters[equal][email][]'].value}));
+                this._displayResults(string.substitute(dom.byId('search-account-guest-register-template').innerHTML, {email: this.get('searchAccountFormNode')['filters[equal][email][]'].value}));
                 on(dom.byId('search-account-guest-register-form'), 'submit', function(event){
                     event.preventDefault();
                     var responsePromise = Ajax.send(Ajax.url('api/1/guest/post'), {
@@ -284,7 +297,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                     });
                     responsePromise.then(function(response){
                         if(response.result > -1){
-                            _widget._searchGuest(form);
+                            _widget._searchGuest();
                         }
                     })
                 })
@@ -293,8 +306,12 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                 domConstruct.empty(this.containerNode);
                 domConstruct.place(content, this.containerNode, 'last');
             },
-            onSelectUser: function(user){return user;},
-            onSelectGuest: function(guest){return guest;}
+            onSelectUser: function(user){
+                return user;
+            },
+            onSelectGuest: function(guest){
+                return guest;
+            }
         });
 
         router.register("get-detail", function(event){
@@ -313,26 +330,65 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
         router.register("get-subscribers", function(event){
             contentPane.clear();
-/*            var dialog = new dijitDialog();
-            dialog.addChild(new SearchUserWidget());
-            dialog.show();*/
             if(!dijitRegistry.byId(event.newPath)){
-                contentPane.addChild(AgreementContainer.getSubscribersWidget({data: $agreementJson, id: event.newPath}));
+                var container = new ContentPane({
+                    id: event.newPath,
+                    style: {padding: 0, margin: 0, overflow: "hidden"}
+                });
+
+                var searchAccountWidget = new SearchAccountWidget();
+                var Dialogbox = new dijitDialog();
+
+                aspect.after(searchAccountWidget, '_displayResults', function(){
+                    Dialogbox.resize();
+                });
+
+                var subscriptionUsersWidget = new SubscriptionUsersWidget({data: $agreementJson});
+                container.addChild(subscriptionUsersWidget);
+                subscriptionUsersWidget.fetch();
+
+                var subscriptionGuestsWidget = new SubscriptionGuestsWidget({data: $agreementJson});
+                container.addChild(subscriptionGuestsWidget);
+                subscriptionGuestsWidget.fetch();
+
+                // Для Пользователей
+                on(subscriptionUsersWidget.get('addSubscriberNode'), 'click', function(){
+                    Dialogbox.addChild(searchAccountWidget);
+                    Dialogbox.show();
+                });
+
+                aspect.after(searchAccountWidget, 'onSelectUser', function(user){
+                    subscriptionUsersWidget.addSubscriber(user).then(function(result){
+                        if(result && result == user.id) Dialogbox.hide();
+                    })
+                });
+
+                // Для Гостей
+                on(subscriptionGuestsWidget.get('addSubscriberNode'), 'click', function(){
+                    Dialogbox.addChild(searchAccountWidget);
+                    Dialogbox.show();
+                });
+
+                aspect.after(searchAccountWidget, 'onSelectGuest', function(guest){
+                    subscriptionGuestsWidget.addSubscriber(guest).then(function(result){
+                        if(result && result == guest.id) Dialogbox.hide();
+                    })
+                });
+
+                contentPane.addChild(container);
             } else {
                 contentPane.addChild(dijitRegistry.byId(event.newPath));
             }
         });
 
         (function(){
-            on(dom.byId('detailNode'), 'click', function(){
-                router.go('get-detail');
-            });
-            on(dom.byId('subscribersNode'), 'click', function(){
-                router.go('get-subscribers');
-            });
+            router.startup();
+            on(dom.byId('detailNode'), 'click', function(){router.go('get-detail')});
+            on(dom.byId('subscribersNode'), 'click', function(){router.go('get-subscribers')});
+            if(hash().length == 0) router.go('get-detail');
         })();
 
-        router.startup();
+
 
     });
 });
@@ -417,8 +473,9 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 <div class="alert alert-error">Договор не найден</div>
 <?php endif; ?>
 
-<script id="subscription-users-container-template" type="text">
-    <form id="edit-agreement-subscribers">
+<!-- Шаблон для Активных подписчиков -->
+<script id="subscription-users-template" type="text">
+    <form id="edit-subscription-users-form">
         <table class="table table-bordered">
             <colgroup>
                 <col width="50">
@@ -463,18 +520,62 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     </tr>
 </script>
 
+<!-- Шаблон для Гостей -->
+<script id="subscription-guest-template" type="text">
+    <form id="edit-subscription-guests-form">
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="50">
+                <col width="50">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th colspan="4">Ожидаемые подписчики</th>
+            </tr>
+            <tr>
+                <th>#ID</th>
+                <th>#</th>
+                <th>Email</th>
+                <th>Ф.И.О</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <td colspan="4">
+                    <input type="hidden" value="14" name="agreement">
+                    <button data-dojo-attach-point="addSubscriberNode" name="add" type="button">Добавить</button>
+                    <!--<button data-dojo-attach-point="resendSubscriberNode" name="add" type="button">Оповестить</button>-->
+                    <button data-dojo-attach-point="removeSubscriberNode" name="remove" type="button">Удалить</button>
+                </td>
+            </tr>
+            </tfoot>
+            <tbody data-dojo-attach-point="subscribersNode"></tbody>
+        </table>
+    </form>
+</script>
+
+<script id="subscription-guest-row-template" type="text">
+    <tr id="subscriptionGuestNode_${id}">
+        <td>${id}</td>
+        <td><input type="checkbox" value="${id}" name="guests[]"></td>
+        <td>${data.email}</td>
+        <td>${data.last_name} ${data.first_name} ${data.middle_name}</td>
+    </tr>
+</script>
 
 <!-- Шаблоны поиска Пользователя -->
 <script id="search-account-template" type="text">
-    <div>
+    <div style="width: 650px">
         <div data-dojo-attach-point="searchAccountContainerNode">
-            <form id="search-account-form">
+            <form data-dojo-attach-point="searchAccountFormNode" id="search-account-form">
                 <table class="table table-bordered">
                     <tbody>
                     <tr>
                         <td>
                             <label>Введите Email учетной записи:</label>
-                            <input type="text" name="filters[equal][email][]" style="width: 400px">
+                            <input type="text" name="filters[equal][email][]">
                         </td>
                     </tr>
                     </tbody>
@@ -497,8 +598,8 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <table class="table table-bordered">
             <colgroup>
                 <col width="50"/>
-                <col width="200"/>
-                <col width="200"/>
+                <col width="150"/>
+                <col width="150"/>
                 <col/>
             </colgroup>
             <thead>
@@ -536,7 +637,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <table class="table table-bordered">
             <colgroup>
                 <col width="50"/>
-                <col width="200"/>
+                <col width="150"/>
                 <col/>
             </colgroup>
             <thead>

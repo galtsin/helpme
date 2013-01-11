@@ -81,7 +81,7 @@ class Default_IndexController extends App_Zend_Controller_Action
     {
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout->disableLayout();
-        sleep(0);
+        sleep(2);
         //$company = HM_Model_Billing_Company::load(12);
         //$this->setAjaxData(array($company->getData()->toArray()));
         //$this->getResponse()->setHttpResponseCode(403);
