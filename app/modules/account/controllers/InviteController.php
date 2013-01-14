@@ -56,6 +56,7 @@ class Account_InviteController extends App_Zend_Controller_Action
                             if($guest->activate($form->getValue('login'), $form->getValue('password'))){
 
                                 // Оповещаем наблюдателей
+                                //TODO: Разумнее передавать Инвайт! Из которого в дальнейшем можно вытащить все
                                 $events = Zend_Registry::get('events');
                                 $events['account_activate_guest']->setGuest($guest)
                                     ->notify();

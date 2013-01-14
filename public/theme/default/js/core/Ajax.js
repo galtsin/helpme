@@ -32,7 +32,7 @@ define([
                 preventCache:   false
             };
             lang.mixin(undefinedOptions, options || {});
-            return this._request(url, undefinedOptions);
+            return this.request(url, undefinedOptions);
         },
         load: function(url, options){
             // undefined
@@ -44,9 +44,9 @@ define([
                 preventCache:   true
             };
             lang.mixin(undefinedOptions, options);
-            return this._request(url, undefinedOptions);
+            return this.request(url, undefinedOptions);
         },
-        _request: function(url, options){
+        request: function(url, options){
             lang.mixin(options, {
                 timeout: this.timeout
             });

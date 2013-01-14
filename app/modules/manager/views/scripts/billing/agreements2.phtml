@@ -550,7 +550,11 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         });
 
-        router.startup();
+        (function(){
+            router.startup();
+            if(hash().length == 0) router.go('get-companies');
+        })();
+
 // =====================================================================================================
 
     });

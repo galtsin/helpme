@@ -65,7 +65,10 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                 aspect.after(this, 'fetch', function(deferred){
                     deferred.then(function(items){
                         array.forEach(items, function(item){
-                            _widget.insertChildNode(item);
+                            var _item = item;
+                            setTimeout(function(){
+                                _widget.insertChildNode(_item);
+                            }, 0);
                         });
                     })
                 });
@@ -86,7 +89,10 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             },
             createChildNode: function(data){
                 return domConstruct.toDom(
-                    string.substitute(dom.byId('subscription-guest-row-template').innerHTML, data)
+                    string.substitute(dom.byId('subscription-guest-row-template').innerHTML, data, function(variable){
+                        variable = variable || '';
+                        return variable;
+                    })
                 );
             },
             insertChildNode: function(data){
@@ -148,7 +154,10 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                 aspect.after(this, 'fetch', function(deferred){
                     deferred.then(function(items){
                         array.forEach(items, function(item){
-                            _widget.insertChildNode(item);
+                            var _item = item;
+                            setTimeout(function(){
+                                _widget.insertChildNode(_item);
+                            }, 0);
                         });
                     })
                 });
@@ -169,7 +178,10 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             },
             createChildNode: function(data){
                 return domConstruct.toDom(
-                    string.substitute(dom.byId('subscription-user-row-template').innerHTML, data)
+                    string.substitute(dom.byId('subscription-user-row-template').innerHTML, data, function(variable){
+                        variable = variable || '';
+                        return variable;
+                    })
                 );
             },
             insertChildNode: function(data){
@@ -247,7 +259,12 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                 });
                 responsePromise.then(function(response){
                     if(response.data.length > 0){
-                        _widget._displayResults(string.substitute(dom.byId('search-account-user-result-template').innerHTML, response.data[0]));
+                        _widget._displayResults(
+                            string.substitute(dom.byId('search-account-user-result-template').innerHTML, response.data[0], function(variable){
+                                variable = variable || '';
+                                return variable;
+                            })
+                        );
                         on(dom.byId('search-account-user-result-form')['select'], 'click', function(){
                             _widget.onSelectUser(response.data[0]);
                         });
@@ -263,7 +280,12 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                 });
                 responsePromise.then(function(response){
                     if(response.data.length > 0){
-                        _widget._displayResults(string.substitute(dom.byId('search-account-guest-result-template').innerHTML, response.data[0]));
+                        _widget._displayResults(
+                            string.substitute(dom.byId('search-account-guest-result-template').innerHTML, response.data[0], function(variable){
+                                variable = variable || '';
+                                return variable;
+                            })
+                        );
                         on(dom.byId('search-account-guest-result-form')['select'], 'click', function(){
                             _widget.onSelectGuest(response.data[0]);
                         });
@@ -273,7 +295,12 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             },
             _registerGuest: function(){
                 var _widget = this;
-                this._displayResults(string.substitute(dom.byId('search-account-guest-register-template').innerHTML, {email: this.get('searchAccountFormNode')['filters[equal][email][]'].value}));
+                this._displayResults(
+                    string.substitute(dom.byId('search-account-guest-register-template').innerHTML, {email: this.get('searchAccountFormNode')['filters[equal][email][]'].value}, function(variable){
+                        variable = variable || '';
+                        return variable;
+                    })
+                );
                 on(dom.byId('search-account-guest-register-form'), 'submit', function(event){
                     event.preventDefault();
                     var responsePromise = Ajax.send(Ajax.url('api/1/guest/post'), {
@@ -342,10 +369,10 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
 
                 // Установить Оверлей Ajax-запросов внутри диалога на время его Отображения
                 aspect.before(Dialogbox, 'show', function(){
-                    var ajaxRequestBeforeHandler = aspect.before(Ajax, '_request', function(){
+                    var ajaxRequestBeforeHandler = aspect.before(Ajax, 'request', function(){
                         Overlay.show();
                     });
-                    var ajaxRequestAfterHandler = aspect.after(Ajax, '_request', function(deferred){
+                    var ajaxRequestAfterHandler = aspect.after(Ajax, 'request', function(deferred){
                         Overlay.hide();
                         return deferred;
                     });

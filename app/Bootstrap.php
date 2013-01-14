@@ -180,6 +180,9 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 
         // Регистрируем ресурс в системе
         App::registerResource('FnApi', new App_Core_Resource_DbApi());
+
+        // Регистрируем отчеты
+        App::registerResource('Report', new App_Core_Report());
     }
 
     /**
