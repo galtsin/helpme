@@ -11,6 +11,7 @@ define([
     "dojo/aspect"
 ], function(declare, lang, xhr, request2, notify, on, keys, Deferred, Msg, aspect){
 
+    // TODO: Убрать Overlay
     var Ajax = declare(null, {
         // Время ожидания ответа. Глобальная переменная
         timeout: 15000,

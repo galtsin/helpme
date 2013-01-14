@@ -17,6 +17,9 @@ class Api_GuestController extends Service_RestController
         $this->_modelCollection = 'HM_Model_Account_Guest_Collection';
     }
 
+    /**
+     * Создать Гостя
+     */
     public function postAction()
     {
         $request = $this->getRequest();
@@ -29,6 +32,10 @@ class Api_GuestController extends Service_RestController
             ->set('last_name', $guestParams['last_name']);
 
         if($guest->save()){
+            $events = Zend_Registry::get('events');
+            $events['account_send_register_invitation']
+                ->setGuest($guest)
+                ->notify();
             $this->setAjaxResult($guest->getData()->getId());
             $this->setAjaxStatus(self::STATUS_OK);
         }

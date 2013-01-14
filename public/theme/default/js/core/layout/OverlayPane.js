@@ -9,7 +9,6 @@ define([
     "dijit/layout/_LayoutWidget"
 ], function(declare, dom, domConstruct, domClass, domGeometry, lang, domStyle, _LayoutWidget){
 
-    // TODO: ContentPane, resize()
     var OverlayPane = declare("OverlayPane", [_LayoutWidget], {
         // Задержка перед удалением оверлея. Визуальное восприятие
         delay: 600,
@@ -27,7 +26,7 @@ define([
          */
         show: function(){
             domConstruct.place(this.overlayNode, this.domNode, 'first');
-            this.resize(); // Пересчитать новый размер
+            this.resize(); // Пересчитать размер
         },
         /**
          * Скорректировать размеры Загрузчика

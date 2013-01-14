@@ -29,6 +29,11 @@ class Api_AgreementController extends Service_RestController
             $user = HM_Model_Account_User::load($this->_getParam('user'));
             if($user instanceof HM_Model_Account_User) {
                 if($agreement->getSubscription()->addUser($user) == $user->getData()->getId()){
+                    $events = Zend_Registry::get('events');
+                    $events['agreement_subscribe_user']
+                        ->setUser($user)
+                        ->setAgreement($agreement)
+                        ->notify();
                     $this->setAjaxResult($user->getData()->getId());
                     $this->setAjaxStatus(self::STATUS_OK);
                 }
@@ -47,6 +52,11 @@ class Api_AgreementController extends Service_RestController
             $user = HM_Model_Account_User::load($this->_getParam('user'));
             if($user instanceof HM_Model_Account_User) {
                 if($agreement->getSubscription()->removeUser($user) == $user->getData()->getId()){
+                    $events = Zend_Registry::get('events');
+                    $events['agreement_unsubscribe_user']
+                        ->setUser($user)
+                        ->setAgreement($agreement)
+                        ->notify();
                     $this->setAjaxResult($user->getData()->getId());
                     $this->setAjaxStatus(self::STATUS_OK);
                 }

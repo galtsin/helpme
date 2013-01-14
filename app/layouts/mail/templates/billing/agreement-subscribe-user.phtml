@@ -3,7 +3,7 @@ $user = $this->user;
 $agreement= $this->agreement;
 ?>
 <table border="0">
-    <tbody>
+    <tbody align="left">
         <tr>
             <td>
                 <p>Уважаемый <strong><?=$user->getData('last_name')?> <?=$user->getData('first_name')?> <?=$user->getData('middle_name')?> (<?=$user->getData('email')?>).</strong><br/>
@@ -12,13 +12,13 @@ $agreement= $this->agreement;
             </td>
         </tr>
         <tr>
-            <th>Информация по договору</th>
-        </tr>
-        <tr>
             <td>
                 <p>
-                    Линия Консультации: <br/>
-                    Тариф: <br/>
+                    <?php $tariff = HM_Model_Billing_Tariff::load($agreement->getData('tariff'));?>
+                    Линия Консультации: <?=$tariff->getLine()->getData('name')?><br/>
+                    Тариф: <?=$tariff->getData('name')?><br/>
+                    <?php $company = HM_Model_Billing_Company::load($agreement->getData('company_client'))?>
+                    Компания-Клиент: <?=$company->getData('name')?><br/>
                 </p>
             </td>
         </tr>

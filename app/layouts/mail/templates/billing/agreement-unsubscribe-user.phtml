@@ -11,5 +11,16 @@ $agreement= $this->agreement;
                 </p>
             </td>
         </tr>
+        <tr>
+            <td>
+                <p>
+                    <?php $tariff = HM_Model_Billing_Tariff::load($agreement->getData('tariff'));?>
+                    Линия Консультации: <?=$tariff->getLine()->getData('name')?><br/>
+                    Тариф: <?=$tariff->getData('name')?><br/>
+                    <?php $company = HM_Model_Billing_Company::load($agreement->getData('company_client'))?>
+                    Компания-Клиент: <?=$company->getData('name')?><br/>
+                </p>
+            </td>
+        </tr>
     </tbody>
 </table>
