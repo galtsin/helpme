@@ -127,12 +127,8 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
      */
     public function hasUser(HM_Model_Account_User $user)
     {
-        foreach($this->getUsers() as $subscriptionUser) {
-            if($subscriptionUser->getData()->getId() == $user->getData()->getId()) {
-                return true;
-            }
-        }
-        return false;
+        $this->getUsers();
+        return in_array($user->getData()->getId(), $this->getData('users'));
     }
 
     /**
@@ -142,12 +138,8 @@ class HM_Model_Billing_Agreement_Subscription extends App_Core_Model_Store_Entit
      */
     public function hasGuest(HM_Model_Account_Guest $guest)
     {
-        foreach($this->getGuests() as $subscriptionGuest) {
-            if($subscriptionGuest->getData()->getId() == $guest->getData()->getId()) {
-                return true;
-            }
-        }
-        return false;
+        $this->getGuests();
+        return in_array($guest->getData()->getId(), $this->getData('guests'));
     }
 
     /**

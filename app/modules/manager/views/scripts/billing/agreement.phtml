@@ -90,8 +90,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             createChildNode: function(data){
                 return domConstruct.toDom(
                     string.substitute(dom.byId('subscription-guest-row-template').innerHTML, data, function(variable){
-                        variable = variable || '';
-                        return variable;
+                        return variable || '';
                     })
                 );
             },
@@ -179,8 +178,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             createChildNode: function(data){
                 return domConstruct.toDom(
                     string.substitute(dom.byId('subscription-user-row-template').innerHTML, data, function(variable){
-                        variable = variable || '';
-                        return variable;
+                        return variable || '';
                     })
                 );
             },
@@ -261,8 +259,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                     if(response.data.length > 0){
                         _widget._displayResults(
                             string.substitute(dom.byId('search-account-user-result-template').innerHTML, response.data[0], function(variable){
-                                variable = variable || '';
-                                return variable;
+                                return variable || '';
                             })
                         );
                         on(dom.byId('search-account-user-result-form')['select'], 'click', function(){
@@ -282,8 +279,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                     if(response.data.length > 0){
                         _widget._displayResults(
                             string.substitute(dom.byId('search-account-guest-result-template').innerHTML, response.data[0], function(variable){
-                                variable = variable || '';
-                                return variable;
+                                return variable || '';
                             })
                         );
                         on(dom.byId('search-account-guest-result-form')['select'], 'click', function(){
@@ -297,8 +293,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                 var _widget = this;
                 this._displayResults(
                     string.substitute(dom.byId('search-account-guest-register-template').innerHTML, {email: this.get('searchAccountFormNode')['filters[equal][email][]'].value}, function(variable){
-                        variable = variable || '';
-                        return variable;
+                        return variable || '';
                     })
                 );
                 on(dom.byId('search-account-guest-register-form'), 'submit', function(event){

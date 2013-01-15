@@ -8,6 +8,11 @@
  */
 class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 {
+    protected function _initTest()
+    {
+        //sleep(2);
+    }
+
     /**
      * Инициализация глобальной конфигурации приложения.
      * Регистрация конфигурации в Реестре
