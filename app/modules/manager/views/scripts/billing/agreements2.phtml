@@ -348,13 +348,12 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
 
 
         var CompanyAgreementsWidget = declare("CompanyAgreementsWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
-            templateString: null,
+            templateString: dom.byId('agreements-container-template').innerHTML,
             agreementsStore: null,
             data: null, // company_owner, company_client
             overlay: null,
             postMixInProperties: function(){
                 this.agreementsStore = new storeMemory();
-                this.templateString = dom.byId('agreements-container-template').innerHTML;
                 if(!this.id) this.id = this._getWidgetId();
             },
             _getWidgetId: function(){
@@ -368,8 +367,33 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                 var _widget = this;
                 if(!this.overlay) this.overlay = new Overlay({domNode: this.domNode});
                 on(this.get('createWidgetNode'), 'click', function(event){
-                    //var dialog = _AgreementContainer.getAgreementCreateWidget({data: _widget.data});
-                    //dialog.show();
+                    var dialogbox = getDialogOverlay({
+                        title: 'Новый договор'
+                    });
+                    var companyCreateAgreementWidget = new CompanyCreateAgreementWidget({
+                        data: _widget.data
+                    });
+
+                    aspect.after(companyCreateAgreementWidget, 'insertContent', function(){
+                        dialogbox.getChildren()[0].addChild(companyCreateAgreementWidget);
+                        dialogbox.resize();
+                    });
+
+                    aspect.after(companyCreateAgreementWidget, 'send', function(deferred){
+                        deferred.then(function(result){
+                            if(result > -1) {
+                                setTimeout(function(){
+                                    _widget.removeChildNode(entry.id);
+                                    _widget.insertChildNode(entry);
+                                    dialogbox.destroy();
+                                }, dialogbox.getChildren()[0].delay);
+                            }
+                        });
+                        return deferred;
+                    });
+
+                    dialogbox.show();
+                    companyCreateAgreementWidget.getContent();
                 });
                 _widget.fetch().then(function(items){
                     array.forEach(items, function(item){
@@ -398,9 +422,9 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                 }).then(function(response){ return response.data; });
             },
             createChildNode: function(data){
-                data.data['date_expires'] = Math.ceil((this.data.data['date_end'] - appConfig.serverTimestamp) / 86400);
+                data.data['date_expires'] = Math.ceil((data.data['date_end'] - appConfig.serverTimestamp) / 86400);
                 return domConstruct.toDom(
-                    string.substitute(dom.byId('company-client-row-template').innerHTML, data, function(variable){
+                    string.substitute(dom.byId('agreement-row-template').innerHTML, data, function(variable){
                         return variable === 0? 0 : variable || '';
                     }, {
                         dateFormat: function(dateValue){
@@ -415,8 +439,10 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                         tariffInfo: function(tariffId){
                             return tariffsStore.get(tariffId).data.name;
                         },
-                        lineInfo: function(lineId){
-                            return linesStore.get(lineId).data.name;
+                        lineInfo: function(tariffId){
+                            return linesStore.get(
+                                tariffsStore.get(tariffId).data.line
+                            ).data.name;
                         }
                     })
                 );
@@ -700,159 +726,6 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         };
 
-        // Контейнер договоров
-        var AgreementContainer = {
-            getAgreementCreateWidget: function(options){
-                var Widget = declare("AgreementCreateWidget", [dijitDialog], {
-                    data: null,
-                    title: 'Новый договор',
-                    buildRendering: function(){
-                        this.inherited(arguments);
-                        var that = this;
-                        var onShowHandler = aspect.after(this, 'onShow', function(){
-                            that.Overlay = new Overlay({
-                                domNode: this.containerNode
-                             });
-                            // Взависимости от результата получения данных - текущая обработка
-                            // будет повторяться или нет
-                            this._getContent(onShowHandler, function(){
-                                domStyle.set(that.Overlay.overlayNode, {
-                                    width: "auto",
-                                    height: "auto"
-                                });
-                                on(dom.byId('form-create-agreement'), 'submit', function(event){
-                                    event.preventDefault();
-                                    console.log(event.target);
-                                    var request = Ajax.send('http://192.168.1.51/manager/billing/create-agreement', {
-                                        overlay: that.Overlay,
-                                        data: domForm.toObject(event.target)
-                                    });
-                                    request.then(function(response){
-                                        if(response.result > -1){
-                                            that.hide();
-                                        }
-                                    });
-                                });
-                            });
-                        });
-                    },
-                    _getContent: function(onShowHandler, callback){
-                        var that = this;
-                        // Отразить заглушку на время загрузки данных
-                        domStyle.set(this.Overlay.overlayNode, {
-                            width: "200px",
-                            height: "100px"
-                        });
-                        var request = Ajax.load('http://192.168.1.51/manager/billing/create-agreement', {
-                            handleAs: 'html',
-                            overlay: this.Overlay,
-                            query: that.data
-                        });
-                        request.then(function(response){
-                            setTimeout(function(){
-                                that.set('content', response);
-                                if(callback) callback(response);
-                                onShowHandler.remove();
-                            }, that.Overlay.delay);
-                        },function(){
-                            setTimeout(function(){
-                                that.set('content', 'Неудалось загрузить контент');
-                            }, that.Overlay.delay);
-                        });
-                        // Событие по закрытию диалога во время загрузки контента
-                        var onHideHandler = aspect.after(this, 'hide', function(){
-                            onHideHandler.remove();
-                            that.destroy();
-                            if(!request.isFulfilled()){
-                                request.cancel();
-                                //Ajax.Messenger.send('PROCESS_STATE_ABORTED');
-                            }
-                        });
-
-                        return request;
-                    }
-                });
-
-                return new Widget(options || {});
-            },
-            // Построить список договоров
-            getAgreementsListWidget: function(options){
-                var _AgreementContainer = this;
-                var Widget = declare("AgreementsListWidget", [_WidgetBase, ContentPane, _TemplatedMixin], {
-                    templateString: null,
-                    agreementsStore: null,
-                    data: null, // company_owner, company_client
-                    style: {padding: 0, margin: 0, overflow: "hidden"},
-                    overlay: null,
-                    postMixInProperties: function(){
-                        this.agreementsStore = new storeMemory();
-                        this.templateString = dom.byId('agreements-container-template').innerHTML;
-                        if(!this.id) this.id = this._getWidgetId();
-                    },
-                    _getWidgetId: function(){
-                        return this.declaredClass + '_' + this.data['company_owner'] + '_' + this.data['company_client'];
-                    },
-                    buildRendering: function(){
-                        this.inherited(arguments);
-                        this.containerNode = this.get('listNode');
-                    },
-                    postCreate: function(){
-                        var _widget = this;
-                        if(!this.overlay) this.overlay = new Overlay({domNode: this.domNode});
-                        on(this.get('createWidgetNode'), 'click', function(event){
-                            var dialog = _AgreementContainer.getAgreementCreateWidget({data: _widget.data});
-                            dialog.show();
-                        });
-                    },
-                    insertChildNode: function(item){
-                        this.agreementsStore.add(item);
-                        this.addChild(this.createChildNode({data: item}));
-                    },
-                    fetchAgreements: function(callback){
-                        var _widget = this;
-                        var request = Ajax.load(
-                            Ajax.url('api/1/agreement/query'), {
-                            query: {
-                                'filters[equal][company_owner][]': _widget.data['company_owner'],
-                                'filters[equal][company_client][]': _widget.data['company_client']
-                            },
-                            overlay: this.overlay
-                        });
-                        request.then(function(response){
-                            callback(response.data);
-                        });
-                        return request;
-                    },
-                    createChildNode: function(options){
-                        var Node = declare("AgreementsListWidgetNode", [_WidgetBase, _Contained, _TemplatedMixin], {
-                            templateString: dom.byId('agreement-node-template').innerHTML,
-                            data: null,
-                            _setDataAttr: function(){
-                                this.get('dateBeginNode').innerHTML = this.formatDate(this.data.data['date_begin']);
-                                this.get('dateEndNode').innerHTML = this.formatDate(this.data.data['date_end']);
-                                this.get('dateExpiresNode').innerHTML = Math.ceil((this.data.data['date_end'] - appConfig.serverTimestamp) / 86400);
-                                this.get('lineNode').innerHTML = linesStore.get(15).data.name;
-                                this.get('tariffNode').innerHTML = tariffsStore.get(27).data.name;
-                                this.get('invoiceNode').innerHTML = "#" + this.data.data['invoice'];
-                            },
-                            formatDate: function(dateValue){
-                                dateValue = dateValue || 0;
-                                var date = new Date(dateValue * 1000);
-                                var dateFormat = {full: ''};
-                                dateFormat.date = (date.getDate() > 9) ? date.getDate() : '0' + date.getDate();
-                                dateFormat.month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1);
-                                dateFormat.year = date.getFullYear();
-                                return dateFormat.full.concat(dateFormat.date, '.' + dateFormat.month, '.' + dateFormat.year);
-                            }
-                        });
-                        return new Node(options || {});
-                    }
-                });
-
-                return new Widget(options || {});
-            }
-        };
-
         router.register('get-companies', function(event){
             contentPane.clear();
             if(!dijitRegistry.byId(event.newPath)){
@@ -911,7 +784,7 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         });
 
-        router.register('get-agreements-test', function(event){
+        router.register('get-agreements-test=:company_owner/:company_client', function(event){
             contentPane.clear();
             if(!dijitRegistry.byId(event.newPath)){
                 var container = new ContentPane({
@@ -956,55 +829,6 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 <div id="content"></div>
-<script id="agreements-container-template" type="text">
-<div>
-    <table class="table table-bordered" id="agreements-container">
-        <colgroup>
-            <col width="50"/>
-            <col width="70"/>
-            <col width="300"/>
-            <col width="300"/>
-            <col width="100"/>
-            <col width="100">
-            <col/>
-            <col/>
-        </colgroup>
-        <thead>
-        <tr>
-            <th>#ID</th>
-            <th>Счет №</th>
-            <th>ЛК</th>
-            <th>Тариф</th>
-            <th>Начало</th>
-            <th>Окончание</th>
-            <th>Истекает (дн.)</th>
-            <th>Опции</th>
-        </tr>
-        </thead>
-        <tfoot>
-        <tr>
-            <td colspan="8">
-                <button type="button" data-dojo-attach-point="createWidgetNode">Новый договор</button>
-            </td>
-        </tr>
-        </tfoot>
-        <tbody data-dojo-attach-point="listNode" class="hidden"></tbody>
-    </table>
-</div>
-</script>
-
-<script id="agreement-node-template" type="text">
-    <tr id="agreement-node-${data.id}">
-        <td data-dojo-attach-point="idNode">${data.id}</td>
-        <td data-dojo-attach-point="invoiceNode"></td>
-        <td data-dojo-attach-point="lineNode"></td>
-        <td data-dojo-attach-point="tariffNode"></td>
-        <td data-dojo-attach-point="dateBeginNode"></td>
-        <td data-dojo-attach-point="dateEndNode"></td>
-        <td data-dojo-attach-point="dateExpiresNode"></td>
-        <td data-dojo-attach-point=""><a href="<?=$this->baseUrl('manager/billing/agreement/id/');?>${data.id}">просмотр</a></td>
-    </tr>
-</script>
 
 <script id="company-client-filter-template" type="text">
     <form id="company-clients-filter" style="margin: 0">
@@ -1176,20 +1000,20 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
                 </td>
             </tr>
             </tfoot>
-            <tbody data-dojo-attach-point="listNode" class="hidden"></tbody>
+            <tbody data-dojo-attach-point="listNode" class="_hidden"></tbody>
         </table>
     </div>
 </script>
 
 <script id="agreement-row-template" type="text">
-    <tr id="agreement-node-${data.id}">
+    <tr id="agreement-node-${id}">
         <td>${id}</td>
         <td>#${data.invoice}</td>
         <td>${data.tariff:tariffInfo}</td>
         <td>${data.tariff:lineInfo}</td>
         <td>${data.date_begin:dateFormat}</td>
         <td>${data.date_end:dateFormat}</td>
-        <td>${data.date_expiries}</td>
-        <td><a href="<?=$this->baseUrl('manager/billing/agreement/id/');?>${data.id}">просмотр</a></td>
+        <td>${data.date_expires}</td>
+        <td><a href="<?=$this->baseUrl('manager/billing/agreement/id/');?>${id}">просмотр</a></td>
     </tr>
 </script>
