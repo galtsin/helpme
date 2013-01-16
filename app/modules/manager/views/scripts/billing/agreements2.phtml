@@ -346,6 +346,31 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         });
 
+       var CompanyDetailWidget = declare("CompanyDetailWidget", [_WidgetBase, _Contained], {
+            data: null,
+            postCreate: function(){
+                var _widget = this;
+                aspect.after(this, 'getContent', function(deferred){
+                    deferred.then(function(response){
+                        _widget.insertContent(response);
+                    })
+                });
+            },
+            insertContent: function(contentDom){
+                domConstruct.place(contentDom, this.domNode, 'last');
+            },
+            getContent: function(){
+                return Ajax.load(Ajax.url(HelperFn.doPath('api/1/company/:id', {id: this.data.id})), {
+                    handleAs: 'json'
+                }).then(function(response){
+                    return domConstruct.toDom(
+                        string.substitute(dom.byId('company-detail-template').innerHTML, response.data[0], function(variable){
+                            return variable === 0? 0 : variable || '';
+                        })
+                    );
+                });
+            }
+        });
 
         var CompanyAgreementsWidget = declare("CompanyAgreementsWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
             templateString: dom.byId('agreements-container-template').innerHTML,
@@ -395,13 +420,16 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                     dialogbox.show();
                     companyCreateAgreementWidget.getContent();
                 });
-                _widget.fetch().then(function(items){
-                    array.forEach(items, function(item){
-                        var _item = item;
-                        setTimeout(function(){
-                            _widget.insertChildNode(_item);
-                        }, 0);
+                aspect.after(this, 'fetch', function(deferred){
+                    deferred.then(function(items){
+                        array.forEach(items, function(item){
+                            var _item = item;
+                            setTimeout(function(){
+                                _widget.insertChildNode(_item);
+                            }, 0);
+                        });
                     });
+                    return deferred;
                 });
             },
             insertChildNode: function(entry){
@@ -791,7 +819,14 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                     id: event.newPath,
                     style: {padding: 0, margin: 0, overflow: "hidden"}
                 });
-                container.addChild(new CompanyAgreementsWidget({data: event.params}));
+                var companyDetailWidget = new CompanyDetailWidget({data: {id: event.params['company_client']}});
+                companyDetailWidget.getContent();
+                container.addChild(companyDetailWidget);
+
+                var companyAgreementsWidget = new CompanyAgreementsWidget({data: event.params});
+                companyAgreementsWidget.fetch();
+                container.addChild(companyAgreementsWidget);
+
                 contentPane.addChild(container);
             } else {
                 contentPane.addChild(dijitRegistry.byId(event.newPath));
@@ -965,6 +1000,26 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
         <td>${data.kpp}</td>
         <td data-dojo-attach-point="companyClientOptionsNode"></td>
     </tr>
+</script>
+
+<script id="company-detail-template" type="text">
+    <div>
+        <table class="table table-bordered">
+            <colgroup>
+                <col/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>${data.name}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${data.inn}/${data.kpp}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </script>
 
 <!-- Договора -->
