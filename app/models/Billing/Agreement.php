@@ -66,6 +66,27 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Store_Entity
         return parent::_insert();
     }
 
+    /**
+     * TODO: В Доработке
+     * @return int
+     */
+    protected function _update()
+    {
+        if($this->isIdentity() && $this->getData()->isDirty()){
+            $result = App::getResource('FnApi')
+                ->execute('agreement_update_identity', array(
+                    'id_agreement'  => $this->getData()->getId(),
+                    'date_end'      => strtotime($this->getData('date_end'))
+                )
+            );
+            if($result->rowCount() > 0) {
+                $row = $result->fetchRow();
+                return (int)$row['o_id_agreement'];
+            }
+        }
+
+        return parent::_update();
+    }
 
     /**
      * Получить подписку на Договор

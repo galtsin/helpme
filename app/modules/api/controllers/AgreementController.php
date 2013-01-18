@@ -19,6 +19,23 @@ class Api_AgreementController extends Service_RestController
     }
 
     /**
+     * TODO: В доработке
+     */
+    public function putAction()
+    {
+        $agreement = HM_Model_Billing_Agreement::load($this->_getParam('id'));
+        $agreementParams = $this->getRequest()->getPost();
+        if($agreement instanceof HM_Model_Billing_Agreement){
+            $agreement->setData($agreementParams);
+            if($agreement->save()){
+                $this->setAjaxStatus(self::STATUS_OK);
+                $this->setAjaxResult(10);
+            }
+        }
+        parent::putAction();
+    }
+
+    /**
      * Подписать Пользователя
      * @param user
      */

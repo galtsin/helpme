@@ -52,6 +52,55 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             }
         }, 'content');
 
+        function getDialogOverlayHelper(options){
+            var Dialog = new dijitDialog(options || {});
+            var showDialogBeforeHandler = aspect.before(Dialog, 'show', function(){
+                showDialogBeforeHandler.remove();
+                Dialog.addChild(new OverlayPane({
+                    domNode: domConstruct.create('div', {
+                        style: {
+                            position: "relative", width: "200px", height: "100px"
+                        }
+                    })
+                }));
+                Dialog.getChildren()[0].show();
+                var addChildOverlayPaneBeforeHandler = aspect.before(Dialog.getChildren()[0], 'addChild', function(){
+                    addChildOverlayPaneBeforeHandler.remove();
+                    domStyle.set(Dialog.getChildren()[0].domNode, {
+                       width: "auto", height: "auto"
+                    });
+                    Dialog.getChildren()[0].hide();
+                    return arguments;
+                });
+                return arguments;
+            });
+
+            var ajaxRequestBeforeHandler = aspect.before(Ajax, 'request', function(){
+                Dialog.getChildren()[0].show();
+                return arguments;
+            });
+
+            var ajaxRequestAfterHandler = aspect.after(Ajax, 'request', function(deferred){
+                Dialog.getChildren()[0].hide();
+                return deferred;
+            });
+
+            aspect.after(Dialog, 'hide', function(){
+                clearHandlers();
+            });
+
+            aspect.after(Dialog, 'destroy', function(){
+                clearHandlers();
+            });
+
+            function clearHandlers(){
+                ajaxRequestBeforeHandler.remove();
+                ajaxRequestAfterHandler.remove();
+            }
+
+            return Dialog;
+        }
+
         var SubscriptionGuestsWidget = declare("SubscriptionGuestsWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
             templateString: dom.byId('subscription-guest-template').innerHTML,
             subscribersStore: null,
@@ -321,6 +370,14 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             }
         });
 
+        var AgreementDetailWidget = declare("AgreementDetailWidget", [_WidgetBase, _Contained], {
+            postCreate: function(){
+                query('a[data-dojo-attach-point="changeAgreementData"]', this.domNode).on('click', function(){
+                    alert('f');
+                })
+            }
+        });
+
         router.register("get-detail", function(event){
             contentPane.clear();
             if(!dijitRegistry.byId(event.newPath)){
@@ -329,7 +386,23 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                     style: {padding: 0, margin: 0, overflow: "hidden"},
                     content: dom.byId('agreementDetail').innerHTML
                 });
+                //new AgreementDetailWidget();
+
+
+
                 contentPane.addChild(container);
+
+                // ==
+                var agreement = $agreementJson;
+                partialEditingHelper(dom.byId('edit-agreement-detail-form')).onSend = function(field){
+                    return Ajax.send(Ajax.url(HelperFn.doPath('api/1/agreement/:id/put', {id: agreement.id})), {
+                        data: field
+                    }).then(function(response){
+                        return response.result;
+                    })
+                };
+                // ==
+
             } else {
                 contentPane.addChild(dijitRegistry.byId(event.newPath));
             }
@@ -414,6 +487,45 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             if(hash().length == 0) router.go('get-detail');
         })();
 
+
+        function partialEditingHelper(form){
+            var Helper = {
+                onSend: function(field){}
+            };
+            array.forEach(form.elements, function(element){
+                var label = query('label[for="' + element.getAttribute('id')+ '"]')[0];
+                on(label, 'click', function(event){
+                    domClass.toggle(event.target, "hidden");
+                    domClass.toggle(element, "hidden");
+                    element.focus();
+                });
+                switch(element.type) {
+                    case 'text' || 'textarea':
+                        on(element, 'blur', function(event){
+                            var data = {};
+                            data[event.target.name] = domForm.fieldToObject(event.target);
+                            Helper.onSend(data).then(function(result){
+                                    if(result > -1){
+                                    label.innerHTML = domForm.fieldToObject(event.target);
+                                } else {
+                                    event.target.value = label.innerHTML;
+                                }
+                                domClass.toggle(event.target, "hidden");
+                                domClass.toggle(label, "hidden");
+                            });
+                        });
+                        break;
+                    case 'select':
+                        on(element, 'change', function(event){
+
+                        });
+                        break;
+                }
+            });
+            return Helper;
+        }
+
+
     });
 });
 
@@ -430,70 +542,78 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 <div id="content"></div>
 <div class="hidden">
 <div id="agreementDetail">
-<table class="table table-bordered" id="_2_">
-    <colgroup>
-        <col width="200">
-        <col>
-    </colgroup>
-    <thead>
-    <tr>
-        <th>Информация по Договору #<?=$agreement->getData()->getId()?></th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th>Срок действия:</th>
-            <td>
-                <?=date('d.m.Y', $agreement->getData('date_begin'))?> &mdash; <?=date('d.m.Y', $agreement->getData('date_end'))?>
-            </td>
-        </tr>
-        <tr>
-            <th>ЛК/Тариф:</th>
-            <td>
-                <?php $tariff = HM_Model_Billing_Tariff::load($agreement->getData('tariff'));?>
-                <?=$tariff->getLine()->getData('name')?> / <?=$tariff->getData('name')?></td>
-        </tr>
-        <tr>
-            <th>Компания-партнер:</th>
-            <td>
-                <?php $company = HM_Model_Billing_Company::load($agreement->getData('company_owner')); ?>
-                <?=$company->getData('name')?> (<?=$company->getData('inn')?> / <?=$company->getData('kpp')?>)
-            </td>
-        </tr>
-        <tr>
-            <th>Компания-контрагент:</th>
-            <td>
-                <?php $companyClient = HM_Model_Billing_Company::load($agreement->getData('company_client')); ?>
-                <?=$companyClient->getData('name')?> (<?=$companyClient->getData('inn')?> / <?=$companyClient->getData('kpp')?>)
-            </td>
-        </tr>
-    </tbody>
-</table>
+    <form id="edit-agreement-detail-form">
+        <table class="table table-bordered" id="_2_">
+            <colgroup>
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>Информация по Договору #<?=$agreement->getData()->getId()?></th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Срок действия:</th>
+                    <td>
+                        <span style="display: inline-block">
+                            <?=date('d.m.Y', $agreement->getData('date_begin'))?> &mdash;
+                        </span>
+                        <span style="display: inline-block">
+                            <label for="edit-agreement-detail-form-date-end" style="border-bottom: 1px dashed #005580; color: #005580; cursor: pointer"><?=date('d.m.Y', $agreement->getData('date_end'))?></label>
+                            <input id="edit-agreement-detail-form-date-end" name="date_end" type="text" class="hidden" value="<?=date('d.m.Y', $agreement->getData('date_end'))?>">
+                        </span>
+                   </td>
+                </tr>
+                <tr>
+                    <th>ЛК/Тариф:</th>
+                    <td>
+                        <?php $tariff = HM_Model_Billing_Tariff::load($agreement->getData('tariff'));?>
+                        <?=$tariff->getLine()->getData('name')?> / <?=$tariff->getData('name')?></td>
+                </tr>
+                <tr>
+                    <th>Компания-партнер:</th>
+                    <td>
+                        <?php $company = HM_Model_Billing_Company::load($agreement->getData('company_owner')); ?>
+                        <?=$company->getData('name')?> (<?=$company->getData('inn')?> / <?=$company->getData('kpp')?>)
+                    </td>
+                </tr>
+                <tr>
+                    <th>Компания-контрагент:</th>
+                    <td>
+                        <?php $companyClient = HM_Model_Billing_Company::load($agreement->getData('company_client')); ?>
+                        <?=$companyClient->getData('name')?> (<?=$companyClient->getData('inn')?> / <?=$companyClient->getData('kpp')?>)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-<table class="table table-bordered">
-    <colgroup>
-        <col width="200">
-        <col>
-    </colgroup>
-    <thead>
-        <tr>
-            <th colspan="3">Баланс по договору</th>
-        </tr>
-        <tr>
-            <th>Время (сек.)</th>
-            <th>Сумма (руб.)</th>
-            <th>Сообщений</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php $invoiceBalance = $companyClient->getInvoiceBalance($agreement->getData('invoice'));?>
-        <tr>
-            <td><?=$invoiceBalance->get('sum_time')?></td>
-            <td><?=$invoiceBalance->get('sum_money')?></td>
-            <td><?=$invoiceBalance->get('messages_count')?></td>
-        </tr>
-    </tbody>
-</table>
+        <table class="table table-bordered">
+            <colgroup>
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th colspan="3">Баланс по договору</th>
+                </tr>
+                <tr>
+                    <th>Время (сек.)</th>
+                    <th>Сумма (руб.)</th>
+                    <th>Сообщений</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $invoiceBalance = $companyClient->getInvoiceBalance($agreement->getData('invoice'));?>
+                <tr>
+                    <td><?=$invoiceBalance->get('sum_time')?></td>
+                    <td><?=$invoiceBalance->get('sum_money')?></td>
+                    <td><?=$invoiceBalance->get('messages_count')?></td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
 </div>
 </div>
 <?php else: ?>

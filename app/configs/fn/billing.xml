@@ -121,4 +121,8 @@
     <agreement_get_agreements_by_guest>
         <id_guest type="integer"/>
     </agreement_get_agreements_by_guest>
+    <agreement_update_identity>
+        <id_agreement type="integer"/>
+        <date_end type="string"/>
+    </agreement_update_identity>
 </functions>
