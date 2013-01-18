@@ -32,6 +32,7 @@ class HM_Model_Billing_Company extends App_Core_Model_Store_Entity
                     ->set('inn', $row['o_inn'])
                     ->set('kpp', $row['o_kpp'])
                     ->set('user_creator', $row['o_id_creator'])
+                    ->set('date_creation', strtotime($row['o_create_date']))
                     ->setDirty(false);
 
                 return $company;

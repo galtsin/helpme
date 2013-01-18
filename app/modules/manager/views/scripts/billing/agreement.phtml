@@ -535,6 +535,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 <div id="OP" style="width: 300px; height: 200px; background: blue; position: relative; display: none">
 
 </div>
+<div style="border-bottom: 3px solid #444; margin-bottom: 15px"><h3>Договор #<?=$agreement->getData()->getId()?></h3></div>
 <p id="routerControls">
     <button id="detailNode">Информация</button>
     <button id="subscribersNode">Подписчики</button>
@@ -549,9 +550,9 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
                 <col>
             </colgroup>
             <thead>
-            <tr>
-                <th>Информация по Договору #<?=$agreement->getData()->getId()?></th>
-            </tr>
+                <tr>
+                    <th colspan="2">Информация по Договору #<?=$agreement->getData()->getId()?></th>
+                </tr>
             </thead>
             <tbody>
                 <tr>

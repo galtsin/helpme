@@ -113,6 +113,26 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         }, 'content');
 
+        var format = {
+            dateFormat: function(dateValue){
+                dateValue = dateValue || 0;
+                var date = new Date(dateValue * 1000);
+                var dateFormat = {full: ''};
+                dateFormat.date = (date.getDate() > 9) ? date.getDate() : '0' + date.getDate();
+                dateFormat.month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1);
+                dateFormat.year = date.getFullYear();
+                return dateFormat.full.concat(dateFormat.date, '.' + dateFormat.month, '.' + dateFormat.year);
+            },
+            tariffInfo: function(tariffId){
+                return tariffsStore.get(tariffId).data.name;
+            },
+            lineInfo: function(tariffId){
+                return linesStore.get(
+                    tariffsStore.get(tariffId).data.line
+                ).data.name;
+            }
+        };
+
         function getDialogOverlay(options){
             var Dialog = new dijitDialog(options || {});
             var showDialogBeforeHandler = aspect.before(Dialog, 'show', function(){
@@ -395,26 +415,6 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         });
 
-        var format = {
-            dateFormat: function(dateValue){
-                dateValue = dateValue || 0;
-                var date = new Date(dateValue * 1000);
-                var dateFormat = {full: ''};
-                dateFormat.date = (date.getDate() > 9) ? date.getDate() : '0' + date.getDate();
-                dateFormat.month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1);
-                dateFormat.year = date.getFullYear();
-                return dateFormat.full.concat(dateFormat.date, '.' + dateFormat.month, '.' + dateFormat.year);
-            },
-            tariffInfo: function(tariffId){
-                return tariffsStore.get(tariffId).data.name;
-            },
-            lineInfo: function(tariffId){
-                return linesStore.get(
-                    tariffsStore.get(tariffId).data.line
-                ).data.name;
-            }
-        };
-
         var CompanyAgreementsWidget = declare("CompanyAgreementsWidget", [_WidgetBase, _Contained, _TemplatedMixin], {
             templateString: dom.byId('agreements-container-template').innerHTML,
             agreementsStore: null,
@@ -625,7 +625,7 @@ JS;
 $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 
-<div id="aNode" data-someKey="d" data-someValue="ffff"></div>
+<div style="border-bottom: 3px solid #444; margin-bottom: 15px"><h3>Договора</h3></div>
 <div id="content"></div>
 
 <script id="company-client-filter-template" type="text">
@@ -781,12 +781,15 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </colgroup>
             <thead>
                 <tr>
-                    <th>Компания-контрагент: ${data.name}</th>
+                    <th>[#ID ${id}] ${data.name} </th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>${data.inn}/${data.kpp}</td>
+                    <td><strong>ИНН:</strong> ${data.inn}</td>
+                </tr>
+                <tr>
+                    <td><strong>КПП:</strong> ${data.kpp}</td>
                 </tr>
             </tbody>
         </table>

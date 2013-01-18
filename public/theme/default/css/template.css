@@ -4,6 +4,10 @@ body {
 /*    padding-top: 110px*/
 }
 
+table thead {
+    background: #F5FAFF;
+}
+
 #header {
 /*    position: fixed;
     left: 0;
