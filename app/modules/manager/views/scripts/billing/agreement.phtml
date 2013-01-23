@@ -52,6 +52,13 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             }
         }, 'content');
 
+        var format = {
+            logo: function(logo){
+                if(logo) return '<img width="60" height="78" src="data:image/png;base64,' + logo + '" style="width: 60px; height: 78px; border: 1px solid #C7CED6">';
+                return '<img width="60" height="78" style="width: 60px; height: 78px; border: 1px solid #C7CED6" src="' + Ajax.url('theme/default/images/not_image.png') + '">';
+            }
+        };
+
         function getDialogOverlayHelper(options){
             var Dialog = new dijitDialog(options || {});
             var showDialogBeforeHandler = aspect.before(Dialog, 'show', function(){
@@ -228,7 +235,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
                 return domConstruct.toDom(
                     string.substitute(dom.byId('subscription-user-row-template').innerHTML, data, function(variable){
                         return variable || '';
-                    })
+                    }, format)
                 );
             },
             insertChildNode: function(data){
@@ -494,33 +501,36 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             };
             array.forEach(form.elements, function(element){
                 var label = query('label[for="' + element.getAttribute('id')+ '"]')[0];
-                on(label, 'click', function(event){
-                    domClass.toggle(event.target, "hidden");
-                    domClass.toggle(element, "hidden");
-                    element.focus();
-                });
-                switch(element.type) {
-                    case 'text' || 'textarea':
-                        on(element, 'blur', function(event){
-                            var data = {};
-                            data[event.target.name] = domForm.fieldToObject(event.target);
-                            Helper.onSend(data).then(function(result){
-                                    if(result > -1){
-                                    label.innerHTML = domForm.fieldToObject(event.target);
-                                } else {
-                                    event.target.value = label.innerHTML;
-                                }
-                                domClass.toggle(event.target, "hidden");
-                                domClass.toggle(label, "hidden");
+                if(label && domClass.contains(label, 'field-editable')) {
+                    on(label, 'click', function(event){
+                        domClass.toggle(event.target, "hidden");
+                        domClass.toggle(element, "hidden");
+                        element.focus();
+                    });
+                    switch(element.type) {
+                        case 'text' || 'textarea':
+                            on(element, 'blur', function(event){
+                                var data = {};
+                                data[event.target.name] = domForm.fieldToObject(event.target);
+                                Helper.onSend(data).then(function(result){
+                                        if(result > -1){
+                                        label.innerHTML = domForm.fieldToObject(event.target);
+                                    } else {
+                                        event.target.value = label.innerHTML;
+                                    }
+                                    domClass.toggle(event.target, "hidden");
+                                    domClass.toggle(label, "hidden");
+                                });
                             });
-                        });
-                        break;
-                    case 'select':
-                        on(element, 'change', function(event){
+                            break;
+                        case 'select':
+                            on(element, 'change', function(event){
 
-                        });
-                        break;
+                            });
+                            break;
+                    }
                 }
+
             });
             return Helper;
         }
@@ -562,7 +572,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
                             <?=date('d.m.Y', $agreement->getData('date_begin'))?> &mdash;
                         </span>
                         <span style="display: inline-block">
-                            <label for="edit-agreement-detail-form-date-end" style="border-bottom: 1px dashed #005580; color: #005580; cursor: pointer"><?=date('d.m.Y', $agreement->getData('date_end'))?></label>
+                            <label for="edit-agreement-detail-form-date-end" class="field-editable">[ <?=date('d.m.Y', $agreement->getData('date_end'))?> ]</label>
                             <input id="edit-agreement-detail-form-date-end" name="date_end" type="text" class="hidden" value="<?=date('d.m.Y', $agreement->getData('date_end'))?>">
                         </span>
                    </td>
@@ -628,17 +638,19 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             <colgroup>
                 <col width="50">
                 <col width="50">
+                <col width="70">
                 <col width="200">
                 <col width="200">
                 <col>
             </colgroup>
             <thead>
             <tr>
-                <th colspan="5">Активные подписчики</th>
+                <th colspan="6">Активные подписчики</th>
             </tr>
             <tr>
                 <th>#ID</th>
                 <th>#</th>
+                <th>Фото</th>
                 <th>Логин</th>
                 <th>Email</th>
                 <th>Ф.И.О</th>
@@ -646,7 +658,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </thead>
             <tfoot>
             <tr>
-                <td colspan="5">
+                <td colspan="6">
                     <input type="hidden" value="14" name="agreement">
                     <button data-dojo-attach-point="addSubscriberNode" name="add" type="button">Добавить</button>
                     <button data-dojo-attach-point="removeSubscriberNode" name="remove" type="button">Удалить</button>
@@ -662,6 +674,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     <tr id="subscriptionUserNode_${id}">
         <td>${id}</td>
         <td><input type="checkbox" value="${id}" name="users[]"></td>
+        <td>${data.logo:logo}</td>
         <td>${data.login}</td>
         <td>${data.email}</td>
         <td>${data.last_name} ${data.first_name} ${data.middle_name}</td>

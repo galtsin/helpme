@@ -24,7 +24,11 @@ class Api_AgreementController extends Service_RestController
     public function putAction()
     {
         $agreement = HM_Model_Billing_Agreement::load($this->_getParam('id'));
-        $agreementParams = $this->getRequest()->getPost();
+        if($this->getRequest()->getPost('agreement')) {
+            $agreementParams = $this->getRequest()->getPost('agreement');
+        } else {
+            $agreementParams = $this->getRequest()->getPost();
+        }
         if($agreement instanceof HM_Model_Billing_Agreement){
             $agreement->setData($agreementParams);
             if($agreement->save()){

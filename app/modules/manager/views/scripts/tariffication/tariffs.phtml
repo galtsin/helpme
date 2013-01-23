@@ -1,0 +1,118 @@
+<?php
+$jScript = <<<JS
+require([
+    "dojo/dom",
+    "dojo/dom-construct",
+    "dojo/dom-form",
+    "dojo/html",
+    "dojo/on",
+    "dojo/query",
+    "dojo/hash",
+    "dojo/router",
+    "core/Dispatcher",
+    "core/Layout",
+    "dijit/Dialog"
+], function(dom, domConstruct, domForm, html, on, query, hash, router, coreDispatcher, coreLayout, dijitDialog){
+    dojo.ready(function(){
+
+        var Layout = new coreLayout({
+            messenger: {
+                node: dom.byId('messenger')
+            },
+            processing: {
+                node: dom.byId('loader')
+            }
+        });
+
+        var DialogBox = new dijitDialog();
+
+        dojo.subscribe('getTariffs', function(){
+            Layout.load({
+                url:    Layout.baseUrl('manager/tariffication/get-tariffs'),
+                format: 'html'
+            }).then(function(response){
+                html.set('contentTariffs', response);
+            }).then(function(){
+                coreDispatcher.parsing('contentTariffs');
+            })
+        });
+
+        coreDispatcher.register('addTariff/:line', function(actionEvent){
+            Layout.load({
+                url:    Layout.baseUrl('manager/tariffication/add-tariff'),
+                format: 'html',
+                args: actionEvent.params
+            }).then(function(response){
+                DialogBox.set('title', 'Добавление нового тарифа');
+                DialogBox.set('content', response);
+                DialogBox.show();
+            }).then(function(){
+                var addTariffForm = dom.byId("add-tariff");
+                on(addTariffForm['send'], 'click', function(event){
+                    event.preventDefault();
+                    Layout.send({
+                        url: Layout.baseUrl('manager/tariffication/add-tariff'),
+                        args: domForm.toObject(addTariffForm)
+                    }).then(function(response){
+                        if(response.results != -1) {
+                            DialogBox.hide();
+                            dojo.publish('getTariffs');
+                        }
+                    })
+                });
+           })
+        });
+
+        coreDispatcher.register('editTariffInfo/:tariff', function(routerEvent){
+            Layout.load({
+                url:    Layout.baseUrl('manager/tariffication/edit-tariff-info'),
+                format: 'html',
+                args: routerEvent.params
+            }).then(function(response){
+                html.set('contentTariffs', response);
+            }).then(function(){
+                var editTariffInfoForm = dom.byId("edit-tariff-info");
+                on(editTariffInfoForm['send'], 'click', function(event){
+                    event.preventDefault();
+                    Layout.send({
+                        url: Layout.baseUrl('manager/tariffication/edit-tariff-info'),
+                        args: domForm.toObject(editTariffInfoForm)
+                    })
+                });
+                if(editTariffInfoForm.hasOwnProperty('remove')){
+                    on(editTariffInfoForm['remove'], 'click', function(event){
+                        event.preventDefault();
+                        Layout.send({
+                            url: Layout.baseUrl('manager/tariffication/remove-tariff'),
+                            args: routerEvent.params
+                        }).then(function(response){
+                            if(response.results != -1) {
+                                dojo.publish('getTariffs');
+                            }
+                        })
+                    });
+                }
+            })
+        }, true);
+
+        // Для использования роутера
+        coreDispatcher.register('getTariffs', function(){
+            dojo.publish('getTariffs');
+        }, true);
+
+
+        (function(){
+            // Активируем роутер
+            coreDispatcher.startup();
+            // Если hash отсутствует - загрузить тарифы
+            if(hash().length == 0){
+                coreDispatcher.dispatch('getTariffs');
+            }
+        })();
+
+    });
+});
+JS;
+$this->headScript()->appendScript($jScript, $type = 'text/javascript');
+?>
+<div id="contentTariffs"></div>

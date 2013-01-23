@@ -4,3 +4,16 @@ http://domain.com/action/path#event=param1/value1/param2/value2
 (\w+)=?(.*)
 
 Для DOM-данных использовать dijitContentPane
+
+
+(*) Использовать dojo/NodeList-data для хранения данных в узлах дом деревьев
+(*) Если в POST параметре приходит массив type[value] - то делаем обход по массиву,
+в противном случае работаем по одному полю
+        if($this->getRequest()->getPost('agreement')) {
+            $agreementParams = $this->getRequest()->getPost('agreement');
+        } else {
+            $agreementParams = $this->getRequest()->getPost();
+        }
+==
+Правила именования
+==

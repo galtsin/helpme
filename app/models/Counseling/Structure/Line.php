@@ -41,7 +41,9 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Store_Entity
     }
 
     /**
+     * TODO:
      * Добавить Уровень на Линию Консультации
+     * @deprecated. Сделать создание подуровня createLevel
      * @param array $options
      * @return HM_Model_Counseling_Structure_Level|null
      */
@@ -49,10 +51,8 @@ class HM_Model_Counseling_Structure_Line extends App_Core_Model_Store_Entity
     {
         if($this->isIdentity()){
             $level = new HM_Model_Counseling_Structure_Level();
-            foreach($options as $key => $value) {
-                $level->setData($key, $value);
-            }
-            $level->setData('line', $this->getData('id'));
+            $options['line'] = $this->getData('id');
+            $level->setData($options);
             if($level->save()) {
                 return $level;
             } else {

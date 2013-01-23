@@ -109,12 +109,12 @@ class App_Core_Model_Store_Entity extends App_Core_Model_ModelAbstract
         if($this->getData() instanceof App_Core_Model_Store_Data) {
             if($this->isIdentity()){
                 if($this->getData()->isRemoved()) {
-                    // Удаление записи
+                    // Удаление записи (только для Identity-сущности)
                     if($this->_remove() > 0) {
                         return true;
                     }
                 } elseif($this->getData()->isDirty()) {
-                    // Обновление записи
+                    // Обновление записи (только для Identity-сущности)
                     if($this->_update() > 0) {
                         $this->getData()->setDirty(false);
                         return true;

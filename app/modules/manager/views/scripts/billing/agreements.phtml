@@ -90,17 +90,10 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             data: $companiesStore
         });
 
+/* Create 'gravdept' namespace */
+/*var gravdept = {};
+gravdept['zoom'] = $('a.zoom');*/
 // ============================================================================
-
-        var str = "{hello: world, name: igor}";
-        var obj = {};
-
-        //console.log(str.match(/(\w+)\:\s*(\w+)/ig));
-        //console.log(str.match(/(\w+)/ig));
-
-/*        array.forEach(str.match(/(\w+)/ig), function(item){
-          console.log(item);
-        });*/
 
         // Контент-контейнер
         var contentPane = new ContentPane({
@@ -112,6 +105,117 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
                 });
             }
         }, 'content');
+
+        // Функции форматирования данных в Шаблонах
+        var dataFormatting = {};
+        lang.mixin(dataFormatting, {
+            dateFormat: function(dateValue){
+                dateValue = dateValue || 0;
+                var date = new Date(dateValue * 1000);
+                var dateFormat = {full: ''};
+                dateFormat.date = (date.getDate() > 9) ? date.getDate() : '0' + date.getDate();
+                dateFormat.month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1);
+                dateFormat.year = date.getFullYear();
+                return dateFormat.full.concat(dateFormat.date, '.' + dateFormat.month, '.' + dateFormat.year);
+            },
+            tariffFormat: function(tariffId){
+                return tariffsStore.get(tariffId).data.name;
+            },
+            lineFormat: function(tariffId){
+                return linesStore.get(
+                    tariffsStore.get(tariffId).data.line
+                ).data.name;
+            }
+        });
+
+        var SimpleBreadcrumbs = declare("SimpleBreadcrumbsWidget", [_WidgetBase, _Container], {
+            store: null,
+            breadcrumbStack: null,
+            routes: null,
+            postMixInProperties: function(){
+                this.store = new storeMemory({idProperty: 'hash'});
+                this.breadcrumbStack = [];
+                this.routes = [];
+            },
+            postCreate: function(){
+                var _SimpleBreadcrumbsWidget = this;
+                require(["dojo/hash", "dojo/topic"], function(hash, topic){
+                    topic.subscribe("/dojo/hashchange", function(changedHash){
+                        _SimpleBreadcrumbsWidget.go(changedHash);
+                    });
+                });
+            },
+            registerRoute: function(route, callback){
+                // Преобразовать в регулярное выражение
+                var Route = {
+                    params: [],
+                    pattern: null,
+                    callback: callback || null
+                };
+                Route.pattern  = route.replace(/:[\w-]+/g, function(param){
+                    Route.params.push(param.substring(1));
+                    return '([0-9a-z_-]+)';
+                });
+                this.routes.push(Route);
+            },
+            go: function(hash){
+                var _SimpleBreadcrumbsWidget = this;
+                var Event = {
+                    hash: hash,
+                    params: {}
+                };
+                if(_SimpleBreadcrumbsWidget.store.get(hash)){
+                    this._refreshBreadcrumbStack(hash);
+                    this.refresh();
+                } else {
+                    array.forEach(this.routes, function(Route){
+                        var Regexp = new RegExp(Route.pattern, 'i');
+                        if(hash.search(Regexp) > -1) {
+                            var hashParams = hash.match(Regexp).slice(1);
+                            array.forEach(Route.params, function(param, index){
+                                Event.params[param] = hashParams[index];
+                            });
+
+                            _SimpleBreadcrumbsWidget.store.add({hash: hash, title: ''});
+                            _SimpleBreadcrumbsWidget._refreshBreadcrumbStack(hash);
+
+                            Route.callback(Event);
+                            _SimpleBreadcrumbsWidget.refresh();
+                        }
+                    });
+                }
+            },
+            _refreshBreadcrumbStack: function(hash){
+                if(this.breadcrumbStack.indexOf(hash) > -1) {
+                    this.breadcrumbStack = this.breadcrumbStack.slice(0, this.breadcrumbStack.indexOf(hash) + 1);
+                } else {
+                    this.breadcrumbStack.push(hash);
+                }
+            },
+            refresh: function(){
+                var that = this;
+                var html = '';
+                array.forEach(this.breadcrumbStack, function(hash, index){
+                    var breadcrumb = that.store.get(hash);
+                    if(index == that.breadcrumbStack.length - 1) {
+                        html += '<strong><em>' + breadcrumb.title + '</em></strong>';
+                    } else {
+                        html += '<a href="#' + breadcrumb.hash + '">' + breadcrumb.title + '</a> / ' ;
+                    }
+
+                });
+                this.domNode.innerHTML = html;
+            }
+        });
+
+        var Breadcrumbs = new SimpleBreadcrumbs({domNode: dom.byId('breadcrumbs')});
+        Breadcrumbs.registerRoute('get-companies', function(event){
+            Breadcrumbs.store.get(event.hash).title = 'Список компаний';
+        });
+
+        Breadcrumbs.registerRoute('get-agreements=:company_owner/:company_client', function(event){
+            Breadcrumbs.store.get(event.hash).title = 'Договора компаний #' + event.params['company_owner'] + ' и #' + event.params['company_client'];
+        });
 
         var format = {
             dateFormat: function(dateValue){
@@ -133,6 +237,9 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             }
         };
 
+
+        var DialogPreloader = null;
+        // Диалог с прелоадером перед загрузкой контента
         function getDialogOverlay(options){
             var Dialog = new dijitDialog(options || {});
             var showDialogBeforeHandler = aspect.before(Dialog, 'show', function(){
@@ -626,6 +733,9 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 ?>
 
 <div style="border-bottom: 3px solid #444; margin-bottom: 15px"><h3>Договора</h3></div>
+<div id="breadcrumbs-container" style="background: #eaeaf2; padding: 10px; margin-bottom: 10px">
+    <i class="icon-flag"></i><span id="breadcrumbs" style="padding-left: 10px"></span>
+</div>
 <div id="content"></div>
 
 <script id="company-client-filter-template" type="text">

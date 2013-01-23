@@ -203,3 +203,14 @@ label.inline {
     display: inline;
     padding-left: 7px;
 }
+
+label.field-editable {
+    margin-bottom: 0;
+    /*border-bottom: 1px dashed #005580;*/
+    color: #005580;
+    cursor: pointer
+}
+
+label.field-editable:hover {
+    text-decoration: underline;
+}
