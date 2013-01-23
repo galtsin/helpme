@@ -56,6 +56,7 @@ require([
     "core/layout/Overlay",
     "core/layout/OverlayPane",
     "core/widgets/SearchCompanyDialog",
+    "core/widgets/SimpleBreadcrumbs",
     "dijit/registry",
     "dijit/popup",
     "dijit/layout/ContentPane",
@@ -69,7 +70,7 @@ require([
     "dojo/NodeList-data"
 ], function(declare, Stateful, dom, domStyle, domHtml, domClass, domConstruct, domAttr, domForm, JSON, string, array, dateLocale,
 on, lang, query, hash, router, storeMemory, storeObservable, storeCache, aspect, coreLayout, coreValidation, coreHelperForm,
-coreHelperCommon, HelperFn, dijitDialog, coreDispatcher, Deferred, Ajax, Overlay, OverlayPane, coreSearchCompanyDialog, dijitRegistry, dijitPopup,
+coreHelperCommon, HelperFn, dijitDialog, coreDispatcher, Deferred, Ajax, Overlay, OverlayPane, coreSearchCompanyDialog, coreSimpleBreadcrumbsWidget, dijitRegistry, dijitPopup,
 ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _TemplatedMixin, TooltipDialog, text){
 
     dojo.ready(function(){
@@ -89,6 +90,8 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             idProperty: 'id',
             data: $companiesStore
         });
+
+
 
 /* Create 'gravdept' namespace */
 /*var gravdept = {};
@@ -128,95 +131,6 @@ gravdept['zoom'] = $('a.zoom');*/
             }
         });
 
-        var SimpleBreadcrumbs = declare("SimpleBreadcrumbsWidget", [_WidgetBase, _Container], {
-            store: null,
-            breadcrumbStack: null,
-            routes: null,
-            postMixInProperties: function(){
-                this.store = new storeMemory({idProperty: 'hash'});
-                this.breadcrumbStack = [];
-                this.routes = [];
-            },
-            postCreate: function(){
-                var _SimpleBreadcrumbsWidget = this;
-                require(["dojo/hash", "dojo/topic"], function(hash, topic){
-                    topic.subscribe("/dojo/hashchange", function(changedHash){
-                        _SimpleBreadcrumbsWidget.go(changedHash);
-                    });
-                });
-            },
-            registerRoute: function(route, callback){
-                // Преобразовать в регулярное выражение
-                var Route = {
-                    params: [],
-                    pattern: null,
-                    callback: callback || null
-                };
-                Route.pattern  = route.replace(/:[\w-]+/g, function(param){
-                    Route.params.push(param.substring(1));
-                    return '([0-9a-z_-]+)';
-                });
-                this.routes.push(Route);
-            },
-            go: function(hash){
-                var _SimpleBreadcrumbsWidget = this;
-                var Event = {
-                    hash: hash,
-                    params: {}
-                };
-                if(_SimpleBreadcrumbsWidget.store.get(hash)){
-                    this._refreshBreadcrumbStack(hash);
-                    this.refresh();
-                } else {
-                    array.forEach(this.routes, function(Route){
-                        var Regexp = new RegExp(Route.pattern, 'i');
-                        if(hash.search(Regexp) > -1) {
-                            var hashParams = hash.match(Regexp).slice(1);
-                            array.forEach(Route.params, function(param, index){
-                                Event.params[param] = hashParams[index];
-                            });
-
-                            _SimpleBreadcrumbsWidget.store.add({hash: hash, title: ''});
-                            _SimpleBreadcrumbsWidget._refreshBreadcrumbStack(hash);
-
-                            Route.callback(Event);
-                            _SimpleBreadcrumbsWidget.refresh();
-                        }
-                    });
-                }
-            },
-            _refreshBreadcrumbStack: function(hash){
-                if(this.breadcrumbStack.indexOf(hash) > -1) {
-                    this.breadcrumbStack = this.breadcrumbStack.slice(0, this.breadcrumbStack.indexOf(hash) + 1);
-                } else {
-                    this.breadcrumbStack.push(hash);
-                }
-            },
-            refresh: function(){
-                var that = this;
-                var html = '';
-                array.forEach(this.breadcrumbStack, function(hash, index){
-                    var breadcrumb = that.store.get(hash);
-                    if(index == that.breadcrumbStack.length - 1) {
-                        html += '<strong><em>' + breadcrumb.title + '</em></strong>';
-                    } else {
-                        html += '<a href="#' + breadcrumb.hash + '">' + breadcrumb.title + '</a> / ' ;
-                    }
-
-                });
-                this.domNode.innerHTML = html;
-            }
-        });
-
-        var Breadcrumbs = new SimpleBreadcrumbs({domNode: dom.byId('breadcrumbs')});
-        Breadcrumbs.registerRoute('get-companies', function(event){
-            Breadcrumbs.store.get(event.hash).title = 'Список компаний';
-        });
-
-        Breadcrumbs.registerRoute('get-agreements=:company_owner/:company_client', function(event){
-            Breadcrumbs.store.get(event.hash).title = 'Договора компаний #' + event.params['company_owner'] + ' и #' + event.params['company_client'];
-        });
-
         var format = {
             dateFormat: function(dateValue){
                 dateValue = dateValue || 0;
@@ -236,6 +150,18 @@ gravdept['zoom'] = $('a.zoom');*/
                 ).data.name;
             }
         };
+
+        var routes = {};
+        routes['get-companies'] = 'get-companies';
+        routes['get-company-agreements'] = 'get-agreements=:company_owner/:company_client';
+
+        var Breadcrumbs = new coreSimpleBreadcrumbsWidget({domNode: dom.byId('breadcrumbs')});
+        Breadcrumbs.registerRoute(routes['get-companies'], function(){
+            return 'Список компаний';
+        });
+        Breadcrumbs.registerRoute(routes['get-company-agreements'], function(event){
+            return 'Договора компании ' + companiesOwnersStore.get(event.params['company_owner']).data['name'];
+        });
 
 
         var DialogPreloader = null;
@@ -393,7 +319,7 @@ gravdept['zoom'] = $('a.zoom');*/
                         optionsNode.innerHTML = '<a data-dojo-attach-point="getAgreementsNode">см. договора</a>';
                         on(optionsNode, 'a[data-dojo-attach-point="getAgreementsNode"]:click', function(){
                             router.go(
-                                HelperFn.doPath('get-agreements=:company_owner/:company_client', {
+                                HelperFn.doPath(routes['get-company-agreements'], {
                                     'company_owner': _widget.data.id,
                                     'company_client': entry.id
                                 })
@@ -535,10 +461,6 @@ gravdept['zoom'] = $('a.zoom');*/
                 if(!this.id) return this.declaredClass + '_' + this.data['company_owner'] + '_' + this.data['company_client'];
                 else return this.id;
             },
-/*            buildRendering: function(){
-                this.inherited(arguments);
-
-            },*/
             postCreate: function(){
                 var _widget = this;
                 this.containerNode = this.get('listNode');
@@ -640,7 +562,7 @@ gravdept['zoom'] = $('a.zoom');*/
                 });
             },
             // Работа с актуальными/Просроченными договорами
-            filterChildNodes: function(){
+            filterChildNodes: function(filterParams){
 
             }
         });
@@ -680,7 +602,7 @@ gravdept['zoom'] = $('a.zoom');*/
             }
         });
 
-        router.register('get-agreements=:company_owner/:company_client', function(event){
+        router.register(routes['get-company-agreements'], function(event){
             contentPane.clear();
             if(!dijitRegistry.byId(event.newPath)){
                 var container = new ContentPane({
@@ -702,7 +624,7 @@ gravdept['zoom'] = $('a.zoom');*/
 
         });
 
-        router.register('get-companies', function(event){
+        router.register(routes['get-companies'], function(event){
             contentPane.clear();
             if(!dijitRegistry.byId(event.newPath)){
                 var container = new ContentPane({
@@ -723,8 +645,6 @@ gravdept['zoom'] = $('a.zoom');*/
             if(hash().length == 0) router.go('get-companies');
         })();
 
-// =====================================================================================================
-
     });
 });
 
@@ -734,7 +654,7 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 
 <div style="border-bottom: 3px solid #444; margin-bottom: 15px"><h3>Договора</h3></div>
 <div id="breadcrumbs-container" style="background: #eaeaf2; padding: 10px; margin-bottom: 10px">
-    <i class="icon-flag"></i><span id="breadcrumbs" style="padding-left: 10px"></span>
+    <i class="icon-flag"></i><span id="breadcrumbs" style="padding-left: 5px"></span>
 </div>
 <div id="content"></div>
 
