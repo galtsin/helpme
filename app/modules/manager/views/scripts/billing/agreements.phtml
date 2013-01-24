@@ -156,13 +156,14 @@ gravdept['zoom'] = $('a.zoom');*/
         routes['get-company-agreements'] = 'get-agreements=:company_owner/:company_client';
 
         var Breadcrumbs = new coreSimpleBreadcrumbsWidget({domNode: dom.byId('breadcrumbs')});
+
         Breadcrumbs.registerRoute(routes['get-companies'], function(){
             return 'Список компаний';
         });
+
         Breadcrumbs.registerRoute(routes['get-company-agreements'], function(event){
             return 'Договора компании ' + companiesOwnersStore.get(event.params['company_owner']).data['name'];
         });
-
 
         var DialogPreloader = null;
         // Диалог с прелоадером перед загрузкой контента

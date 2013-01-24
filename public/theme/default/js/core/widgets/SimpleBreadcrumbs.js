@@ -24,7 +24,12 @@ define([
                 _SimpleBreadcrumbsWidget.go(changedHash);
             });
         },
-        registerRoute: function(/*String*/route, createTitleCallback){
+        /**
+         * Зарегистрировать маршрут
+         * @param route
+         * @param createTitleCallback
+         */
+        registerRoute: function(/*String*/route, /*Function*/createTitleCallback){
             var Route = {
                 params: [],
                 pattern: null,
@@ -37,6 +42,10 @@ define([
             });
             this.routes.push(Route);
         },
+        /**
+         * Перейти на указатель
+         * @param hash
+         */
         go: function(hash){
             var Event = {hash: hash, params: {}};
             var currentRoute = this._searchRoute(hash);
@@ -49,6 +58,12 @@ define([
                 this.refresh(Event);
             }
         },
+        /**
+         * Найти маршрут
+         * @param hash
+         * @return {*}
+         * @private
+         */
         _searchRoute: function(hash){
             var route = null;
             array.some(this.routes, function(Route){
@@ -58,6 +73,10 @@ define([
             });
             return route;
         },
+        /**
+         * Обновить DOM-дерево
+         * @param event
+         */
         refresh: function(event){
             if(this.breadcrumbStack.indexOf(event.hash) > -1) {
                 this.breadcrumbStack = this.breadcrumbStack.slice(0, this.breadcrumbStack.indexOf(event.hash) + 1);

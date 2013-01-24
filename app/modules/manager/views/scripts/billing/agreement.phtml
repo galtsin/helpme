@@ -42,6 +42,8 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
 
     dojo.ready(function(){
 
+        var agreement = $agreementJson;
+
         var contentPane = new ContentPane({
             id: 'content',
             style: {padding: 0, margin: 0,  overflow: "hidden"},
@@ -491,6 +493,15 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             router.startup();
             on(dom.byId('detailNode'), 'click', function(){router.go('get-detail')});
             on(dom.byId('subscribersNode'), 'click', function(){router.go('get-subscribers')});
+            if(dom.byId('removeNode')) {
+                on(dom.byId('removeNode'), 'click', function(){
+                    Ajax.send(Ajax.url(HelperFn.doPath('api/1/agreement/:id/delete', {id: agreement.id})),{
+                        method: "DELETE"
+                    }).then(function(){
+                        window.location.reload();
+                    })
+                });
+            }
             if(hash().length == 0) router.go('get-detail');
         })();
 
@@ -549,6 +560,9 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 <p id="routerControls">
     <button id="detailNode">Информация</button>
     <button id="subscribersNode">Подписчики</button>
+    <?php if(count($agreement->getSubscription()->getGuests()) == 0 && count($agreement->getSubscription()->getUsers()) == 0): ?>
+    <button id="removeNode">Удалить</button>
+    <?php endif; ?>
 </p>
 <div id="content"></div>
 <div class="hidden">

@@ -45,15 +45,17 @@ $lineColl->addEqualFilter('company', $companyOwner->getData()->getId())->getColl
         </tr>
         <tr>
             <td>
+                <?php // По умолчаню договор действует на месяц ?>
+                <?php $data = new Zend_Date();?>
                 <label for="add-agreement-date-end">Дата окончания (ДД/ММ/ГГ)</label>
                 <select name="agreement[date_end][day]" style="width: 50px">
                     <?php for($i = 1; $i <= 31; $i ++):?>
-                    <option value="<?=$i?>"><?=str_pad($i, 2, '0', STR_PAD_LEFT)?></option>
+                    <option <?php if($data->get(Zend_Date::DAY) == $i) echo "selected" ?> value="<?=$i?>"><?=str_pad($i, 2, '0', STR_PAD_LEFT)?></option>
                     <?php endfor; ?>
                 </select>
                 <select name="agreement[date_end][month]" style="width: 50px">
                     <?php for($i = 1; $i <= 12; $i ++):?>
-                    <option value="<?=$i?>"><?=str_pad($i, 2, '0', STR_PAD_LEFT)?></option>
+                    <option <?php if($data->get(Zend_Date::MONTH) + 1 == $i) echo "selected" ?> value="<?=$i?>"><?=str_pad($i, 2, '0', STR_PAD_LEFT)?></option>
                     <?php endfor; ?>
                 </select>
                 <select name="agreement[date_end][year]" style="width: 100px">

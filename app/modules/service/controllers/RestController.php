@@ -14,8 +14,10 @@ class Service_RestController extends Zend_Rest_Controller
      * http://dojotoolkit.org/reference-guide/1.8/quickstart/rest.html#id18
      * 200: (Ok) GET
      * 201: (Created) POST + изменение состояния
-     * 202: (Accepted) PUT
+     * 202: (Accepted) PUT (POST) + обновление
      * 204: (No Content) DELETE
+     * 500: (Internal Server Error) Ошибка при выполнении операции
+     * 510: (Not Implemented) Метод не реализовано
      * @var string
      */
     private $_status = 'error';
@@ -101,6 +103,8 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function dispatchAction()
     {
+        Zend_Debug::dump($this->_getAllParams());
+
         $operation = $this->_getParam('operation');
         $entity = $this->_getParam('entity');
         $request = $this->getRequest();
@@ -258,8 +262,8 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function postAction()
     {
-        //echo "post";
-        $this->getResponse()->setHttpResponseCode(201);
+        //$this->getResponse()->setHttpResponseCode(201);
+        $this->getResponse()->setHttpResponseCode(501);
     }
 
     /**
@@ -267,8 +271,8 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function putAction()
     {
-        //echo "put";
-        $this->getResponse()->setHttpResponseCode(202);
+        //$this->getResponse()->setHttpResponseCode(202);
+        $this->getResponse()->setHttpResponseCode(501);
     }
 
     /**
@@ -277,7 +281,8 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function deleteAction()
     {
-        $this->getResponse()->setHttpResponseCode(204);
+        //$this->getResponse()->setHttpResponseCode(204);
+        $this->getResponse()->setHttpResponseCode(501);
     }
 
     /**

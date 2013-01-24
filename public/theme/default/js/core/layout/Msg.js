@@ -26,7 +26,8 @@ define([
             SERVER_DISCONNECT:      'Не удалось получить ответ от сервера',
             SERVER_FORBIDDEN:       'Доступ запрещен',
             SERVER_ERROR:           'Ошибка на сервере',
-            SERVER_NOT_FOUND:       'Ресурс не найден'
+            SERVER_NOT_FOUND:       'Ресурс не найден',
+            SERVER_UNAUTHORIZED:    'Необходима авторизация пользователя'
         },
         domNode:    null,   //
         timeout:    15000,   // Время автоновного завершения процесса и вывод сообщения об ошибке

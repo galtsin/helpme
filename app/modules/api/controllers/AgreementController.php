@@ -24,20 +24,42 @@ class Api_AgreementController extends Service_RestController
     public function putAction()
     {
         $agreement = HM_Model_Billing_Agreement::load($this->_getParam('id'));
-        if($this->getRequest()->getPost('agreement')) {
-            $agreementParams = $this->getRequest()->getPost('agreement');
-        } else {
-            $agreementParams = $this->getRequest()->getPost();
-        }
         if($agreement instanceof HM_Model_Billing_Agreement){
-            $agreement->setData($agreementParams);
+            if($this->getRequest()->getPost('agreement')) {
+                $agreement->setData($this->getRequest()->getPost('agreement'));
+            } else {
+                $agreement->setData($this->getRequest()->getPost());
+            }
             if($agreement->save()){
                 $this->setAjaxStatus(self::STATUS_OK);
-                $this->setAjaxResult(10);
+                $this->setAjaxResult($this->_getParam('id'));
+                $this->getResponse()->setHttpResponseCode(202);
+            } else {
+                $this->getResponse()->setHttpResponseCode(500);
             }
+        } else {
+            $this->getResponse()->setHttpResponseCode(404);
         }
-        parent::putAction();
     }
+
+    /**
+     * Удалить договор
+     */
+    public function deleteAction()
+    {
+        $agreement = HM_Model_Billing_Agreement::load($this->_getParam('id'));
+        if($agreement instanceof HM_Model_Billing_Agreement){
+            $agreement->getData()->setRemoved(true);
+            if($agreement->save()) {
+                $this->getResponse()->setHttpResponseCode(204);
+            } else {
+                $this->getResponse()->setHttpResponseCode(500);
+            }
+        } else {
+            $this->getResponse()->setHttpResponseCode(404);
+        }
+    }
+
 
     /**
      * Подписать Пользователя

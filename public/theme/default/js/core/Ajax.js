@@ -139,6 +139,9 @@ define([
                     case 403:
                         processDeferred.reject('SERVER_FORBIDDEN');
                         break;
+                    case 401:
+                        processDeferred.reject('SERVER_UNAUTHORIZED');
+                        break;
                     default:
                         processDeferred.reject('PROCESS_STATE_FAILED');
                 }

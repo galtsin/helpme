@@ -125,4 +125,7 @@
         <id_agreement type="integer"/>
         <date_end type="string"/>
     </agreement_update_identity>
+    <agreement_remove_identity>
+        <id_agreement type="integer"/>
+    </agreement_remove_identity>
 </functions>

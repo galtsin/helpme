@@ -89,6 +89,26 @@ class HM_Model_Billing_Agreement extends App_Core_Model_Store_Entity
     }
 
     /**
+     * Удалить договор
+     * @return int
+     */
+    protected function _remove()
+    {
+        $result = App::getResource('FnApi')
+            ->execute('agreement_remove_identity', array(
+                'id_agreement'  => $this->getData()->getId(),
+            )
+        );
+
+        if($result->rowCount() > 0) {
+            $row = $result->fetchRow();
+            return (int)$row['o_id_agreement'];
+        }
+
+        return parent::_remove();
+    }
+
+    /**
      * Получить подписку на Договор
      * @return HM_Model_Billing_Agreement_Subscription|null
      */
