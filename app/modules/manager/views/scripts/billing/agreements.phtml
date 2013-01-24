@@ -23,13 +23,10 @@ $tariffsStore = Zend_Json::encode($tariffColl->toArray());
 $jScript = <<<JS
 require([
     "dojo/_base/declare", // declare
-    "dojo/Stateful",
     "dojo/dom",
     "dojo/dom-style",
-    "dojo/html",
     "dojo/dom-class",
     "dojo/dom-construct",
-    "dojo/dom-attr",
     "dojo/dom-form",
     "dojo/json",
     "dojo/string",
@@ -44,37 +41,28 @@ require([
     "dojo/store/Observable",
     "dojo/store/Cache",
     "dojo/aspect",
-    "core/Layout",
-    "core/helper/Validation",
-    "core/helper/form",
-    "core/helper/common",
     "core/helper/fn",
     "dijit/Dialog",
-    "core/Dispatcher",
     "dojo/Deferred",
     "core/Ajax",
-    "core/layout/Overlay",
     "core/layout/OverlayPane",
-    "core/widgets/SearchCompanyDialog",
     "core/widgets/SimpleBreadcrumbs",
     "dijit/registry",
     "dijit/popup",
     "dijit/layout/ContentPane",
     "dijit/_WidgetBase",
-    "dijit/_WidgetsInTemplateMixin",
     "dijit/_Container",
     "dijit/_Contained",
     "dijit/_TemplatedMixin",
     "dijit/TooltipDialog",
     "dojo/text!app/modules/manager/billing/template/test.html",
     "dojo/NodeList-data"
-], function(declare, Stateful, dom, domStyle, domHtml, domClass, domConstruct, domAttr, domForm, JSON, string, array, dateLocale,
-on, lang, query, hash, router, storeMemory, storeObservable, storeCache, aspect, coreLayout, coreValidation, coreHelperForm,
-coreHelperCommon, HelperFn, dijitDialog, coreDispatcher, Deferred, Ajax, Overlay, OverlayPane, coreSearchCompanyDialog, coreSimpleBreadcrumbsWidget, dijitRegistry, dijitPopup,
-ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _TemplatedMixin, TooltipDialog, text){
+], function(declare, dom, domStyle, domClass, domConstruct, domForm, JSON, string, array, dateLocale,
+on, lang, query, hash, router, storeMemory, storeObservable, storeCache, aspect, HelperFn, dijitDialog, Deferred, Ajax,
+OverlayPane, SimpleBreadcrumbsWidget, dijitRegistry, dijitPopup, ContentPane, _WidgetBase,
+_Container, _Contained, _TemplatedMixin, TooltipDialog, text){
 
     dojo.ready(function(){
-
 
         var linesStore = new storeMemory({
             idProperty: 'id',
@@ -90,8 +78,6 @@ ContentPane, _WidgetBase, _WidgetsInTemplateMixin, _Container, _Contained, _Temp
             idProperty: 'id',
             data: $companiesStore
         });
-
-
 
 /* Create 'gravdept' namespace */
 /*var gravdept = {};
@@ -128,39 +114,21 @@ gravdept['zoom'] = $('a.zoom');*/
                 return linesStore.get(
                     tariffsStore.get(tariffId).data.line
                 ).data.name;
+            },
+            logoFormat: function(logo){
+                if(logo) return '<img width="60" height="78" src="data:image/png;base64,' + logo + '" style="width: 60px; height: 78px; border: 1px solid #C7CED6">';
+                return '<img width="60" height="78" style="width: 60px; height: 78px; border: 1px solid #C7CED6" src="' + Ajax.url('theme/default/images/not_image.png') + '">';
             }
         });
-
-        var format = {
-            dateFormat: function(dateValue){
-                dateValue = dateValue || 0;
-                var date = new Date(dateValue * 1000);
-                var dateFormat = {full: ''};
-                dateFormat.date = (date.getDate() > 9) ? date.getDate() : '0' + date.getDate();
-                dateFormat.month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1);
-                dateFormat.year = date.getFullYear();
-                return dateFormat.full.concat(dateFormat.date, '.' + dateFormat.month, '.' + dateFormat.year);
-            },
-            tariffInfo: function(tariffId){
-                return tariffsStore.get(tariffId).data.name;
-            },
-            lineInfo: function(tariffId){
-                return linesStore.get(
-                    tariffsStore.get(tariffId).data.line
-                ).data.name;
-            }
-        };
 
         var routes = {};
         routes['get-companies'] = 'get-companies';
         routes['get-company-agreements'] = 'get-agreements=:company_owner/:company_client';
 
-        var Breadcrumbs = new coreSimpleBreadcrumbsWidget({domNode: dom.byId('breadcrumbs')});
-
+        var Breadcrumbs = new SimpleBreadcrumbsWidget({domNode: dom.byId('breadcrumbs')});
         Breadcrumbs.registerRoute(routes['get-companies'], function(){
             return 'Список компаний';
         });
-
         Breadcrumbs.registerRoute(routes['get-company-agreements'], function(event){
             return 'Договора компании ' + companiesOwnersStore.get(event.params['company_owner']).data['name'];
         });
@@ -229,6 +197,24 @@ gravdept['zoom'] = $('a.zoom');*/
                 this.inherited(arguments);
                 this.containerNode = this.get('companyClientsNode');
                 var _widget = this;
+
+                // ==
+
+/*                // Инициализируем сортировку
+                // Использование dojo/NodeList-data
+                query(this.get('filterByIdNode')).data("filter", "id");
+                query(this.get('filterByInnNode')).data("filter", "inn");
+
+                var filterPoints = ['filterByIdNode', 'filterByInnNode'];
+                array.forEach(filterPoints, function(point){
+                    on(_widget.get(point), 'click', function(event){
+                        _widget._companyClientsFilter(event.target);
+                        //_widget._widget._companyClientsFilter(event.target);(query(event.target).data()[0]);
+                    })
+                });*/
+
+                // ==
+
                 on(this.get('companyClientsFilter'), 'a:click', function(event){
                     _widget._companyClientsFilter(event.target);
                 });
@@ -241,10 +227,7 @@ gravdept['zoom'] = $('a.zoom');*/
                 var handler = on(this.get('showChildNode'), 'click', function(event){
                     _widget.fetch().then(function(items){
                         array.forEach(items, function(item){
-                            var _item = item;
-                            setTimeout(function(){
-                                _widget.insertChildNode(_item);
-                            }, 0);
+                            _widget.insertChildNode(item);
                         });
                         setTimeout(function(){
                             query('button', _widget.get('toggleChildNodes')).forEach(function(button){
@@ -548,7 +531,7 @@ gravdept['zoom'] = $('a.zoom');*/
                 return domConstruct.toDom(
                     string.substitute(dom.byId('agreement-row-template').innerHTML, data, function(variable){
                         return variable === 0? 0 : variable || '';
-                    }, format)
+                    }, dataFormatting)
                 );
             },
             // Сортировка
@@ -657,97 +640,15 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
 <div id="breadcrumbs-container" style="background: #eaeaf2; padding: 10px; margin-bottom: 10px">
     <i class="icon-flag"></i><span id="breadcrumbs" style="padding-left: 5px"></span>
 </div>
+
 <div id="content"></div>
 
-<script id="company-client-filter-template" type="text">
-    <form id="company-clients-filter" style="margin: 0">
-        <input type="text" name="filters[equal][${field}][]" value=""/>
-        <input type="hidden" name="field" value="${field}"/><br/>
-        <button type="submit" name="send">применить</button>
-    </form>
-</script>
-
-<script id="company-client-node-template" type="text">
-    <tr data-dojo-attach-point="companyClientNode_${data.id}">
-        <td>${data.id}</td>
-        <td>${data.data.name}</td>
-        <td>${data.data.inn}</td>
-        <td>${data.data.kpp}</td>
-        <td data-dojo-attach-point="companyClientOptionsNode"></td>
-    </tr>
-</script>
-
-<script id="company-client-detail-node-template" type="text">
-
-    <tr data-dojo-attach-point="companyClientNode_${data.id}">
-        <td>${data.id}</td>
-        <td>${data.data.name}</td>
-        <td>${data.data.inn}</td>
-        <td>${data.data.kpp}</td>
-        <td data-dojo-attach-point="companyClientOptionsNode"></td>
-    </tr>
-</script>
-
-<script id="company-owner-node-template" type="text">
-<div>
-    <table class="table table-bordered" data-dojo-attach-point="companyOwnerNode_${data.id}">
-        <colgroup>
-            <col width="50"/>
-            <col width="450"/>
-            <col width="150"/>
-            <col width="150"/>
-            <col/>
-        </colgroup>
-        <thead>
-            <tr>
-                <th colspan="5">
-                    ${data.data.name} (${data.id})
-                </th>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr data-dojo-attach-point="toggleChildNodes">
-                <td colspan="5">
-                    <button type="button" data-dojo-attach-point="showChildNode">&darr; развернуть</button>
-                    <button type="button" data-dojo-attach-point="hideChildNode" type="button" class="hidden">&uarr; свернуть</button>
-                </td>
-            </tr>
-        </tfoot>
-        <tbody class="hidden" data-dojo-attach-point="companyClientsNode">
-            <tr data-dojo-attach-point="companyClientsFilter">
-                <th><a data-args-filter-by="id">#ID</a></th>
-                <th>Контрагент</th>
-                <th><a data-args-filter-by="inn">ИНН</a></th>
-                <th>КПП</th>
-                <th>Опции</th>
-            </tr>
-        </tbody>
-    </table>
-</div>
-</script>
-
-<script id="company-about-node-template" type="text">
-    <div>
-        <table class="table table-bordered">
-            <colgroup>
-                <col/>
-            </colgroup>
-            <thead>
-                <tr>
-                    <th data-dojo-attach-point="nameNode">Наименование</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td data-dojo-attach-point="innKppNode">Инн/Кпп</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</script>
-
-
-<!-- -->
+<?php
+/**
+ * Шаблоны для виджетов
+ */
+?>
+<!-- Список компаний -->
 <script id="company-owner-template" type="text">
     <div>
         <table class="table table-bordered" data-dojo-attach-point="companyOwnerNode_${data.id}">
@@ -776,9 +677,9 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
             </tfoot>
             <tbody class="hidden" data-dojo-attach-point="companyClientsNode">
                 <tr data-dojo-attach-point="companyClientsFilter">
-                    <th><a data-args-filter-by="id">#ID</a></th>
+                    <th><a data-dojo-attach-point="filterByIdNode" data-args-filter-by="id">#ID</a></th>
                     <th>Контрагент</th>
-                    <th><a data-args-filter-by="inn">ИНН</a></th>
+                    <th><a data-dojo-attach-point="filterByInnNode" data-args-filter-by="inn">ИНН</a></th>
                     <th>КПП</th>
                     <th>Опции</th>
                 </tr>
@@ -827,7 +728,15 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     </div>
 </script>
 
-<!-- Договора -->
+<script id="company-client-filter-template" type="text">
+    <form id="company-clients-filter" style="margin: 0">
+        <input type="text" name="filters[equal][${field}][]" value=""/>
+        <input type="hidden" name="field" value="${field}"/><br/>
+        <button type="submit" name="send">применить</button>
+    </form>
+</script>
+
+<!-- Список договоров компании -->
 <script id="agreements-container-template" type="text">
     <div>
         <table class="table table-bordered" id="agreements-container">
@@ -869,8 +778,8 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     <tr id="agreement-node-${id}">
         <td>${id}</td>
         <td>#${data.invoice}</td>
-        <td>${data.tariff:lineInfo}</td>
-        <td>${data.tariff:tariffInfo}</td>
+        <td>${data.tariff:lineFormat}</td>
+        <td>${data.tariff:tariffFormat}</td>
         <td>${data.date_begin:dateFormat}</td>
         <td>${data.date_end:dateFormat}</td>
         <td>${data.date_expires}</td>

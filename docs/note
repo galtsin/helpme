@@ -17,3 +17,7 @@ http://domain.com/action/path#event=param1/value1/param2/value2
 ==
 Правила именования
 ==
+DOM-идентификаторы
+id: с маленькой, разделитель '-'
+Data-dojo
+id: с большой, верблюйжей нотацией + Node
