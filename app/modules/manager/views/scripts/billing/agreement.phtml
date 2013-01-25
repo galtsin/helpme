@@ -495,11 +495,14 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             on(dom.byId('subscribersNode'), 'click', function(){router.go('get-subscribers')});
             if(dom.byId('removeNode')) {
                 on(dom.byId('removeNode'), 'click', function(){
-                    Ajax.send(Ajax.url(HelperFn.doPath('api/1/agreement/:id/delete', {id: agreement.id})),{
-                        method: "DELETE"
-                    }).then(function(){
-                        window.location.reload();
-                    })
+                    var confirm = window.confirm('Удалить договор №' + agreement.id + '?');
+                    if(confirm){
+                        Ajax.send(Ajax.url(HelperFn.doPath('api/1/agreement/:id/delete', {id: agreement.id})),{
+                            method: "DELETE"
+                        }).then(function(){
+                            dom.byId('agreement-remove-form').submit();
+                        })
+                    }
                 });
             }
             if(hash().length == 0) router.go('get-detail');
@@ -562,6 +565,11 @@ $this->headScript()->appendScript($jScript, $type = 'text/javascript')
     <button id="subscribersNode">Подписчики</button>
     <?php if(count($agreement->getSubscription()->getGuests()) == 0 && count($agreement->getSubscription()->getUsers()) == 0): ?>
     <button id="removeNode">Удалить</button>
+    <!-- Форма для переадресации на страницу с успешным удалением -->
+    <form style="display: none" id="agreement-remove-form" method="POST">
+        <input type="hidden" name="do" value="remove"/>
+        <input type="hidden" name="agreement" value="<?=$agreement->getData()->getId()?>"/>
+    </form>
     <?php endif; ?>
 </p>
 <div id="content"></div>

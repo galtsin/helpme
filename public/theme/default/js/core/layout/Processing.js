@@ -1,3 +1,6 @@
+/**
+ * @dwprecated
+ */
 dojo.provide("core.layout.Processing");
 require([
     "dojo/_base/lang",

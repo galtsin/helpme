@@ -1,6 +1,9 @@
 /**
  * Переписать Deferred с Dojo >= 1.8
  */
+/**
+ * @dwprecated
+ */
 dojo.provide("core.Layout");
 require([
     "dojo/_base/lang",

@@ -1,3 +1,6 @@
+/**
+ * @dwprecated
+ */
 dojo.provide("core.layout.Messenger");
 require([
     "dojo/_base/lang",

@@ -11,12 +11,22 @@ class Manager_BillingController extends App_Zend_Controller_Action
     public function agreementAction()
     {
         $request = $this->getRequest();
-        if(HM_Model_Billing_Agreement::load($request->getParam('id'))){
-            $this->view->assign(array(
-                    'agreement' => HM_Model_Billing_Agreement::load($request->getParam('id'))
-                )
-            );
+        if($request->isPost()){
+            if($request->getParam('do')){
+                switch($request->getParam('do')){
+                    case 'remove':
+                        $this->_helper->viewRenderer('agreement-remove-success');
+                }
+            }
+        } else {
+            if(HM_Model_Billing_Agreement::load($request->getParam('id'))){
+                $this->view->assign(array(
+                        'agreement' => HM_Model_Billing_Agreement::load($request->getParam('id'))
+                    )
+                );
+            }
         }
+
     }
 
     public function agreementsAction()

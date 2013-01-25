@@ -8,8 +8,9 @@ define([
     "dojo/keys",
     "dojo/Deferred",
     "core/layout/Msg",
-    "dojo/aspect"
-], function(declare, lang, xhr, request2, notify, on, keys, Deferred, Msg, aspect){
+    "dojo/aspect",
+    "core/helper/fn"
+], function(declare, lang, xhr, request2, notify, on, keys, Deferred, Msg, aspect, HelperFn){
 
     // TODO: Убрать Overlay
     var Ajax = declare(null, {
@@ -149,13 +150,19 @@ define([
 
             return request;
         },
-        url: function(url, args){
-            args = args || {};
-/*            for(var param in args){
-                if(obj.hasOwnProperty(param)){
-                    url = url.replace(':' + param, obj[param]);
-                }
-            }*/
+        /**
+         *
+         * @param url
+         * Example: domain.com/:param1/:param2
+         * @param args
+         * Example:
+         * {param1: value, param2: value}
+         * @return {String}
+         */
+        url: function(/*String*/url, /*Object*/args){
+            if(args) {
+                url = HelperFn.doPath(url, args);
+            }
             return window.location.protocol + '//' + window.location.host + '/' + url;
         }
     });
