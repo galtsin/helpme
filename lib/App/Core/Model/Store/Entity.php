@@ -146,6 +146,21 @@ class App_Core_Model_Store_Entity extends App_Core_Model_ModelAbstract
     }
 
     /**
+     * TODO: Экспериментальная ветка
+     * @return string
+     */
+    public static function getCollection()
+    {
+        $collectionClass = get_called_class() . '_' . 'Collection';
+        if(class_exists($collectionClass)) {
+            return new $collectionClass();
+        }
+
+        return null;
+    }
+
+
+    /**
      * Проверка, принадлежности сущности системе
      * Определяется по Id сущности в системе
      */

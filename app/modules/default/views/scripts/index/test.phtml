@@ -42,12 +42,12 @@ require([
         }, 1000);*/
 
 
-        var sc = new SC();
+/*        var sc = new SC();
         sc.show();
 
         setTimeout(function(){
             //sc.show();
-        }, 5000);
+        }, 5000);*/
 
 /*        var o = new Overlay({
             domNode: 'lt'
@@ -63,12 +63,9 @@ require([
             }, 3000);*/
 
 
-/*        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
-            handleAs: 'json',
-            overlay: new Overlay({
-                domNode: query('.container')[0]
-            })
-        });*/
+        var t = Ajax.load('http://192.168.1.51/default/index/ajax', {
+            handleAs: 'json'
+        });
 
 
 
@@ -86,36 +83,7 @@ require([
 
 
 
-        var deferred = new Deferred(function(){
-            alert('Cancel');
-        });
-
-/*        setTimeout(function(){
-          deferred.resolve("success");
-        }, 400);*/
-
-/*        setTimeout(function(){
-          deferred.reject("ooops");
-        }, 900);*/
-
-/*        setTimeout(function(){
-          deferred.cancel("process");
-        }, 2000);*/
-
-        //deferred.progress(update);
-
-        deferred.then(function(value){
-            // Do something when the process completes
-            alert(value);
-
-        }, function(err){
-            // Do something when the process errors out
-            alert(err + 'Error');
-            console.log(deferred.isCanceled());
-        });
-
-
-        var rest = new JsonRest({
+/*        var rest = new JsonRest({
             target: "/api/1/company/"
         });
 
@@ -130,7 +98,7 @@ require([
             sort: [
               { attribute: "baz", descending: true }
             ]
-        });
+        });*/
 
 
 /*var userMemoryStore = new dojo.store.Memory();

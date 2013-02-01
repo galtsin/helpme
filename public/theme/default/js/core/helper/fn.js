@@ -24,7 +24,7 @@ define([
 
             return enumerable;
         },
-        doPath: function(path, params) {
+        doPath: function (/* String */path, /*Object*/ params) {
             return path.replace(/:[\w-]+/g, function(param){
                 var _p = param.substring(1);
                 if(_p in params){

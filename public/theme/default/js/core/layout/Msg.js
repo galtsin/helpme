@@ -18,7 +18,7 @@ define([
             PROCESS_LOAD:           'Загрузка данных',
             PROCESS_SEND:           'Отправка данных',
             PROCESS_STATE_OK:       'Операция выполнена',
-            PROCESS_STATE_FAILED:   'Ошибка',
+            PROCESS_STATE_FAILED:   'Произошла ошибка',
             PROCESS_STATE_WAITING:  'Идет обработка',
             PROCESS_STATE_ABORTED:  'Операция прервана',
             PROCESS_STATE_TIMEOUT:  'Превышено время ожидания',
@@ -30,9 +30,8 @@ define([
             SERVER_UNAUTHORIZED:    'Необходима авторизация пользователя'
         },
         domNode:    null,   //
-        timeout:    15000,   // Время автоновного завершения процесса и вывод сообщения об ошибке
-        duration:   2000,    // Продолжительность показа сообщения
-        fadeDuration: 700, // Время угасания/проявления сообщения
+        duration:   3000,    // Продолжительность показа экземпляра сообщения
+        fadeDuration: 700, // Время угасания/проявления экземпляра сообщения
         constructor: function(options){
             lang.mixin(this, options);
         },
@@ -43,6 +42,7 @@ define([
          * @return {*|Number}
          */
         send: function(status, msg){
+            var _Messenger = this;
             var container = domConstruct.create('div');
             domStyle.set(container, {
                 opacity: 0
@@ -52,43 +52,42 @@ define([
                 content: this.fullText(status, msg),
                 style: {padding: '0px', margin: '0px'}
             }, container);
+
             message.startup();
 
-            var _Messenger = this;
-
             // Обработчик
-            var handler = {
-                // Автозапуск удаления
+            var messageHandler = {
+                // Автоудаление сообщения
                 clearTimeout: setTimeout(function(){
-                    handler.remove();
+                    messageHandler.remove();
                 }, this.duration + _Messenger.fadeDuration),
-                // Скрыть сообщение
-                hide: function(){
-                    return fx.fadeOut({
-                        node:       container,
-                        duration:   _Messenger.fadeDuration
-                    }).play();
-                },
                 // Показать сообщение
                 show: function(){
-                    return  fx.fadeIn({
+                    fx.fadeIn({
                         node:       container,
                         duration:   _Messenger.fadeDuration
                     }).play();
                 },
                 // Удалить сообщение
                 remove: function(){
-                    aspect.after(handler.hide(), "onEnd", function(){
-                        handler.message.destroy(); // Уничтожить диджит
-                        delete handler.show;
-                        delete handler.hide;
+                    var animation = fx.fadeOut({
+                        node:       container,
+                        duration:   _Messenger.fadeDuration,
+                        onEnd: function(){
+                            messageHandler.message.destroy(); // Уничтожить диджит
+                        }
                     });
+                    animation.play();
                 },
-                // Сообщение ContentPane instance
-                message: message
+                message: /* ContentPane */message
             };
 
-            return handler;
+            on(messageHandler.message.domNode, 'button:click', function(event){
+                event.preventDefault();
+                messageHandler.remove();
+            });
+
+            return messageHandler;
         },
         /**
          * Заполнить текст сообщения
@@ -97,41 +96,12 @@ define([
          * @return {String}
          */
         fullText: function(status, msg){
-            var html = '<p><span class="status">= ' + this.statuses[status] + ' =</span>';
+            var html = '<p style="position: relative">' +
+                '<span style="position: absolute; top: 5px; right: 5px;"><button type="button" class="close">×</button></span>' +
+                '<span class="status">= ' + this.statuses[status] + ' =</span>';
             if(msg) html += '<span class="message">' + msg + '</span>';
             html += '</p>';
             return html;
-        },
-        // Синхронный процесс
-        process: function(callback){
-            var timeout;
-            var deferred = new Deferred();
-            var _Messenger = this;
-
-            // TODO: Отображать все сообщения (ошибки и статусы процессов)
-/*            deferred.promise.always(function(status){
-                clearTimeout(timeout);
-                _Messenger.send(status).show();
-            });*/
-
-            // TODO: Отображать только сообщения об ошибках. ЗАменить на предыдущий блок
-            deferred.promise.then(function(){
-                clearTimeout(timeout);
-            }, function(status){
-                _Messenger.send(status).show();
-            });
-
-            // Завершение процесса по истечении времени ожидания
-            timeout = setTimeout(function(){
-                // Если было уже инициировано Ошибка или Успешный ответ, то данные дальше не перейдут
-                deferred.reject('PROCESS_STATE_TIMEOUT');
-            }, this.timeout);
-
-            // Возможность отменить Автозавершение процессы
-            if(callback) callback(timeout);
-
-            // Инициализация процесса resolve должна быть инициализирована извне
-            return deferred;
         }
     });
 

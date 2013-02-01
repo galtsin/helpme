@@ -43,7 +43,7 @@ define([
             this.routes.push(Route);
         },
         /**
-         * Перейти на указатель
+         * Перейти на хэш-указатель
          * @param hash
          */
         go: function(hash){
@@ -74,7 +74,7 @@ define([
             return route;
         },
         /**
-         * Обновить DOM-дерево
+         * Обновить DOM-дерево навигации
          * @param event
          */
         refresh: function(event){

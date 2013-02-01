@@ -63,52 +63,22 @@ define([
                     url += 'format=html';
             }
 
-            var processDeferred = this.Messenger.process(function(timeout){
-                clearTimeout(timeout); // Удалить счетчик автозавершения процесса
-                if(options.overlay) options.overlay.show();
+            var processDeferred = new Deferred();
+            var Messenger = this.Messenger;
+
+            //Отображать все сообщения (ошибки и статусы процессов)
+            //deferred.promise.always
+            // Отображать только сообщения об ошибках
+            processDeferred.promise.then(null, function(status){
+                var message = Messenger.send(status);
+                message.show();
             });
-
-            processDeferred.promise.always(function(){
-                if(options.overlay) options.overlay.hide();
-            });
-
-            // Отобразить процессы загрузки и отправки данных
-/*            var status = (options.method  == ('POST' || 'PUT' || 'DELETE')) ? 'PROCESS_SEND' : 'PROCESS_LOAD';
-            if(true === options.processing){
-                var handler = this.Messenger.send(status);
-                handler.show();
-                clearTimeout(handler.clearTimeout);
-            }
-
-            // Удалить Сообщение и Оверлей
-            processDeferred.promise.always(function(){
-                if(options.overlay) options.overlay.hide();
-                if(true === options.processing){
-                    setTimeout(function(){
-                        handler.remove();
-                    }, 700);
-                }
-            });*/
-
-            // Прерывание процесса пользователем
-/*            on(window, "keypress", function(event){
-                 if(event.keyCode == keys.ESCAPE) {
-                     processDeferred.cancel('PROCESS_STATE_ABORTED');
-                 }
-             });*/
-
 
 /*            request.response.then(function(response){
              console.log(response);
              });*/
             var request =  xhr(url, options);
-/*            request.response.then(function(response){
-                switch(response.status){
-                }
-            }, function(error){
-              // console.log(er.response);
-            });*/
-            request.then(function(response, g){
+            request.then(function(response){
                 if(response && 'object' == typeof response) {
                     // Состояния приложения и внутренних операций
                     switch (response.status.toLowerCase()) {
@@ -151,7 +121,6 @@ define([
             return request;
         },
         /**
-         *
          * @param url
          * Example: domain.com/:param1/:param2
          * @param args

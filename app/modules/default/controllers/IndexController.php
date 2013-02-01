@@ -58,13 +58,11 @@ class Default_IndexController extends App_Zend_Controller_Action
                     $possibility->setPrivileges($line);
                 }*/
 
-        //$this->_helper->viewRenderer->setNoRender(true);
-        //$this->_helper->layout->disableLayout();
+        $this->_helper->viewRenderer->setNoRender(true);
+        $this->_helper->layout->disableLayout();
+        $coll = HM_Model_Billing_Company::getCollection();
+        Zend_Debug::dump(get_class($coll));
 
-        $guest = new HM_Model_Account_Guest();
-        $guest->getData()
-            ->set('email', 'testme@mail.ru');
-        $guest->save();
 
     }
 
@@ -81,9 +79,9 @@ class Default_IndexController extends App_Zend_Controller_Action
     {
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout->disableLayout();
-        sleep(1);
+        sleep(5);
         $this->setAjaxResult(10);
-
+        $this->getResponse()->setHttpResponseCode(403);
 
         //$company = HM_Model_Billing_Company::load(12);
         //$this->setAjaxData(array($company->getData()->toArray()));

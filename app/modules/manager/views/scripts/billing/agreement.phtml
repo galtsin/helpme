@@ -495,7 +495,7 @@ _WidgetBase, _Container, _Contained, _TemplatedMixin, text, OverlayPane){
             on(dom.byId('subscribersNode'), 'click', function(){router.go('get-subscribers')});
             if(dom.byId('removeNode')) {
                 on(dom.byId('removeNode'), 'click', function(){
-                    var confirm = window.confirm('Удалить договор №' + agreement.id + '?');
+                    var confirm = window.confirm('Вы уверены, что хотите удалить договор ?');
                     if(confirm){
                         Ajax.send(Ajax.url(HelperFn.doPath('api/1/agreement/:id/delete', {id: agreement.id})),{
                             method: "DELETE"

@@ -85,6 +85,11 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
+     * Призвана заменить self::getCollection()
+     */
+    public function fetch(){}
+
+    /**
      * Делегирование полномочий по созданию коллекции идентификаторов сущностей
      * для дальнейшей обработки и загрузки коллекции сущностей
      * @return array
@@ -169,8 +174,9 @@ abstract class App_Core_Model_CollectionAbstract
     }
 
     /**
-     * Определить тип добавляемой записи и вставить в коллекцию
-     * @param mixed $entry
+     * Добавить объекты в коллекцию
+     * @param $entry
+     * @throws Exception
      */
     private function _addToCollection($entry)
     {
@@ -179,11 +185,14 @@ abstract class App_Core_Model_CollectionAbstract
                 $this->_idsCollection[] = $entry;
             }
             // Проверять тип добавляемой в коллекцию сущности!!!
-            // TODO: $entry instanceof $this->getModelRestore
         } elseif ($entry instanceof App_Core_Model_Store_Entity) {
-            if(!array_key_exists($entry->getData()->getId(), $this->getObjectsIterator()) && !in_array($entry->getData()->getId(), $this->getIdsIterator())) {
-                $this->_idsCollection[] = $entry->getData()->getId();
-                $this->_objectsCollection[$entry->getData()->getId()] = $entry;
+            if(get_class($entry) == $this->getModelRestore()) {
+                if(!array_key_exists($entry->getData()->getId(), $this->getObjectsIterator()) && !in_array($entry->getData()->getId(), $this->getIdsIterator())) {
+                    $this->_idsCollection[] = $entry->getData()->getId();
+                    $this->_objectsCollection[$entry->getData()->getId()] = $entry;
+                }
+            } else {
+                throw new Exception("Entity is not instance '" . $this->getModelRestore() . "' (Сущность не является экземпляром класса '" . $this->getModelRestore() . "')");
             }
         }
     }
