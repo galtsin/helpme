@@ -60,10 +60,10 @@ class Default_IndexController extends App_Zend_Controller_Action
 
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout->disableLayout();
-        $coll = HM_Model_Billing_Company::getCollection();
-        Zend_Debug::dump(get_class($coll));
 
-
+        $t = call_user_func_array('HM_Model_Billing_Company::load', array(16));
+        //$coll = HM_Model_Counseling_Structure_Line::getCollection();
+        Zend_Debug::dump($t);
     }
 
     protected function _normalizationFilterName($name)

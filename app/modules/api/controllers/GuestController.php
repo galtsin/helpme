@@ -15,6 +15,7 @@ class Api_GuestController extends Service_RestController
     {
         parent::init();
         $this->_modelCollection = 'HM_Model_Account_Guest_Collection';
+        $this->_modelClass = 'HM_Model_Account_Guest';
     }
 
     /**

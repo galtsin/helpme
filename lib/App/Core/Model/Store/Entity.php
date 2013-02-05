@@ -159,10 +159,8 @@ class App_Core_Model_Store_Entity extends App_Core_Model_ModelAbstract
         return null;
     }
 
-
     /**
-     * Проверка, принадлежности сущности системе
-     * Определяется по Id сущности в системе
+     * Проверка, идентификации сущности
      */
     public function isIdentity()
     {

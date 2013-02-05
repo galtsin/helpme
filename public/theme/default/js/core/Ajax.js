@@ -12,7 +12,6 @@ define([
     "core/helper/fn"
 ], function(declare, lang, xhr, request2, notify, on, keys, Deferred, Msg, aspect, HelperFn){
 
-    // TODO: Убрать Overlay
     var Ajax = declare(null, {
         // Время ожидания ответа. Глобальная переменная
         timeout: 15000,
@@ -96,7 +95,7 @@ define([
                 }
             }, function(error){
                 //error.response;
-                // Состояние операции
+                // Состояние сервера
                 switch(error.response.xhr.status){
                     case 0:
                         processDeferred.reject('PROCESS_STATE_ABORTED');

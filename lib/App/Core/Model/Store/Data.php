@@ -192,6 +192,7 @@ final class App_Core_Model_Store_Data
     /**
      * Проверка на изменения в объекте
      * "true" — объект изменен; "false" — объект
+     * TODO: Можно судить о изменениях объекта по сигнатуре данных
      * @return bool
      */
     public function isDirty()
@@ -272,7 +273,6 @@ final class App_Core_Model_Store_Data
         return $this;
     }
 
-
     /**
      * Проверить наличие ключа в индексе данных data
      * @param $key
@@ -284,18 +284,32 @@ final class App_Core_Model_Store_Data
     }
 
     /**
+     * Получить контрольную сигнатуру данных объекта
+     * @return string
+     */
+    public function getSignature()
+    {
+        return md5(serialize(array(
+                    'id'    => $this->get('id'),
+                    'data'  => $this->get('data')
+                )
+            )
+        );
+    }
+
+    /**
      * Преобразование объекта в массив
      * @return array
      */
     public function toArray()
     {
-        $arr = array(
-            'id' => $this->get('id'),
-            'data' => $this->get('data')
+        return array(
+            'id'        => $this->get('id'),
+            'data'      => $this->get('data'),
+            'signature' => $this->getSignature()
         );
-        $arr['signature'] = md5(serialize($arr)); // 'digest' Check signature Контрольная сумма объекта
-        return $arr;
     }
+
 
     /**
      * Преобразовать объект в JSON данные

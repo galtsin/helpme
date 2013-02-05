@@ -87,7 +87,12 @@ abstract class App_Core_Model_CollectionAbstract
     /**
      * Призвана заменить self::getCollection()
      */
-    public function fetch(){}
+    public function fetch()
+    {
+        $idsCollection = array_merge($this->_idsCollection, $this->_doCollection());
+        $this->_idsCollection = array_unique($idsCollection);
+        return $this;
+    }
 
     /**
      * Делегирование полномочий по созданию коллекции идентификаторов сущностей
@@ -115,7 +120,7 @@ abstract class App_Core_Model_CollectionAbstract
             return $this->_objectsCollection[$id];
         } else {
             $object = forward_static_call_array(array($this->getModelRestore(), 'load'), array($id));
-            if($object instanceof App_Core_Model_Store_Entity) {
+            if(get_class($object) == $this->getModelRestore()) {
                 if(!in_array($id, $this->getIdsIterator())){
                     $this->_idsCollection[] = $id;
                 }
@@ -192,10 +197,15 @@ abstract class App_Core_Model_CollectionAbstract
                     $this->_objectsCollection[$entry->getData()->getId()] = $entry;
                 }
             } else {
-                throw new Exception("Entity is not instance '" . $this->getModelRestore() . "' (Сущность не является экземпляром класса '" . $this->getModelRestore() . "')");
+                throw new Exception("Entity is not instance class '" . $this->getModelRestore() . "' (Сущность не является экземпляром класса '" . $this->getModelRestore() . "')");
             }
         }
     }
+
+    /**
+     * TODO: Замена addToCollection
+     */
+    public function intoCollection(){}
 
     /**
      * ru: Очистить коллекцию

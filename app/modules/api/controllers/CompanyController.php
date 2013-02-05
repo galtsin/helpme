@@ -15,6 +15,7 @@ class Api_CompanyController extends Service_RestController
     {
         parent::init();
         $this->_modelCollection = 'HM_Model_Billing_Company_Collection';
+        $this->_modelClass = 'HM_Model_Billing_Company';
     }
 
     /**

@@ -9,15 +9,22 @@
 class Service_RestController extends Zend_Rest_Controller
 {
     /**
-     * Статус доступности ответа
-     * Выдавать соответствующие коды и дублировать их в status переменной
+     * Статус доступности
+     * Выдача соответствующих кодов
      * http://dojotoolkit.org/reference-guide/1.8/quickstart/rest.html#id18
+     *
+     * Коды удачного завершения запроса
+     *
      * 200: (Ok) GET
      * 201: (Created) POST + изменение состояния
      * 202: (Accepted) PUT (POST) + обновление
      * 204: (No Content) DELETE
+     *
+     * Коды ошибок
+     *
      * 500: (Internal Server Error) Ошибка при выполнении операции
-     * 510: (Not Implemented) Метод не реализовано
+     * 501: (Not Implemented) Метод не реализовано
+     *
      * @var string
      */
     private $_status = 'error';
@@ -34,7 +41,8 @@ class Service_RestController extends Zend_Rest_Controller
 
     /**
      * Результат выполнения оцерации.
-     * Используется для изменяющих POST, PUT, DELETE запросов
+     * Используется для изменяющих POST, PUT, DELETE запросов в совокупностью со статусами
+     * Возможно избыточная величина?
      * @var int
      */
     private $_result = -1;
@@ -53,9 +61,16 @@ class Service_RestController extends Zend_Rest_Controller
 
     /**
      * Назначить модель-коллекцию для запроса компаний
+     * @deprecated
      * @var null|string App_Core_Model_Collection_Filter
      */
     protected $_modelCollection = null;
+
+    /**
+     * TODO: В разработке. Через модель можно получить его коллекцию
+     * @var null
+     */
+    protected $_modelClass = null;
 
     /**
      * Тип данных для экземпляров объектов
@@ -75,9 +90,6 @@ class Service_RestController extends Zend_Rest_Controller
         $this->getHelper('ContextSwitch')
             ->addActionContext($this->getRequest()->getActionName(), 'json')
             ->initContext('json');
-
-        // TODO:
-
     }
 
     /**
@@ -103,8 +115,6 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function dispatchAction()
     {
-        Zend_Debug::dump($this->_getAllParams());
-
         $operation = $this->_getParam('operation');
         $entity = $this->_getParam('entity');
         $request = $this->getRequest();
@@ -230,10 +240,12 @@ class Service_RestController extends Zend_Rest_Controller
     }
 
     /**
+     * TODO: Может созвращать только идентификаторы, а грузить сущности через запрос fetch
      * Использование коллекций и фильтров для получения данных
      * App_Core_Model_CollectionAbstract
      * TODO: Использовать Content-Range: для передачи страниц страницы
      * filters[equal][company_owner][]
+     * TODO: расширяющий фильтр
      */
     public function queryAction()
     {
@@ -252,6 +264,52 @@ class Service_RestController extends Zend_Rest_Controller
                     }
                 }
                 $this->setAjaxData($modelCollection->getCollection()->toArray());
+            }
+            $this->setAjaxStatus(self::STATUS_OK);
+        }
+    }
+
+    /**
+     * TODO: Новое
+     * Загрузка данных сущностей по идентификаторам.
+     */
+    public function fetchAction()
+    {
+        $idsArray = $this->getRequest()->getQuery('ids');
+        if(!empty($idsArray) && count($idsArray) > 0) {
+            $modelCollection = call_user_func($this->_modelClass . '::getCollection');
+            if(null !== $modelCollection){
+                foreach($idsArray as $id) {
+                    $modelCollection->load($id);
+                }
+                $this->setAjaxData($modelCollection->toArray());
+                $this->setAjaxStatus(self::STATUS_OK);
+            }
+        }
+    }
+
+    /**
+     * TODO: Новое
+     * Сужающий фильтр
+     * Возвращает идентификаторы отфильтрованных сущностей
+     */
+    public function filterAction()
+    {
+        $modelCollection = call_user_func($this->_modelClass . '::getCollection');
+        if(null !== $modelCollection){
+            $filters = $this->getRequest()->getParam('filters');
+            if(!empty($filters) && count($filters) > 0) {
+                foreach($filters as $filterType => $filter) {
+                    $method = 'add' . ucfirst(trim($filterType)) . 'Filter';
+                    if(method_exists($modelCollection, $method)) {
+                        foreach($filter as $name => $values) {
+                            foreach($values as $value) {
+                                $modelCollection->{$method}($name, trim($value));
+                            }
+                        }
+                    }
+                }
+                $this->setAjaxData($modelCollection->getCollection()->getIdsIterator());
             }
             $this->setAjaxStatus(self::STATUS_OK);
         }
@@ -290,10 +348,9 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function getAction()
     {
-        $modelCollection = new $this->_modelCollection();
-        if(null !== $modelCollection && $modelCollection instanceof App_Core_Model_Collection_Filter){
-            $modelCollection->load($this->_getParam('id'));
-            $this->setAjaxData($modelCollection->getCollection()->toArray());
+        $entity = call_user_func($this->_modelClass . '::load', $this->_getParam('id'));
+        if(get_class($entity) == $this->_modelClass){
+            $this->setAjaxData($entity->getData()->toArray());
             $this->setAjaxStatus(self::STATUS_OK);
         }
     }
