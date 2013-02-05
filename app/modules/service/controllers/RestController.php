@@ -60,13 +60,6 @@ class Service_RestController extends Zend_Rest_Controller
     private $_error = array();
 
     /**
-     * Назначить модель-коллекцию для запроса компаний
-     * @deprecated
-     * @var null|string App_Core_Model_Collection_Filter
-     */
-    protected $_modelCollection = null;
-
-    /**
      * TODO: В разработке. Через модель можно получить его коллекцию
      * @var null
      */
@@ -230,6 +223,11 @@ class Service_RestController extends Zend_Rest_Controller
         return $this;
     }
 
+    protected function _getCollectionInstance()
+    {
+        return call_user_func($this->_modelClass . '::getCollection');
+    }
+
     /**
      * Получить информацию о сущности
      * Метод является заглушкой для получения экземпляра объекта get
@@ -249,8 +247,8 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function queryAction()
     {
-        $modelCollection = new $this->_modelCollection();
-        if(null !== $modelCollection && $modelCollection instanceof App_Core_Model_Collection_Filter){
+        $modelCollection = $this->_getCollectionInstance();
+        if($modelCollection instanceof App_Core_Model_Collection_Filter){
             $filters = $this->getRequest()->getParam('filters');
             if(!empty($filters) && count($filters) > 0) {
                 foreach($filters as $filterType => $filter) {
@@ -277,8 +275,8 @@ class Service_RestController extends Zend_Rest_Controller
     {
         $idsArray = $this->getRequest()->getQuery('ids');
         if(!empty($idsArray) && count($idsArray) > 0) {
-            $modelCollection = call_user_func($this->_modelClass . '::getCollection');
-            if(null !== $modelCollection){
+            $modelCollection = $this->_getCollectionInstance();
+            if($modelCollection instanceof App_Core_Model_Collection_Filter){
                 foreach($idsArray as $id) {
                     $modelCollection->load($id);
                 }
@@ -295,8 +293,8 @@ class Service_RestController extends Zend_Rest_Controller
      */
     public function filterAction()
     {
-        $modelCollection = call_user_func($this->_modelClass . '::getCollection');
-        if(null !== $modelCollection){
+        $modelCollection = $this->_getCollectionInstance();
+        if($modelCollection instanceof App_Core_Model_Collection_Filter){
             $filters = $this->getRequest()->getParam('filters');
             if(!empty($filters) && count($filters) > 0) {
                 foreach($filters as $filterType => $filter) {

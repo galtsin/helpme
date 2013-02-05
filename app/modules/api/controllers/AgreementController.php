@@ -15,7 +15,6 @@ class Api_AgreementController extends Service_RestController
     public function init()
     {
         parent::init();
-        $this->_modelCollection = 'HM_Model_Billing_Agreement_Collection';
         $this->_modelClass = 'HM_Model_Billing_Agreement';
     }
 
